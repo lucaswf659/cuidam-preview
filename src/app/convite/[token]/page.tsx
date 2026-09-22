@@ -7,6 +7,14 @@ import { createClient } from "@/lib/supabase/browser";
 type InviteInfo = { email: string; householdName: string; expiresAt: string };
 type AuthMode = "signup" | "login";
 
+const mockDemoInviteEmail = "morador.teste@cuidam.dev";
+const mockDemoAreas = [
+  { id: "kitchen", name: "Cozinha", icon: "🍳" },
+  { id: "living", name: "Sala", icon: "🛋️" },
+  { id: "bathroom", name: "Banheiro", icon: "🫧" },
+  { id: "bedroom", name: "Quartos", icon: "🛏️" }
+];
+
 export default function InvitePage({ params }: { params: Promise<{ token: string }> }) {
   const router = useRouter();
   const [token, setToken] = useState("");
@@ -59,6 +67,39 @@ export default function InvitePage({ params }: { params: Promise<{ token: string
     const body = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(body.error ?? "Não foi possível aceitar o convite.");
     setAccepted(true);
+  };
+
+  const acceptMockDemoInvite = async () => {
+    setSubmitting(true);
+    setError("");
+    try {
+      // O convite demo não passa pelo Supabase. Criamos a sessão mock do
+      // morador convidado e uma casa de demonstração antes de liberar o
+      // destino, para que /today não redirecione de volta à entrada.
+      const authResponse = await fetch("/api/mock-auth", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ email: mockDemoInviteEmail })
+      });
+      if (!authResponse.ok) throw new Error("Não foi possível iniciar a sessão de demonstração.");
+
+      const householdResponse = await fetch("/api/onboarding");
+      if (!householdResponse.ok) throw new Error("Não foi possível carregar a casa de demonstração.");
+      const householdData = await householdResponse.json();
+      if (!householdData.household) {
+        const onboardingResponse = await fetch("/api/onboarding", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ name: "Morador de teste", houseName: "Nossa casa de teste", areas: mockDemoAreas })
+        });
+        if (!onboardingResponse.ok) throw new Error("Não foi possível preparar a casa de demonstração.");
+      }
+      setAccepted(true);
+    } catch (reason: unknown) {
+      setError(reason instanceof Error ? reason.message : "Não foi possível aceitar o convite de teste.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   useEffect(() => {
@@ -122,8 +163,8 @@ export default function InvitePage({ params }: { params: Promise<{ token: string
             <p className="eyebrow">Convite de teste</p>
             <h1>Entre para cuidar da Nossa casa de teste.</h1>
             <p className="lead">Este link simula a experiência do convite usando dados mockados. Nenhuma conta ou banco real será alterado.</p>
-            <div className="invite-summary"><span>Convite enviado para</span><strong>morador.teste@cuidam.dev</strong><small>Link local de demonstração</small></div>
-            <button className="button primary" onClick={() => setAccepted(true)}>Aceitar convite de teste</button>
+            <div className="invite-summary"><span>Convite enviado para</span><strong>{mockDemoInviteEmail}</strong><small>Link local de demonstração</small></div>
+            <button className="button primary" onClick={acceptMockDemoInvite} disabled={submitting}>{submitting ? "Preparando a casa…" : "Aceitar convite de teste"}</button>
             <button className="button text-button" onClick={() => router.push("/")}>Voltar para o início</button>
           </div>
         )}
