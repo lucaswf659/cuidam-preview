@@ -9,9 +9,36 @@ const store: MockStore = globalStore.__cuidamMockStore ?? { households: new Map(
 globalStore.__cuidamMockStore = store;
 
 export function mockSessionId(email: string) { return `mock-${encodeURIComponent(email.trim().toLowerCase())}`; }
+
+const mockDemoEmail = "morador.teste@cuidam.dev";
+const mockDemoSessionId = mockSessionId(mockDemoEmail);
+
+function createMockDemoHousehold(): MockHousehold {
+  const areas: MockArea[] = [
+    { id: "kitchen", name: "Cozinha", icon: "🍳", sortOrder: 0 },
+    { id: "living", name: "Sala", icon: "🛋️", sortOrder: 1 },
+    { id: "bathroom", name: "Banheiro", icon: "🫧", sortOrder: 2 },
+    { id: "bedroom", name: "Quartos", icon: "🛏️", sortOrder: 3 }
+  ];
+  const tasks: MockTask[] = [
+    { id: "mock-demo-task-kitchen", name: "Limpar bancada", areaId: "kitchen", responsibility: "Você", recurrence: "Diária", load: 2, completed: false },
+    { id: "mock-demo-task-living", name: "Aspirar sala", areaId: "living", responsibility: "Nós", recurrence: "Semanal", load: 2, completed: false },
+    { id: "mock-demo-task-bathroom", name: "Limpar banheiro", areaId: "bathroom", responsibility: "Você", recurrence: "Semanal", load: 3, completed: false },
+    { id: "mock-demo-task-bedroom", name: "Trocar roupa de cama", areaId: "bedroom", responsibility: "Você", recurrence: "Semanal", load: 2, completed: false }
+  ];
+  return { id: "mock-household-demo", name: "Nossa casa de teste", ownerName: "Morador de teste", ownerEmail: mockDemoEmail, areas, tasks };
+}
+
 export function mockHouseholdForSession(sessionId: string | undefined) {
   const householdId = sessionId ? store.sessions.get(sessionId) : undefined;
-  return householdId ? store.households.get(householdId) : undefined;
+  if (householdId) {
+    const household = store.households.get(householdId);
+    if (household) return household;
+  }
+  // Vercel pode atender cada request mock em uma instância diferente, então
+  // a sessão demo precisa resolver sem depender do Map em memória.
+  if (sessionId === mockDemoSessionId) return createMockDemoHousehold();
+  return undefined;
 }
 export function saveMockHousehold(sessionId: string, household: MockHousehold) {
   store.households.set(household.id, household); store.sessions.set(sessionId, household.id); return household;
