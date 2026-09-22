@@ -1,0 +1,251 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum MembershipRole {
+  MEMBER
+}
+
+enum MembershipStatus {
+  ACTIVE
+  LEFT
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  CANCELLED
+  EXPIRED
+}
+
+enum AreaStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum TaskStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum ResponsibilityType {
+  PERSON
+  SHARED
+}
+
+enum RecurrenceKind {
+  DAILY
+  WEEKLY
+  EVERY_N_WEEKS
+  MONTHLY
+}
+
+enum OccurrenceStatus {
+  PENDING
+  COMPLETED
+  MISSED
+  CANCELLED
+}
+
+enum RewardStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum RewardRecipientType {
+  HOUSEHOLD
+  MEMBER
+}
+
+model User {
+  id              String       @id @default(cuid())
+  authProviderId  String       @unique
+  name            String
+  email           String       @unique
+  activeHouseholdId String?    @unique
+  createdAt       DateTime     @default(now())
+  activeHousehold Household?   @relation("ActiveHousehold", fields: [activeHouseholdId], references: [id], onDelete: Restrict)
+  memberships     Membership[]
+  sentInvitations Invitation[] @relation("SentInvitations")
+  claims          TaskOccurrence[] @relation("OccurrenceClaim")
+  completions     OccurrenceCompletion[]
+  redemptions     RewardRedemption[] @relation("RedeemedBy")
+}
+
+model Household {
+  id          String       @id @default(cuid())
+  name        String
+  timezone    String
+  createdAt   DateTime     @default(now())
+  activeAccount User?       @relation("ActiveHousehold")
+  memberships Membership[]
+  invitations Invitation[]
+  areas       Area[]
+  tasks       Task[]
+  rewards     Reward[]
+  redemptions RewardRedemption[]
+}
+
+model Membership {
+  id            String           @id @default(cuid())
+  householdId   String
+  userId        String
+  role          MembershipRole   @default(MEMBER)
+  status        MembershipStatus @default(ACTIVE)
+  joinedAt      DateTime         @default(now())
+  leftAt        DateTime?
+  household     Household        @relation(fields: [householdId], references: [id], onDelete: Restrict)
+  user          User             @relation(fields: [userId], references: [id], onDelete: Restrict)
+  responsibleTasks Task[]        @relation("TaskResponsibleMember")
+  notificationPreference NotificationPreference?
+
+  @@unique([householdId, userId])
+  @@index([userId, status])
+}
+
+model Invitation {
+  id              String           @id @default(cuid())
+  householdId     String
+  email           String
+  invitedByUserId String
+  status          InvitationStatus @default(PENDING)
+  tokenHash       String           @unique
+  expiresAt       DateTime
+  acceptedAt      DateTime?
+  createdAt       DateTime         @default(now())
+  household       Household        @relation(fields: [householdId], references: [id], onDelete: Restrict)
+  invitedBy       User             @relation("SentInvitations", fields: [invitedByUserId], references: [id], onDelete: Restrict)
+
+  @@index([householdId, status])
+}
+
+model Area {
+  id          String     @id @default(cuid())
+  householdId String
+  name        String
+  icon        String?
+  sortOrder   Int
+  status      AreaStatus @default(ACTIVE)
+  archivedAt  DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  household   Household  @relation(fields: [householdId], references: [id], onDelete: Restrict)
+  tasks       Task[]
+
+  @@unique([householdId, sortOrder])
+  @@index([householdId, status])
+}
+
+model Task {
+  id                    String             @id @default(cuid())
+  householdId           String
+  areaId                String
+  name                  String
+  responsibilityType    ResponsibilityType
+  responsibleMemberId   String?
+  recurrenceKind        RecurrenceKind
+  recurrenceInterval    Int                @default(1)
+  weeklyTarget          Int                @default(1)
+  recurrenceAnchor      DateTime
+  preferredTime         String?
+  instructions          String?
+  load                  Int
+  status                TaskStatus         @default(ACTIVE)
+  archivedAt            DateTime?
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+  household             Household          @relation(fields: [householdId], references: [id], onDelete: Restrict)
+  area                  Area               @relation(fields: [areaId], references: [id], onDelete: Restrict)
+  responsibleMember     Membership?        @relation("TaskResponsibleMember", fields: [responsibleMemberId], references: [id], onDelete: Restrict)
+  occurrences           TaskOccurrence[]
+
+  @@index([householdId, status])
+  @@index([areaId, status])
+}
+
+model TaskOccurrence {
+  id                          String           @id @default(cuid())
+  taskId                      String
+  periodKey                   String
+  scheduledFor                DateTime
+  status                      OccurrenceStatus @default(PENDING)
+  targetCompletions           Int              @default(1)
+  completedCount              Int              @default(0)
+  responsibleMemberIdSnapshot String?
+  responsibilityTypeSnapshot  ResponsibilityType
+  loadSnapshot                Int
+  claimedByUserId             String?
+  claimedAt                   DateTime?
+  completedAt                 DateTime?
+  starsGrantedSnapshot        Int              @default(0)
+  createdAt                   DateTime         @default(now())
+  task                        Task             @relation(fields: [taskId], references: [id], onDelete: Restrict)
+  claimedBy                   User?            @relation("OccurrenceClaim", fields: [claimedByUserId], references: [id], onDelete: Restrict)
+  completions                 OccurrenceCompletion[]
+
+  @@unique([taskId, periodKey])
+  @@index([scheduledFor, status])
+}
+
+model OccurrenceCompletion {
+  id            String         @id @default(cuid())
+  occurrenceId  String
+  completedById String
+  completedAt   DateTime       @default(now())
+  starsGranted  Int
+  occurrence    TaskOccurrence @relation(fields: [occurrenceId], references: [id], onDelete: Restrict)
+  completedBy   User           @relation(fields: [completedById], references: [id], onDelete: Restrict)
+
+  @@index([occurrenceId, completedAt])
+}
+
+model Reward {
+  id                String              @id @default(cuid())
+  householdId       String
+  name              String
+  cost              Int
+  icon              String?
+  description       String?
+  recipientType     RewardRecipientType @default(HOUSEHOLD)
+  recipientMemberId String?
+  status            RewardStatus        @default(ACTIVE)
+  archivedAt        DateTime?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  household         Household           @relation(fields: [householdId], references: [id], onDelete: Restrict)
+  redemptions       RewardRedemption[]
+
+  @@index([householdId, status])
+}
+
+model RewardRedemption {
+  id                  String              @id @default(cuid())
+  rewardId            String
+  householdId         String
+  redeemedByUserId    String
+  recipientType       RewardRecipientType
+  recipientMemberId   String?
+  costSnapshot        Int
+  redeemedAt          DateTime            @default(now())
+  reward              Reward              @relation(fields: [rewardId], references: [id], onDelete: Restrict)
+  household           Household           @relation(fields: [householdId], references: [id], onDelete: Restrict)
+  redeemedBy          User                @relation("RedeemedBy", fields: [redeemedByUserId], references: [id], onDelete: Restrict)
+
+  @@index([householdId, redeemedAt])
+}
+
+model NotificationPreference {
+  id              String     @id @default(cuid())
+  membershipId    String     @unique
+  morningReminder Boolean    @default(true)
+  activity        Boolean    @default(false)
+  sharedTask      Boolean    @default(false)
+  quietStart      String?
+  quietEnd        String?
+  membership      Membership @relation(fields: [membershipId], references: [id], onDelete: Restrict)
+}

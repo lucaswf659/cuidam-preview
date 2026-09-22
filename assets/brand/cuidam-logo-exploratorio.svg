@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 160" role="img" aria-labelledby="title desc">
+  <title id="title">cuidam</title>
+  <desc id="desc">Logotipo exploratório Cuidam com símbolo de abrigo compartilhado.</desc>
+  <g transform="translate(18 18)" fill="none" stroke="#376B45" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20 72 72 28l52 44v48H20Z"/>
+    <path d="M51 120V81h42v39"/>
+    <path d="M20 72c12-5 24-5 36 0"/>
+    <path d="M88 72c12-5 24-5 36 0"/>
+  </g>
+  <text x="176" y="108" font-family="Poppins, Arial, sans-serif" font-size="78" font-weight="700" letter-spacing="-2" fill="#292A27">cuidam</text>
+</svg>

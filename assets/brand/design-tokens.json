@@ -1,0 +1,31 @@
+{
+  "color": {
+    "cream": "#FAF7F2",
+    "white": "#FFFFFF",
+    "softBeige": "#F1ECE4",
+    "graphite": "#292A27",
+    "muted": "#777873",
+    "green": "#68BB7F",
+    "greenDark": "#376B45",
+    "blue": "#8EC8FF",
+    "yellow": "#F4C95D",
+    "coral": "#F58E8E",
+    "orange": "#FFB167"
+  },
+  "type": {
+    "family": "Poppins",
+    "title": "SemiBold",
+    "body": "Regular/Medium",
+    "number": "Bold"
+  },
+  "radius": {
+    "card": "20-24px",
+    "control": "14-18px",
+    "pill": "999px"
+  },
+  "spacing": {
+    "base": "8px",
+    "mobileMargin": "16px",
+    "primaryButton": "48px"
+  }
+}

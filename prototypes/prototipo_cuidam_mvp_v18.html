@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Casa — MVP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--cream:#FAF7F2;--white:#fff;--beige:#F1ECE4;--text:#292A27;--muted:#777873;--line:#E6DFD6;--green:#68BB7F;--green2:#EEF7F0;--greenDark:#376B45;--blue:#8EC8FF;--yellow:#F4C95D;--coral:#F58E8E;--orange:#FFB167;--shadow:0 8px 24px rgba(41,42,39,.07);--r:22px}
+*{box-sizing:border-box}html,body{margin:0;background:var(--cream);color:var(--text);font-family:Poppins,Arial,sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}.app{max-width:460px;min-height:100vh;margin:auto;background:var(--cream);padding-bottom:88px;position:relative}.top{height:64px;display:flex;align-items:center;justify-content:space-between;padding:14px 16px}.logo{font-weight:700;font-size:20px}.proto{font-size:10px;color:var(--muted);background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 9px}.main{padding:0 16px}.screen{display:none}.screen.active{display:block}.eyebrow{font-size:11px;color:var(--muted);letter-spacing:.02em}.title{font-size:29px;line-height:1.16;margin:6px 0 8px;font-weight:700}.sub{font-size:13px;line-height:1.55;color:var(--muted)}.card{background:#fff;border-radius:var(--r);box-shadow:var(--shadow);padding:16px;margin:12px 0}.hero{padding:19px}.btn{border:0;border-radius:15px;padding:12px 14px;font-size:13px;font-weight:600}.primary{background:var(--green);color:#173B20}.soft{background:var(--beige);color:var(--text)}.ghost{border:0;background:none;color:#57795F;font-size:12px;padding:7px 2px}.full{width:100%}.danger{color:#A45151}.form label{display:block;font-size:11px;font-weight:600;margin:15px 0 6px}.form input,.form select,.form textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:14px;background:#fff;color:var(--text);outline:none}.form textarea{min-height:76px}.row{display:flex;gap:8px;align-items:center}.row>*{flex:1}.section{display:flex;align-items:end;justify-content:space-between;margin:22px 2px 9px}.section h3{font-size:15px;margin:0}.section span{font-size:10px;color:var(--muted)}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:460px;background:#fff;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(3,1fr);padding:8px 8px 10px;z-index:40}.nav button{border:0;background:none;color:#888982;font-size:10px;padding:5px}.nav b{display:block;font-size:20px;margin-bottom:2px}.nav .on{color:var(--text);font-weight:600}
+.task{padding:14px}.task-top{display:flex;gap:10px;align-items:flex-start}.icon{width:40px;height:40px;border-radius:14px;background:var(--beige);display:grid;place-items:center;font-size:20px;flex:none}.task-body{flex:1;min-width:0}.task-name{font-size:14px;font-weight:600;line-height:1.35}.meta{font-size:11px;color:var(--muted);line-height:1.55;margin-top:4px}.load{font-size:10px;letter-spacing:1px;color:#559764}.chev{border:0;background:none;color:#999;padding:0;font-size:20px}.complete{margin-top:11px}.done{opacity:.82}.done .task-name{text-decoration:line-through}.status{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600}.dot{width:9px;height:9px;border-radius:50%;background:var(--green)}.progress{height:8px;background:var(--beige);border-radius:99px;overflow:hidden;margin-top:12px}.progress i{display:block;height:100%;background:var(--green);border-radius:99px}.pill{display:inline-flex;background:var(--beige);border-radius:999px;padding:6px 9px;font-size:10px;color:var(--muted)}
+.resp{padding:14px}.resp-head{display:flex;gap:11px;align-items:flex-start}.resp-icon{width:42px;height:42px;border-radius:15px;display:grid;place-items:center;background:#F6F1E9;font-size:22px;flex:none}.resp-body{flex:1}.resp-title{font-size:14px;font-weight:600}.resp-owner{margin-top:3px;font-size:11px;color:var(--muted)}.resp-tasks{margin-top:11px;padding-top:10px;border-top:1px solid #EEE9E2;display:flex;justify-content:space-between;align-items:center;font-size:11px}.owner-chip{font-size:10px;background:var(--green2);color:var(--greenDark);padding:6px 8px;border-radius:999px}.owner-chip.other{background:#EFF6FD;color:#37607D}.owner-chip.shared{background:#FFF6DF;color:#7B641A}
+.balance{display:flex;align-items:center;gap:8px}.bar{height:12px;background:var(--beige);display:flex;flex:1;border-radius:99px;overflow:hidden}.barA{background:var(--blue)}.barB{background:var(--yellow)}.legend{display:flex;justify-content:space-between;margin-top:8px;font-size:11px;color:var(--muted)}.insight{background:var(--green2);padding:13px;border-radius:16px;font-size:11px;line-height:1.55}.notice{background:#FFF6DF;padding:13px;border-radius:16px;font-size:11px;line-height:1.55}.activity{display:flex;gap:10px;padding:11px 0;border-bottom:1px solid #EEE9E2}.activity:last-child{border-bottom:0}.avatar{width:34px;height:34px;border-radius:50%;background:var(--green2);display:grid;place-items:center;flex:none;font-size:16px}
+.choice{background:var(--beige);border:2px solid transparent;border-radius:16px;padding:13px;text-align:left;margin:8px 0}.choice.selected{background:#F4FBF5;border-color:#9BCBA7}.choice-title{font-size:13px;font-weight:600}.choice-help{font-size:10px;color:var(--muted);margin-top:3px}.choice-actions{display:flex;gap:6px;margin-top:9px}.choice-actions button{border:0;border-radius:10px;padding:7px 9px;font-size:10px;background:#fff}.choice-actions .sel{background:var(--green2);color:var(--greenDark);font-weight:600}.choice-actions .sel2{background:#EFF6FD;color:#37607D;font-weight:600}.choice-actions .sel3{background:#FFF6DF;color:#7B641A;font-weight:600}
+.step{display:flex;gap:6px;margin:15px 0}.step i{width:7px;height:7px;border-radius:50%;background:#DED7CD}.step i.on{background:var(--text)}.aha{text-align:center;padding:24px 16px}.aha .big{font-size:48px}.aha h2{font-size:23px;line-height:1.25;margin:8px 0}.aha p{font-size:12px;color:var(--muted);line-height:1.55}.summary-line{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid #EEE9E2;font-size:11px}.summary-line:last-child{border-bottom:0}.summary-line b{font-size:11px}.empty{text-align:center;padding:30px 15px}.empty .em{font-size:40px}.modal{position:fixed;inset:0;background:rgba(41,42,39,.3);display:none;align-items:flex-end;justify-content:center;z-index:90}.modal.show{display:flex}.sheet{width:100%;max-width:460px;background:var(--cream);border-radius:25px 25px 0 0;padding:18px 16px 28px}.sheet h3{margin:0 0 6px;font-size:17px}.sheet p{font-size:12px;color:var(--muted);line-height:1.55}.sheet .actions{display:flex;gap:8px;margin-top:14px}.sheet .actions button{flex:1}.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:94px;background:var(--text);color:#fff;padding:10px 13px;border-radius:13px;font-size:11px;z-index:100;opacity:0;pointer-events:none;transition:.2s}.toast.show{opacity:1}.fab{position:fixed;right:calc(50% - 208px);bottom:102px;width:52px;height:52px;border:0;border-radius:18px;background:var(--text);color:#fff;font-size:24px;z-index:30}@media(max-width:460px){.fab{right:18px}}
+@media(min-width:800px){body{padding:18px 0}.app{box-shadow:0 20px 60px rgba(41,42,39,.12);border-radius:28px;overflow:hidden}}
+
+
+    .today-progress-card{margin:10px 0 18px;padding:13px 14px;background:#fff;border:1px solid #eee9e1;border-radius:16px;box-shadow:0 4px 14px rgba(41,42,39,.04)}
+    .progress-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:9px}
+    .progress-label{font-size:12px;color:#777873;font-weight:600}
+    .progress-status{font-size:14px;color:#292a27;font-weight:600;margin-top:2px}
+    .progress-count{font-size:13px;color:#777873;font-weight:600;white-space:nowrap;padding-top:1px}
+    .progress-track{height:8px;border-radius:999px;background:#f1ece4;overflow:hidden}
+    .progress-fill{height:100%;border-radius:999px;background:#68bb7f;transition:width .25s ease}
+    .suggestion-list{padding:8px}
+    .suggestion{display:flex;align-items:center;gap:10px;padding:11px 8px;border-radius:14px;cursor:pointer;position:relative}
+    .suggestion input{position:absolute;opacity:0;pointer-events:none}
+    .suggestion-icon{width:38px;height:38px;border-radius:12px;background:#f7f2eb;display:flex;align-items:center;justify-content:center;font-size:19px;flex:none}
+    .suggestion-copy{display:flex;flex-direction:column;gap:2px;flex:1}
+    .suggestion-copy b{font-size:13px}
+    .suggestion-copy small{font-size:11px;color:#777873}
+    .checkmark{width:24px;height:24px;border-radius:8px;background:#f1ece4;color:transparent;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+    .suggestion.selected{background:#faf8f4}
+    .suggestion.selected .checkmark{background:#68bb7f;color:#fff}
+    .category-hero{display:flex;align-items:center;gap:12px;margin-top:12px}
+    .category-hero-icon{width:50px;height:50px;border-radius:16px;background:#f7f2eb;display:flex;align-items:center;justify-content:center;font-size:25px;flex:none}
+    .category-task{padding:14px}
+    .category-task-top{display:flex;gap:11px;align-items:flex-start}
+    .category-task-icon{width:38px;height:38px;border-radius:12px;background:#f7f2eb;display:flex;align-items:center;justify-content:center;font-size:18px;flex:none}
+    .category-task-copy{display:flex;flex-direction:column;gap:3px}
+    .brandlockup{display:flex;align-items:center;gap:7px;color:var(--text)}
+    .brandmark{display:grid;place-items:center;color:var(--greenDark)}
+    .logo{font-weight:700;font-size:21px;letter-spacing:-.02em}
+    .brand-hero{display:flex;align-items:center;gap:9px;margin-bottom:3px}
+    .hero-mark{width:44px;height:44px;border-radius:15px;background:var(--green2);display:grid;place-items:center;color:var(--greenDark)}
+    .entry-actions{padding:14px 16px 16px}
+    .entry-actions .btn{min-height:48px}
+    .settings-list{padding:8px}
+    .settings-row{display:flex;align-items:center;gap:11px;width:100%;border:0;background:transparent;text-align:left;padding:12px 8px;border-radius:14px}
+    .settings-row+.settings-row{border-top:1px solid #eee9e2}
+    .settings-icon{width:38px;height:38px;border-radius:12px;background:#f7f2eb;display:grid;place-items:center;font-size:19px;flex:none}
+    .settings-copy{display:flex;flex-direction:column;gap:2px;flex:1}
+    .settings-copy b{font-size:13px}
+    .settings-copy small{font-size:11px;color:var(--muted)}
+    .form-group{padding:0 0 13px;margin-bottom:13px;border-bottom:1px solid #eee9e2}
+    .form-group:last-of-type{border-bottom:0;margin-bottom:0}
+    .form-group-title{font-size:11px;font-weight:700;color:var(--text);margin-bottom:1px}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+  <div class="brandlockup" aria-label="Cuidam">
+    <span class="brandmark" aria-hidden="true"><svg viewBox="0 0 32 32" width="28" height="28"><path d="M6 15.5 16 7l10 8.5v8.2a2.3 2.3 0 0 1-2.3 2.3H8.3A2.3 2.3 0 0 1 6 23.7Z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path d="M11.2 24v-5.3h9.6V24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path d="M10.5 14.8 16 10l5.5 4.8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span>
+    <span class="logo">cuidam</span>
+  </div>
+  <button class="proto" onclick="toggleViewer()" id="viewer">Protótipo · você ↕</button>
+</div>
+  <main class="main">
+<section id="entry" class="screen active">
+      <div style="padding-top:30px">
+        <div class="brand-hero">
+          <div class="hero-mark" aria-hidden="true"><svg viewBox="0 0 48 48" width="42" height="42"><path d="M8 23 24 10l16 13v12a3 3 0 0 1-3 3H11a3 3 0 0 1-3-3Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><path d="M15 38v-9h18v9" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/></svg></div>
+          <div class="eyebrow">cuidam</div>
+        </div>
+        <h1 class="title">Uma casa mais leve<br>começa sabendo o que é de cada um.</h1>
+        <p class="sub">Cada pessoa cuida do que é seu. O casa organiza o resto.</p>
+        <div class="card entry-actions" style="margin-top:22px">
+          <button class="btn primary full" onclick="go('account')">Criar conta</button>
+          <button class="btn soft full" style="margin-top:8px" onclick="go('login')">Já tenho uma conta</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="account" class="screen">
+      <div style="padding-top:24px"><div class="eyebrow">Começando</div><h1 class="title">Vamos deixar isso fácil.</h1><p class="sub">Crie sua conta. Você pode configurar a casa agora e convidar alguém depois.</p>
+      <div class="step"><i class="on"></i><i></i><i></i></div>
+      <div class="card form"><label>Nome</label><input id="name" placeholder="Como você quer ser chamado?"><label>E-mail</label><input id="email" type="email" placeholder="voce@email.com"><label>Senha</label><input id="password" type="password" placeholder="••••••••"><button class="btn primary full" style="margin-top:16px" onclick="createAccount()">Continuar</button></div></div>
+    </section>
+
+    <section id="login" class="screen">
+      <div style="padding-top:24px"><div class="eyebrow">Entrar</div><h1 class="title">Que bom ter você de volta.</h1><div class="card form"><label>E-mail</label><input placeholder="voce@email.com" value="lucas@exemplo.com"><label>Senha</label><input type="password" value="12345678"><button class="btn primary full" style="margin-top:16px" onclick="go('today')">Entrar</button><div style="text-align:center"><button class="ghost">Esqueci minha senha</button></div></div></div>
+    </section>
+
+    <section id="house" class="screen">
+      <div style="padding-top:24px"><div class="eyebrow">Sua casa</div><h1 class="title">Como vocês chamam a casa?</h1><p class="sub">Pode deixar “Nossa casa”. Dá para mudar depois.</p><div class="card form"><label>Nome da casa</label><input id="houseName" value="Nossa casa"><button class="btn primary full" style="margin-top:16px" onclick="go('responsibilities')">Continuar</button></div></div>
+    </section>
+
+    <section id="responsibilities" class="screen">
+      <div style="padding-top:24px">
+        <div class="eyebrow">Sugestões</div>
+        <h1 class="title">O que faz parte da casa?</h1>
+        <p class="sub">A gente separou algumas áreas comuns e trouxe tarefas prontas. Escolha só o que faz sentido.</p>
+        <div class="card suggestion-list">
+          <label class="suggestion selected">
+            <input type="checkbox" checked onchange="this.closest('.suggestion').classList.toggle('selected',this.checked)">
+            <span class="suggestion-icon">🍳</span><span class="suggestion-copy"><b>Cozinha</b><small>6 tarefas</small></span><span class="checkmark">✓</span>
+          </label>
+          <label class="suggestion selected">
+            <input type="checkbox" checked onchange="this.closest('.suggestion').classList.toggle('selected',this.checked)">
+            <span class="suggestion-icon">🛋️</span><span class="suggestion-copy"><b>Sala</b><small>4 tarefas</small></span><span class="checkmark">✓</span>
+          </label>
+          <label class="suggestion selected">
+            <input type="checkbox" checked onchange="this.closest('.suggestion').classList.toggle('selected',this.checked)">
+            <span class="suggestion-icon">🛏️</span><span class="suggestion-copy"><b>Quartos</b><small>3 tarefas</small></span><span class="checkmark">✓</span>
+          </label>
+          <label class="suggestion selected">
+            <input type="checkbox" checked onchange="this.closest('.suggestion').classList.toggle('selected',this.checked)">
+            <span class="suggestion-icon">🛁</span><span class="suggestion-copy"><b>Banheiro</b><small>3 tarefas</small></span><span class="checkmark">✓</span>
+          </label>
+          <label class="suggestion">
+            <input type="checkbox" onchange="this.closest('.suggestion').classList.toggle('selected',this.checked)">
+            <span class="suggestion-icon">💻</span><span class="suggestion-copy"><b>Escritório</b><small>2 tarefas</small></span><span class="checkmark">✓</span>
+          </label>
+          <label class="suggestion selected">
+            <input type="checkbox" checked onchange="this.closest('.suggestion').classList.toggle('selected',this.checked)">
+            <span class="suggestion-icon">🐶</span><span class="suggestion-copy"><b>Pets</b><small>2 tarefas</small></span><span class="checkmark">✓</span>
+          </label>
+        </div>
+        <div class="notice" style="margin-top:12px">A gente sugere. Vocês decidem.</div>
+        <button class="btn primary full" style="margin-top:12px" onclick="go('invite')">Continuar</button>
+      </div>
+    </section>
+
+    <section id="invite" class="screen">
+      <div style="padding-top:24px"><div class="eyebrow">Pessoas</div><h1 class="title">Convide alguém da casa.</h1><p class="sub">A pessoa entra direto nessa divisão quando aceitar. Você pode fazer isso depois.</p><div class="card form"><label>E-mail</label><input id="inviteEmail" placeholder="alguem@email.com"><button class="btn primary full" onclick="invite()">Enviar convite</button><button class="btn soft full" style="margin-top:8px" onclick="go('today')">Fazer depois</button></div></div>
+    </section>
+<section id="today" class="screen">
+      <div style="padding-top:10px">
+        <div class="eyebrow">Quarta, 16 de setembro</div>
+        <h1 class="title">Bom dia, <span id="greetName">você</span> ☀️</h1>
+        <div class="section" style="margin-top:24px"><h3>Suas tarefas</h3></div>
+        <div class="today-progress-card" aria-label="Seu progresso hoje">
+          <div class="progress-card-top">
+            <div>
+              <div class="progress-label">Seu progresso</div>
+              <div id="todayStatus" class="progress-status">Sua parte está andando</div>
+            </div>
+            <div id="progText" class="progress-count">1 de 2</div>
+          </div>
+          <div class="progress-track"><div id="todayProgressFill" class="progress-fill" style="width:50%"></div></div>
+        </div>
+        <div id="tasks">
+          <div class="card task">
+            <div class="task-top">
+              <div class="icon">🛁</div>
+              <div class="task-body">
+                <div class="task-name">Limpar banheiro</div>
+                <div class="meta">Hoje · ●●●○○</div>
+              </div>
+              <button class="chev" onclick="openTask('bath-1')" aria-label="Ver detalhes">›</button>
+            </div>
+            <button class="btn primary full complete" onclick="completeCurrent()">✓ Concluir</button>
+          </div>
+          <div class="card task" id="sharedTask">
+            <div class="task-top">
+              <div class="icon">🐶</div>
+              <div class="task-body">
+                <div class="task-name">Alimentar pets</div>
+                <div class="meta">Hoje · compartilhada</div>
+              </div>
+              <button class="chev" onclick="openTask('pet-1')" aria-label="Ver detalhes">›</button>
+            </div>
+            <button class="btn soft full complete" onclick="claimShared()">Vou cuidar</button>
+          </div>
+        </div>
+        <div id="todayEmpty" class="card empty" style="display:none">
+          <div class="em">✨</div>
+          <b>Tudo certo por hoje.</b>
+          <div class="meta" style="margin-top:5px">Você cuidou das suas tarefas.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="categoryTasks" class="screen">
+      <div style="padding-top:8px">
+        <button class="ghost" onclick="go('division')">← Nós</button>
+        <div class="category-hero">
+          <div class="category-hero-icon" id="categoryIcon">🛁</div>
+          <div>
+            <div class="eyebrow">Área da casa</div>
+            <h1 class="title" id="categoryTitle" style="font-size:25px">Banheiro</h1>
+          </div>
+        </div>
+        <p class="sub" id="categorySubtitle">Tarefas cadastradas nesta área.</p>
+        <div class="section"><h3>Tarefas</h3><span id="categoryCount">0</span></div>
+        <div id="categoryTaskList"></div>
+        <button class="btn primary full" style="margin-top:12px" onclick="openAddForCategory()">＋ Adicionar tarefa</button>
+      </div>
+    </section>
+
+    <section id="taskDetail" class="screen">
+      <div style="padding-top:12px">
+        <button class="ghost" onclick="go('categoryTasks')">← Área</button>
+        <div class="card hero">
+          <div class="icon" id="detailIcon">🛁</div>
+          <h1 class="title" id="detailTitle" style="font-size:24px">Limpar banheiro</h1>
+          <p class="sub" id="detailAreaText">Banheiro</p>
+          <div class="notice" style="margin-top:12px"><b id="detailOwner">Responsável: você</b><br>Quem garante que essa tarefa aconteça. A execução pode ser feita por outra pessoa sem mudar essa responsabilidade.</div>
+          <div class="summary-line"><span>Frequência</span><b id="detailFreq">1× por semana</b></div>
+          <div class="summary-line"><span>Carga</span><b id="detailLoad">●●●○○ · moderada</b></div>
+          <div class="summary-line"><span>Próxima ocorrência</span><b>Quarta, 23/09</b></div>
+          <div class="summary-line"><span>Instruções</span><b>Detalhes adicionados pela casa</b></div>
+          <button class="btn primary full" style="margin-top:14px" onclick="completeCurrent()">✓ Concluir</button>
+          <div class="row" style="margin-top:8px"><button class="btn soft" onclick="prepareEdit();go('editTask')">Editar</button><button class="btn soft" onclick="removeTask()">Remover</button></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="division" class="screen">
+      <div style="padding-top:8px"><div class="eyebrow">Nós</div><h1 class="title">A casa está bem distribuída.</h1><p class="sub">Aqui vocês enxergam <b>responsabilidades</b>, não quem está “ganhando”.</p><div class="card hero"><div class="status"><span class="dot"></span> Bem equilibrada</div><div class="balance" style="margin-top:14px"><div class="bar"><span class="barA" style="width:50%"></span><span class="barB" style="width:50%"></span></div></div><div class="legend"><span>Você · 50%</span><span>Outra pessoa · 50%</span></div><div class="insight" style="margin-top:14px">A divisão considera o peso e a frequência das responsabilidades. Não existe uma divisão perfeita — o objetivo é tornar a responsabilidade visível.</div></div>
+      <div class="section"><h3>Áreas da casa</h3><span>6 áreas</span></div><div id="allResponsibilities"></div>
+      <div class="section"><h3>Atividade recente</h3></div><div class="card"><div class="activity"><div class="avatar">🌿</div><div><b style="font-size:12px">Você concluiu Limpar banheiro</b><div class="meta">Hoje, 14:20 · responsabilidade: você</div></div></div><div class="activity"><div class="avatar">🤝</div><div><b style="font-size:12px">Vocês assumiram Pets</b><div class="meta">Ontem · responsabilidade compartilhada</div></div></div></div></div>
+    </section>
+
+    <section id="houseMain" class="screen">
+      <div style="padding-top:8px">
+        <div class="eyebrow">Organização</div>
+        <h1 class="title">Casa</h1>
+        <p class="sub">Ajuste a casa quando quiser. No dia a dia, vocês não precisam ficar aqui.</p>
+        <div class="card settings-list">
+          <button class="settings-row" onclick="go('division')">
+            <span class="settings-icon">🤝</span>
+            <span class="settings-copy"><b>Divisão</b><small>Quem cuida de cada tarefa</small></span>
+            <span class="chev">›</span>
+          </button>
+          <button class="settings-row" onclick="go('people')">
+            <span class="settings-icon">👥</span>
+            <span class="settings-copy"><b>Pessoas</b><small>Membros e convite</small></span>
+            <span class="chev">›</span>
+          </button>
+          <button class="settings-row" onclick="go('notifications')">
+            <span class="settings-icon">🔔</span>
+            <span class="settings-copy"><b>Notificações</b><small>Lembretes e atividade</small></span>
+            <span class="chev">›</span>
+          </button>
+        </div>
+        <div class="section"><h3>Áreas da casa</h3><span>6 áreas</span></div>
+        <div class="card settings-list">
+          <button class="settings-row" onclick="openCategory('Cozinha')"><span class="settings-icon">🍳</span><span class="settings-copy"><b>Cozinha</b><small>6 tarefas · editar área</small></span><span class="chev">›</span></button>
+          <button class="settings-row" onclick="openCategory('Sala')"><span class="settings-icon">🛋️</span><span class="settings-copy"><b>Sala</b><small>4 tarefas · editar área</small></span><span class="chev">›</span></button>
+          <button class="settings-row" onclick="openCategory('Quartos')"><span class="settings-icon">🛏️</span><span class="settings-copy"><b>Quartos</b><small>3 tarefas · editar área</small></span><span class="chev">›</span></button>
+          <button class="settings-row" onclick="openCategory('Banheiro')"><span class="settings-icon">🛁</span><span class="settings-copy"><b>Banheiro</b><small>3 tarefas · editar área</small></span><span class="chev">›</span></button>
+          <button class="settings-row" onclick="openCategory('Escritório')"><span class="settings-icon">💻</span><span class="settings-copy"><b>Escritório</b><small>1 tarefa · editar área</small></span><span class="chev">›</span></button>
+          <button class="settings-row" onclick="openCategory('Pets')"><span class="settings-icon">🐶</span><span class="settings-copy"><b>Pets</b><small>2 tarefas · editar área</small></span><span class="chev">›</span></button>
+        </div>
+        <div class="notice">Configure uma vez e deixe o dia a dia acontecer.</div>
+      </div>
+    </section>
+<section id="people" class="screen"><div style="padding-top:8px"><button class="ghost" onclick="go('houseMain')">← Casa</button><h1 class="title" style="font-size:25px">Pessoas</h1><p class="sub">Cada pessoa entra na casa e vê o que é da própria responsabilidade.</p><div class="card"><div class="listrow"><span>Você</span><span class="pill">membro</span></div><div class="listrow"><span>Outra pessoa</span><span class="pill">membro</span></div></div><button class="btn primary full" onclick="go('invite')">Convidar alguém</button></div></section>
+
+    <section id="notifications" class="screen"><div style="padding-top:8px"><button class="ghost" onclick="go('houseMain')">← Casa</button><h1 class="title" style="font-size:25px">Notificações</h1><p class="sub">Lembrar, nunca cobrar.</p><div class="card"><div class="listrow"><div><b style="font-size:13px">Suas tarefas do dia</b><div class="meta">Um lembrete agrupado pela manhã</div></div><input type="checkbox" checked></div><div class="listrow"><div><b style="font-size:13px">Tarefa compartilhada</b><div class="meta">Avisar quando alguém assumir</div></div><input type="checkbox"></div><div class="listrow"><div><b style="font-size:13px">Atividade da casa</b><div class="meta">Conclusões importantes dos membros</div></div><input type="checkbox"></div><div class="listrow"><div><b style="font-size:13px">Silêncio</b><div class="meta">22:00 — 08:00</div></div><span class="pill">Ativo</span></div></div></div></section>
+
+    <section id="editTask" class="screen">
+      <div style="padding-top:8px">
+        <button class="ghost" onclick="go('taskDetail')">← Tarefa</button>
+        <h1 class="title" style="font-size:25px">Editar tarefa</h1>
+        <p class="sub">Mude só o que precisar. O restante continua como está.</p>
+        <div class="card form">
+          <div class="form-group"><div class="form-group-title">O que acontece</div>
+            <label>Tarefa</label><input value="Limpar banheiro">
+          </div>
+          <div class="form-group"><div class="form-group-title">Onde</div>
+            <label>Categoria</label><select id="editTaskArea"></select>
+          </div>
+          <div class="form-group"><div class="form-group-title">Quem cuida</div>
+            <label>Responsável</label><select><option>Você</option><option>Outra pessoa</option><option>Nós</option></select>
+          </div>
+          <div class="form-group"><div class="form-group-title">Quando</div>
+            <label>Frequência</label><select><option>1× por semana</option><option>2× por semana</option><option>Diária</option></select>
+          </div>
+          <div class="form-group"><div class="form-group-title">Quanto pesa</div>
+            <label>Carga</label><select><option>3 · moderada</option><option>1 · muito leve</option><option>2 · leve</option><option>4 · pesada</option><option>5 · muito pesada</option></select>
+          </div>
+          <button class="btn primary full" style="margin-top:6px" onclick="saveEdit()">Salvar</button>
+          <button class="ghost danger full" onclick="removeTask()">Remover da rotina</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <nav class="nav" id="nav" style="display:none"><button onclick="go('today')" id="nToday"><b>☀️</b>Hoje</button><button onclick="go('division')" id="nDivision"><b>🤝</b>Nós</button><button onclick="go('houseMain')" id="nHouse"><b>🏡</b>Casa</button></nav>
+  <button class="fab" id="fab" style="display:none" onclick="openAdd()">＋</button>
+  <div class="toast" id="toast"></div>
+
+  <div class="modal" id="addModal"><div class="sheet"><h3>O que precisa acontecer?</h3><p>Comece pelo que precisa ser feito. Você pode ajustar os detalhes depois.</p><div class="form"><label>Nome da tarefa</label><input id="newTask" placeholder="Ex.: Trocar roupa de cama"><label>Área</label><select id="newTaskArea"></select><label>Responsabilidade</label><select><option>Você</option><option>Outra pessoa</option><option>Nós</option></select></div><div class="actions"><button class="btn soft" onclick="closeAdd()">Cancelar</button><button class="btn primary" onclick="addTask()">Adicionar</button></div></div></div>
+</div>
+<script>
+let viewer='Você', completed=false, removed=false, sharedClaimed=false;
+const $=id=>document.getElementById(id);
+function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); $(id).classList.add('active'); const app=['today','division','categoryTasks','houseMain','taskDetail','people','notifications','editTask'].includes(id); $('nav').style.display=app?'grid':'none'; $('fab').style.display=id==='today'?'block':'none'; updateNav(id); window.scrollTo(0,0)}
+function updateNav(id){['nToday','nDivision','nHouse'].forEach(x=>$(x).classList.remove('on')); if(['today','taskDetail','editTask'].includes(id))$('nToday').classList.add('on'); if(id==='division')$('nDivision').classList.add('on'); if(['houseMain','people','notifications'].includes(id))$('nHouse').classList.add('on')}
+function createAccount(){if(!$('name').value.trim())$('name').value='Você'; $('greetName').textContent=$('name').value.trim()||'você'; go('house')}
+function invite(){if(!$('inviteEmail').value.trim()){toast('Digite um e-mail para enviar o convite.');return} toast('Convite enviado.'); go('today')}
+function toggleViewer(){viewer=viewer==='Você'?'Outra pessoa':'Você'; $('viewer').textContent='Protótipo · '+viewer.toLowerCase()+' ↕'; $('greetName').textContent=viewer; toast('Visualização trocada só para testar o protótipo.')}
+function setOwner(btn,who){const choice=btn.closest('.choice'); const chip=choice.querySelector('.owner-chip'); choice.querySelectorAll('button').forEach(b=>b.className=''); if(who==='me'){btn.className='sel';chip.className='owner-chip';chip.textContent='Você'} if(who==='other'){btn.className='sel2';chip.className='owner-chip other';chip.textContent='Outra pessoa'} if(who==='shared'){btn.className='sel3';chip.className='owner-chip shared';chip.textContent='Nós'} choice.classList.add('selected')}
+function completeCurrent(){
+  completed=true;
+  toast('Concluído. Mais uma tarefa a menos.');
+  const first=$('tasks')?.querySelector('.task');
+  if(first) first.remove();
+  updateTodayEmpty();
+}
+function claimShared(){
+  sharedClaimed=true;
+  toast('Você assumiu Pets.');
+  renderToday();
+}
+function renderToday(){
+  const shared=$('sharedTask');
+  if(shared && sharedClaimed){
+    const b=shared.querySelector('.complete');
+    b.className='btn primary full complete';
+    b.textContent='✓ Concluir';
+    b.onclick=completeShared;
+  }
+  updateTodayEmpty();
+}
+function completeShared(){
+  sharedClaimed=true;
+  toast('Concluído. Mais uma tarefa a menos.');
+  $('sharedTask')?.remove();
+  updateTodayEmpty();
+}
+function updateTodayEmpty(){
+  const remaining=$('tasks')?.querySelectorAll('.task').length || 0;
+  const done=2-remaining;
+  const pct=Math.max(0,Math.min(100,done*50));
+  if($('todayProgressFill')) $('todayProgressFill').style.width=(remaining===0?100:pct)+'%';
+  if($('progText')) $('progText').textContent=done+' de 2';
+  if($('todayStatus')) $('todayStatus').textContent=
+    remaining===0 ? 'Tudo em dia por hoje' :
+    done===0 ? 'Vamos começar' :
+    done===1 ? 'Sua parte está andando' : 'Quase lá';
+  if($('todayEmpty')) $('todayEmpty').style.display=remaining===0?'block':'none';
+}
+function prepareEdit(){
+  const found=findTask(currentTaskId);
+  const select=$('editTaskArea');
+  if(found && select) select.innerHTML=Object.keys(areaData).map(name=>`<option ${name===found.areaName?'selected':''}>${name}</option>`).join('');
+}
+function removeTask(){removed=true;toast('Removida da rotina. O histórico continua preservado.');go('today');}
+function saveEdit(){
+  const selected=$('editTaskArea')?.value || currentArea;
+  const found=findTask(currentTaskId);
+  if(found && selected && selected!==found.areaName){
+    const idx=found.area.tasks.findIndex(t=>t.id===currentTaskId);
+    const task=found.task;
+    found.area.tasks.splice(idx,1);
+    areaData[selected].tasks.push(task);
+    currentArea=selected;
+    toast('Tarefa movida para '+selected+'.');
+  } else {
+    toast('Tarefa atualizada.');
+  }
+  go('taskDetail');
+}
+function openAdd(){taskTargetArea=currentArea||'Banheiro';$('addModal').classList.add('show');const select=document.querySelector('#addModal select');if(select)select.innerHTML=Object.keys(areaData).map(name=>`<option ${name===taskTargetArea?'selected':''}>${name}</option>`).join('');$('newTask').focus()} function closeAdd(){$('addModal').classList.remove('show')}
+function addTask(){
+  const name=$('newTask').value.trim()||'Nova tarefa';
+  const select=document.querySelector('#addModal select');
+  const areaName=select?select.value:taskTargetArea;
+  if(!areaData[areaName]) return;
+  areaData[areaName].tasks.push({id:'custom-'+Date.now(),name,meta:'Nova tarefa · carga 1',owner:'Você'});
+  closeAdd();
+  $('newTask').value='';
+  toast(name+' adicionada em '+areaName+'.');
+  openCategory(areaName);
+}
+function toast(msg){$('toast').textContent=msg;$('toast').classList.add('show');clearTimeout(window.tt);window.tt=setTimeout(()=>$('toast').classList.remove('show'),2200)}
+const areaData={
+  'Banheiro':{icon:'🛁',tasks:[
+    {id:'bath-1',name:'Limpar banheiro',meta:'1× por semana · carga 3',owner:'Você'},
+    {id:'bath-2',name:'Repor papel higiênico',meta:'quando necessário · carga 1',owner:'Você'},
+    {id:'bath-3',name:'Limpar espelho',meta:'1× por semana · carga 1',owner:'Outra pessoa'}
+  ]},
+  'Cozinha':{icon:'🍳',tasks:[
+    {id:'kit-1',name:'Limpar bancada',meta:'Diária · carga 2',owner:'Você'},
+    {id:'kit-2',name:'Esvaziar lava-louças',meta:'Diária · carga 2',owner:'Outra pessoa'},
+    {id:'kit-3',name:'Limpar geladeira',meta:'1× por mês · carga 3',owner:'Nós'}
+  ]},
+  'Sala':{icon:'🛋️',tasks:[
+    {id:'liv-1',name:'Aspirar sala',meta:'1× por semana · carga 2',owner:'Outra pessoa'},
+    {id:'liv-2',name:'Organizar sala',meta:'2× por semana · carga 1',owner:'Você'}
+  ]},
+  'Quartos':{icon:'🛏️',tasks:[
+    {id:'bed-1',name:'Trocar roupa de cama',meta:'1× por semana · carga 2',owner:'Você'},
+    {id:'bed-2',name:'Aspirar quartos',meta:'1× por semana · carga 2',owner:'Outra pessoa'}
+  ]},
+  'Escritório':{icon:'💻',tasks:[
+    {id:'off-1',name:'Organizar mesa',meta:'1× por semana · carga 1',owner:'Você'}
+  ]},
+  'Pets':{icon:'🐶',tasks:[
+    {id:'pet-1',name:'Alimentar pets',meta:'Diária · compartilhada',owner:'Nós'},
+    {id:'pet-2',name:'Comprar ração',meta:'1× por mês · carga 2',owner:'Você'}
+  ]}
+};
+let currentArea='Banheiro';
+let currentTaskId='bath-1';
+let taskTargetArea='Banheiro';
+const respData=[
+  ['🛁','Banheiro','Você','3 tarefas','me'],
+  ['🍳','Cozinha','Você','3 tarefas','me'],
+  ['🛋️','Sala','Outra pessoa','2 tarefas','other'],
+  ['🛏️','Quartos','Outra pessoa','2 tarefas','other'],
+  ['💻','Escritório','Você','1 tarefa','me'],
+  ['🐶','Pets','Nós','2 tarefas','shared']
+];
+function respCard(r){let chip=r[4]==='other'?'other':r[4]==='shared'?'shared':'';return `<div class="card resp"><div class="resp-head"><div class="resp-icon">${r[0]}</div><div class="resp-body"><div class="resp-title">${r[1]}</div><div class="resp-owner">Responsável: <b>${r[2]}</b></div></div><span class="owner-chip ${chip}">${r[2]}</span></div><div class="resp-tasks"><span>${r[3]}</span><button class="ghost" onclick="openCategory('${r[1]}')">Ver ›</button></div></div>`}
+function openCategory(name){
+  currentArea=name;
+  const area=areaData[name];
+  if(!area) return;
+  $('categoryIcon').textContent=area.icon;
+  $('categoryTitle').textContent=name;
+  $('categorySubtitle').textContent=area.tasks.length+' tarefas cadastradas nesta área.';
+  $('categoryCount').textContent=area.tasks.length;
+  $('categoryTaskList').innerHTML=area.tasks.map(t=>`
+    <div class="card category-task">
+      <div class="category-task-top">
+        <div class="category-task-icon">${area.icon}</div>
+        <div class="category-task-copy">
+          <b>${t.name}</b>
+          <div class="meta">${t.meta}</div>
+          <div class="meta">Responsável: ${t.owner}</div>
+        </div>
+      </div>
+      <button class="btn soft full" style="margin-top:10px" onclick="openTask('${t.id}')">Ver tarefa</button>
+    </div>
+  `).join('');
+  go('categoryTasks');
+}
+function findTask(id){
+  for(const [areaName,area] of Object.entries(areaData)){
+    const task=area.tasks.find(t=>t.id===id);
+    if(task) return {areaName,area,task};
+  }
+  return null;
+}
+function openTask(id){
+  const found=findTask(id);
+  if(!found) return;
+  currentArea=found.areaName;
+  currentTaskId=id;
+  $('detailIcon').textContent=found.area.icon;
+  $('detailTitle').textContent=found.task.name;
+  $('detailAreaText').textContent=found.areaName;
+  $('detailOwner').textContent='Responsável: '+found.task.owner.toLowerCase();
+  $('detailFreq').textContent=(found.task.meta.split(' · ')[0] || 'Configuração');
+  $('detailLoad').textContent=(found.task.meta.split(' · ')[1] || 'carga 1').replace('carga','● carga');
+  const editArea=$('editTaskArea');
+  if(editArea) editArea.innerHTML=Object.keys(areaData).map(name=>`<option ${name===found.areaName?'selected':''}>${name}</option>`).join('');
+  go('taskDetail');
+}
+function openAddForCategory(){
+  taskTargetArea=currentArea;
+  $('addModal').classList.add('show');
+  const select=document.querySelector('#addModal select');
+  if(select) select.innerHTML=Object.keys(areaData).map(name=>`<option ${name===taskTargetArea?'selected':''}>${name}</option>`).join('');
+  $('newTask').focus();
+}
+function buildResp(){if($('myResponsibilities'))$('myResponsibilities').innerHTML=respData.filter(r=>r[4]===(viewer==='Você'?'me':'other')||r[4]==='shared').slice(0,2).map(respCard).join(''); if($('allResponsibilities'))$('allResponsibilities').innerHTML=respData.map(respCard).join('')}
+buildResp();renderToday();
+</script>
+</body>
+</html>

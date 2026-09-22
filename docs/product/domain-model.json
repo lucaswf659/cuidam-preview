@@ -1,0 +1,134 @@
+{
+  "entities": {
+    "User": [
+      "id",
+      "name",
+      "email",
+      "authProviderId",
+      "createdAt"
+    ],
+    "Household": [
+      "id",
+      "name",
+      "status",
+      "createdAt"
+    ],
+    "Membership": [
+      "householdId",
+      "userId",
+      "role",
+      "status",
+      "joinedAt",
+      "leftAt"
+    ],
+    "Invitation": [
+      "id",
+      "householdId",
+      "email",
+      "invitedByUserId",
+      "status",
+      "tokenHash",
+      "expiresAt"
+    ],
+    "Area": [
+      "id",
+      "householdId",
+      "name",
+      "icon",
+      "sortOrder",
+      "status"
+    ],
+    "Task": [
+      "id",
+      "householdId",
+      "areaId",
+      "name",
+      "responsibilityType",
+      "responsibleMemberId",
+      "recurrenceRule",
+      "load",
+      "preferredTime",
+      "instructions",
+      "status"
+    ],
+    "TaskOccurrence": [
+      "id",
+      "taskId",
+      "periodKey",
+      "scheduledFor",
+      "status",
+      "targetCompletions",
+      "completedCount",
+      "responsibleMemberIdSnapshot",
+      "responsibilityTypeSnapshot",
+      "loadSnapshot",
+      "claimedByMemberId",
+      "claimedAt",
+      "completedAt",
+      "completedByMemberId",
+      "starsGrantedSnapshot"
+    ],
+    "OccurrenceCompletion": [
+      "id",
+      "occurrenceId",
+      "completedByUserId",
+      "completedAt",
+      "starsGranted"
+    ],
+    "Reward": [
+      "id",
+      "householdId",
+      "name",
+      "cost",
+      "icon",
+      "description",
+      "recipientType",
+      "recipientMemberId",
+      "status"
+    ],
+    "RewardRedemption": [
+      "id",
+      "rewardId",
+      "householdId",
+      "redeemedByMemberId",
+      "recipientType",
+      "recipientMemberId",
+      "costSnapshot",
+      "redeemedAt"
+    ],
+    "NotificationPreference": [
+      "memberId",
+      "morningReminder",
+      "activity",
+      "sharedTask",
+      "quietStart",
+      "quietEnd"
+    ]
+  },
+  "relationships": [
+    "Household 1:N Membership",
+    "Household 1:N Area",
+    "Household 1:N Task",
+    "Area 1:N Task",
+    "Task 1:N TaskOccurrence",
+    "TaskOccurrence 1:N OccurrenceCompletion",
+    "Household 1:N Reward",
+    "Reward 1:N RewardRedemption"
+  ],
+  "enums": {
+    "responsibilityType": [
+      "PERSON",
+      "SHARED"
+    ],
+    "taskStatus": [
+      "ACTIVE",
+      "ARCHIVED"
+    ],
+    "occurrenceStatus": [
+      "PENDING",
+      "COMPLETED",
+      "MISSED",
+      "CANCELLED"
+    ]
+  }
+}
