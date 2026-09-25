@@ -108,41 +108,68 @@ export async function POST(request: Request) {
 
     const household = await tx.household.create({ data: { name: parsed.data.houseName, timezone: "America/Sao_Paulo" } });
     const membership = await tx.membership.create({ data: { householdId: household.id, userId: dbUser.id, role: "MEMBER", status: "ACTIVE" } });
-    const createdAreas = [];
-    for (const [index, area] of parsed.data.areas.entries()) {
-      createdAreas.push(await tx.area.create({ data: { householdId: household.id, name: area.name, icon: area.icon, sortOrder: index, status: "ACTIVE" } }));
-    }
+    const createdAreas = parsed.data.areas.length
+      ? await tx.area.createManyAndReturn({
+        data: parsed.data.areas.map((area, sortOrder) => ({
+          householdId: household.id,
+          name: area.name,
+          icon: area.icon,
+          sortOrder,
+          status: "ACTIVE" as const
+        })),
+        select: { id: true, sortOrder: true }
+      })
+      : [];
+    const areaIdBySortOrder = new Map(createdAreas.map((area) => [area.sortOrder, area.id]));
     const now = new Date();
-    for (const [index, area] of parsed.data.areas.entries()) {
-      const dbArea = createdAreas[index];
-      for (const suggestion of suggestedTasks[area.id] ?? []) {
+    const taskSeeds = parsed.data.areas.flatMap((area, index) => {
+      const areaId = areaIdBySortOrder.get(index);
+      if (!areaId) throw new Error("An onboarding area was not returned after creation.");
+
+      return (suggestedTasks[area.id] ?? []).map((suggestion) => {
         const recurrence = recurrenceFromLabel(suggestion.recurrence);
         const responsibilityType = suggestion.responsibility === "Nós" ? "SHARED" as const : "PERSON" as const;
-        const task = await tx.task.create({
+        return {
+          key: JSON.stringify([areaId, suggestion.name]),
+          recurrence,
+          responsibilityType,
+          responsibleMemberId: responsibilityType === "PERSON" ? membership.id : null,
+          load: suggestion.load,
           data: {
             householdId: household.id,
-            areaId: dbArea.id,
+            areaId,
             name: suggestion.name,
             responsibilityType,
             responsibleMemberId: responsibilityType === "PERSON" ? membership.id : null,
             ...recurrence,
             recurrenceAnchor: now,
             load: suggestion.load,
-            status: "ACTIVE"
+            status: "ACTIVE" as const
           }
-        });
-        await tx.taskOccurrence.create({
-          data: {
-            taskId: task.id,
-            periodKey: periodKeyForRecurrence({ ...recurrence, recurrenceAnchor: now }, now, "America/Sao_Paulo")!,
-            scheduledFor: now,
-            responsibilityTypeSnapshot: responsibilityType,
-            responsibleMemberIdSnapshot: responsibilityType === "PERSON" ? membership.id : null,
-            loadSnapshot: suggestion.load
-          }
-        });
-      }
-    }
+        };
+      });
+    });
+    const createdTasks = taskSeeds.length
+      ? await tx.task.createManyAndReturn({
+        data: taskSeeds.map((seed) => seed.data),
+        select: { id: true, areaId: true, name: true }
+      })
+      : [];
+    const taskSeedByKey = new Map(taskSeeds.map((seed) => [seed.key, seed]));
+    const occurrenceData = createdTasks.map((task) => {
+      const seed = taskSeedByKey.get(JSON.stringify([task.areaId, task.name]));
+      if (!seed) throw new Error("An onboarding task was not returned after creation.");
+
+      return {
+        taskId: task.id,
+        periodKey: periodKeyForRecurrence({ ...seed.recurrence, recurrenceAnchor: now }, now, "America/Sao_Paulo")!,
+        scheduledFor: now,
+        responsibilityTypeSnapshot: seed.responsibilityType,
+        responsibleMemberIdSnapshot: seed.responsibleMemberId,
+        loadSnapshot: seed.load
+      };
+    });
+    if (occurrenceData.length) await tx.taskOccurrence.createMany({ data: occurrenceData });
     await tx.user.update({ where: { id: dbUser.id }, data: { activeHouseholdId: household.id } });
     return { household, created: true };
   });
