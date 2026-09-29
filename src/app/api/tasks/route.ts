@@ -51,31 +51,27 @@ export async function POST(request: Request) {
 
   const now = new Date();
   const recurrence = recurrenceFromLabel(parsed.recurrence);
-  const task = await prisma.$transaction(async (tx) => {
-    const created = await tx.task.create({
-      data: {
-        householdId: context.household.id,
-        areaId: area.id,
-        name: parsed.name,
-        responsibilityType: responsibility.responsibilityType,
-        responsibleMemberId: responsibility.responsibleMemberId,
-        ...recurrence,
-        recurrenceAnchor: now,
-        load: parsed.load,
-        status: "ACTIVE"
+  const task = await prisma.task.create({
+    data: {
+      householdId: context.household.id,
+      areaId: area.id,
+      name: parsed.name,
+      responsibilityType: responsibility.responsibilityType,
+      responsibleMemberId: responsibility.responsibleMemberId,
+      ...recurrence,
+      recurrenceAnchor: now,
+      load: parsed.load,
+      status: "ACTIVE",
+      occurrences: {
+        create: {
+          periodKey: periodKeyForRecurrence({ ...recurrence, recurrenceAnchor: now }, now, context.household.timezone)!,
+          scheduledFor: now,
+          responsibilityTypeSnapshot: responsibility.responsibilityType,
+          responsibleMemberIdSnapshot: responsibility.responsibleMemberId,
+          loadSnapshot: parsed.load
+        }
       }
-    });
-    await tx.taskOccurrence.create({
-      data: {
-        taskId: created.id,
-        periodKey: periodKeyForRecurrence({ ...recurrence, recurrenceAnchor: now }, now, context.household.timezone)!,
-        scheduledFor: now,
-        responsibilityTypeSnapshot: responsibility.responsibilityType,
-        responsibleMemberIdSnapshot: responsibility.responsibleMemberId,
-        loadSnapshot: parsed.load
-      }
-    });
-    return created;
+    }
   });
 
   return NextResponse.json({ task: await taskResponse(task.id) }, { status: 201 });
