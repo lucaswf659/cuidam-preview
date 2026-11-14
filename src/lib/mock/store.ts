@@ -1,6 +1,6 @@
 export type MockArea = { id: string; name: string; icon: string; sortOrder: number };
 export type MockResponsibility = "Você" | "Outra pessoa" | "Nós";
-export type MockTask = { id: string; name: string; areaId: string; responsibility: MockResponsibility; recurrence: string; load: number; completed: boolean; completedAt?: string; archived?: boolean };
+export type MockTask = { id: string; name: string; areaId: string; responsibility: MockResponsibility; recurrence: string; load: number; completed: boolean; completedAt?: string; archived?: boolean; claimInProgress?: boolean; claimOwnedByCurrentUser?: boolean; claimOwnerName?: string };
 export type MockHousehold = { id: string; name: string; ownerName: string; ownerEmail: string; memberCount: number; areas: MockArea[]; tasks: MockTask[]; inviteEmail?: string };
 
 type MockStore = { households: Map<string, MockHousehold>; sessions: Map<string, string> };
