@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import type { MockArea, MockResponsibility, MockTask } from "@/lib/mock/store";
+import { LogoutButton } from "@/components/logout-button";
 
 const frequencyCount: Record<string, number> = { "Diária": 7, "Semanal": 1, "3× por semana": 3, "Mensal": 1 };
 const recurrenceOptions = ["Diária", "Semanal", "3× por semana", "Mensal"];
@@ -110,7 +111,7 @@ export function NosMock({ household }: { household: { name: string; ownerName: s
   };
 
   return <main className="nos-shell">
-    <div className="topbar"><a className="brand-lockup" href="/today" aria-label="Voltar para Hoje"><span className="brand-mark">⌂</span><span>cuidam</span></a><a className="top-link" href="/today">Hoje</a></div>
+    <div className="topbar"><a className="brand-lockup" href="/today" aria-label="Voltar para Hoje"><span className="brand-mark">⌂</span><span>cuidam</span></a><LogoutButton /></div>
     <section className="nos-content">
       <p className="eyebrow">Nós · {household.name}</p>
       <h1>Como a casa está funcionando?</h1>
@@ -169,3 +170,4 @@ export function NosMock({ household }: { household: { name: string; ownerName: s
     <nav className="bottom-nav"><a href="/today"><b>☀️</b>Hoje</a><a className="active" href="/nos"><b>🤝</b>Nós</a><a href="/casa"><b>🏡</b>Casa</a></nav>
   </main>;
 }
+
