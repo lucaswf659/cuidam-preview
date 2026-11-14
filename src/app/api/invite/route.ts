@@ -26,5 +26,6 @@ export async function POST(request: Request) {
       }
     });
   });
-  return NextResponse.json({ sent: true, inviteUrl: `/convite/${token}`, expiresAt: expiresAt.toISOString() });
+  return NextResponse.json({ created: true, inviteUrl: `/convite/${token}`, expiresAt: expiresAt.toISOString() });
 }
+

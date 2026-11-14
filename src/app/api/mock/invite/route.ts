@@ -9,5 +9,6 @@ export async function POST(request: Request) {
   const body = await request.json().catch(() => null) as { email?: unknown } | null;
   if (typeof body?.email !== "string" || !body.email.includes("@")) return NextResponse.json({ error: "Informe um e-mail válido." }, { status: 400 });
   updateMockHousehold({ ...household, inviteEmail: body.email.trim().toLowerCase() });
-  return NextResponse.json({ sent: true });
+  return NextResponse.json({ created: true, inviteUrl: "/convite/demo" });
 }
+
