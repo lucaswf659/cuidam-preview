@@ -115,6 +115,11 @@ input:focus { border-color: var(--green); box-shadow: 0 0 0 3px var(--ring); }
 .task-remove { width: 26px; height: 26px; display: grid; place-items: center; border: 1px solid #d8d3cc; border-radius: 6px; color: var(--graphite); background: #fff; font-size: .9rem; line-height: 1; cursor: pointer; }.task-remove:hover { border-color: #c98282; color: #a45151; background: #fff5f5; }.task-edit { border: 0; padding: 4px 0; color: var(--green-dark); background: transparent; font-size: .68rem; font-weight: 700; cursor: pointer; }.task-edit:hover { text-decoration: underline; }
 .area-empty { margin: 0; color: var(--muted); font-size: .76rem; }
 .proto-badge { padding: 7px 9px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); background: var(--white); font-size: .65rem; }
+.logout-control { display: flex; align-items: center; gap: 8px; }
+.logout-button { min-width: 44px; min-height: 44px; padding: 0 12px; border: 1px solid var(--line); border-radius: 999px; color: var(--green-dark); background: var(--white); font: inherit; font-size: .75rem; font-weight: 700; cursor: pointer; }
+.logout-button:focus-visible { outline: 3px solid var(--ring); outline-offset: 2px; }
+.logout-button:disabled { opacity: .6; cursor: wait; }
+.logout-error { max-width: 120px; color: #9b3d35; font-size: .7rem; }
 .today-shell, .nos-shell { padding-bottom: 92px; }
 .today-content { padding-bottom: 72px; }
 .today-progress-card { display: grid; grid-template-columns: 1fr auto; gap: 3px 12px; margin: 14px 0 18px; padding: 13px 14px; border: 1px solid var(--line); border-radius: 16px; background: var(--white); box-shadow: 0 4px 14px rgba(41,42,39,.04); }
@@ -137,9 +142,9 @@ input:focus { border-color: var(--green); box-shadow: 0 0 0 3px var(--ring); }
 .settings-row-button { width: 100%; border: 0; background: transparent; color: inherit; text-align: left; cursor: pointer; }
 .settings-chevron { transition: transform .2s ease; }.settings-chevron.open { transform: rotate(90deg); color: var(--green-dark); }
 .settings-options { display: grid; gap: 5px; padding: 0 16px 14px 65px; }.settings-options a { color: var(--green-dark); font-size: .75rem; font-weight: 700; text-decoration: none; }.settings-options a span { margin-left: 4px; }.settings-option-note { color: var(--muted); font-size: .68rem; }
-.load-dots { border: 0; padding: 0; margin: 0; }.load-dots legend { padding: 0; color: var(--graphite); font-size: .76rem; font-weight: 600; }.load-dots legend span { float: right; color: var(--green-dark); }.load-dots div { display: flex; gap: 9px; margin-top: 10px; }.load-dots button { width: 16px; height: 16px; padding: 0; border: 2px solid #b8d9bf; border-radius: 50%; background: transparent; cursor: pointer; transition: transform .15s ease, background .15s ease; }.load-dots button.selected { border-color: var(--green-dark); background: var(--green); }.load-dots button:hover { transform: scale(1.2); }
+.load-dots { border: 0; padding: 0; margin: 0; }.load-dots legend { display: flex; align-items: baseline; gap: 4px; padding: 0; color: var(--graphite); font-size: .76rem; font-weight: 600; }.load-dots legend span { margin-left: auto; color: var(--green-dark); }.load-dots div { display: flex; gap: 0; margin-top: 10px; }.load-dots button { position: relative; z-index: 1; display: grid; flex: 0 0 44px; width: 44px; height: 44px; place-items: center; padding: 0; border: 0; border-radius: 12px; background: transparent; cursor: pointer; transition: background .15s ease; }.load-dots button::before { content: ""; width: 16px; height: 16px; border: 2px solid #b8d9bf; border-radius: 50%; background: transparent; transition: transform .15s ease, background .15s ease; }.load-dots button.selected::before { border-color: var(--green-dark); background: var(--green); }.load-dots button:hover::before { transform: scale(1.2); }.load-dots button:focus-visible { outline: 3px solid var(--ring); outline-offset: 1px; }
 @media (max-width: 899px) { .add-first { position: fixed; right: 0; bottom: 58px; left: 0; z-index: 35; width: 100%; min-height: 52px; border-radius: 0; box-shadow: 0 -5px 16px rgba(41,42,39,.08); } }
-.load-dots div { position: relative; justify-content: space-between; max-width: 190px; }.load-dots div::before { content: ""; position: absolute; top: 7px; right: 8px; left: 8px; height: 2px; background: #dcefe0; }.load-dots button { position: relative; z-index: 1; }
+.load-dots div { position: relative; justify-content: space-between; max-width: 220px; }.load-dots div::before { content: ""; position: absolute; top: 21px; right: 22px; left: 22px; height: 2px; background: #dcefe0; }
 .today-content > .add-task-card { position: fixed; top: 50%; left: 50%; z-index: 81; width: min(92vw, 480px); max-height: 86svh; margin: 0; overflow-y: auto; transform: translate(-50%, -50%); box-shadow: 0 24px 70px rgba(41,42,39,.24); }
 @media (min-width: 900px) { .nos-areas-panel .nos-area-list { height: auto; max-height: calc(100svh - 390px); align-content: start; grid-auto-rows: max-content; }.nos-areas-panel .nos-area { align-self: start; }.nos-areas-panel .nos-area-button { min-height: 64px; }.casa-share-panel .casa-card { min-height: 315px; display: flex; flex-direction: column; }.casa-share-panel .casa-card .button { margin-top: auto; } }
 @media (min-width: 900px) { .nos-areas-panel .nos-area.open { grid-column: 1 / -1; }.nos-areas-panel .nos-area.open .nos-task-list { max-height: min(230px, calc(100svh - 510px)); overflow-y: auto; } }
@@ -508,6 +513,13 @@ html, body { overflow-x: hidden; }
   .today-task-region .complete-button { width: 100%; }
 }
 
+@media (max-width: 360px) {
+  .balance-legend { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 8px; }
+  .balance-legend span { overflow-wrap: normal; word-break: normal; hyphens: none; }
+  .balance-legend span:nth-child(2), .balance-legend span:last-child { text-align: left; }
+  .balance-legend span:last-child { grid-column: 1 / -1; }
+}
+
 @media (max-width: 899px) and (max-height: 640px) {
   .today-shell {
     height: 100svh;
@@ -550,3 +562,8 @@ html, body { overflow-x: hidden; }
     box-shadow: none;
   }
 }
+
+@media (max-width: 340px) and (max-height: 640px) {
+  .today-heading h1 { font-size: 1.375rem; line-height: 1.15; }
+}
+

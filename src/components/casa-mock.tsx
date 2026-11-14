@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import type { MockArea } from "@/lib/mock/store";
+import { LogoutButton } from "@/components/logout-button";
 
 type AreaForm = { mode: "add" | "edit"; areaId?: string; name: string; icon: string };
 const apiAreas = process.env.NEXT_PUBLIC_CUIDAM_MOCK === "false" ? "/api/areas" : "/api/mock/areas";
@@ -42,7 +43,7 @@ export function CasaMock({ household }: { household: { name: string; ownerName: 
   };
 
   return <main className="casa-shell">
-    <div className="topbar"><a className="brand-lockup" href="/today" aria-label="Voltar para Hoje"><span className="brand-mark">⌂</span><span>cuidam</span></a><span className="proto-badge">Você</span></div>
+    <div className="topbar"><a className="brand-lockup" href="/today" aria-label="Voltar para Hoje"><span className="brand-mark">⌂</span><span>cuidam</span></a><LogoutButton /></div>
     <section className="casa-content">
       <div className="casa-heading"><p className="eyebrow">Casa</p><h1>{household.name}</h1><p className="lead">Um lugar simples para ajustar como vocês cuidam da casa.</p></div>
       <div className="casa-card casa-owner-card"><span className="meta-label">Pessoa responsável</span><strong>{household.ownerName}</strong><small>membro da casa</small></div>
@@ -57,3 +58,4 @@ export function CasaMock({ household }: { household: { name: string; ownerName: 
     <nav className="bottom-nav"><a href="/today"><b>☀️</b>Hoje</a><a href="/nos"><b>🤝</b>Nós</a><a className="active" href="/casa"><b>🏡</b>Casa</a></nav>
   </main>;
 }
+

@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import type { MockArea, MockResponsibility, MockTask } from "@/lib/mock/store";
+import { LogoutButton } from "@/components/logout-button";
 
 const recurrenceOptions = ["Diária", "Semanal", "3× por semana", "Mensal"];
 const apiTasks = process.env.NEXT_PUBLIC_CUIDAM_MOCK === "false" ? "/api/tasks" : "/api/mock/tasks";
@@ -40,7 +41,7 @@ export function TodayMock({ household }: { household: { name: string; ownerName:
   };
 
   return <main className="today-shell">
-    <div className="topbar"><div className="brand-lockup" aria-label="cuidam"><span className="brand-mark">⌂</span><span>cuidam</span></div><span className="proto-badge">Você</span></div>
+    <div className="topbar"><div className="brand-lockup" aria-label="cuidam"><span className="brand-mark">⌂</span><span>cuidam</span></div><LogoutButton /></div>
     <section className="today-content">
       <div className="today-heading"><p className="eyebrow">Hoje · {household.name}</p><h1>Bom dia, {household.ownerName.split(" ")[0]} ☀️</h1><p className="lead">O que você cuida hoje?</p></div>
       <div className="today-progress-card"><div><span>Seu progresso</span><strong>{completedCount === routineTasks.length && routineTasks.length ? "Tudo em dia por hoje" : completedCount ? "Sua parte está andando" : "Vamos começar"}</strong></div><b>{completedCount} de {routineTasks.length}</b><div className="progress-track"><i style={{ width: `${progress}%` }} /></div></div>
@@ -51,3 +52,4 @@ export function TodayMock({ household }: { household: { name: string; ownerName:
     <nav className="bottom-nav"><a className="active" href="/today"><b>☀️</b>Hoje</a><a href="/nos"><b>🤝</b>Nós</a><a href="/casa"><b>🏡</b>Casa</a></nav>
   </main>;
 }
+
