@@ -44,6 +44,7 @@ export async function getRealHouseholdSnapshot(): Promise<MockHousehold | null> 
   const household = await prisma.household.findUnique({
     where: { id: context.household.id },
     include: {
+      memberships: { where: { status: "ACTIVE" }, select: { id: true } },
       areas: { where: { status: "ACTIVE" }, orderBy: { sortOrder: "asc" } },
       invitations: { where: { status: "PENDING" }, orderBy: { createdAt: "desc" }, take: 1 },
       tasks: {
@@ -85,8 +86,10 @@ export async function getRealHouseholdSnapshot(): Promise<MockHousehold | null> 
     name: household.name,
     ownerName: context.dbUser.name,
     ownerEmail: context.dbUser.email,
+    memberCount: household.memberships.length,
     areas,
     tasks,
     inviteEmail: household.invitations[0]?.email
   };
 }
+
