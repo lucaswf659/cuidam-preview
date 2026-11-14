@@ -48,7 +48,7 @@ export function OnboardingFlow() {
       if (authMode === "login") {
         const householdResponse = await fetch("/api/onboarding");
         const householdData = await householdResponse.json();
-        if (householdData.household) { setHouseName(householdData.household.name); setStep("done"); return; }
+        if (householdData.household) { router.replace("/today"); return; }
       }
       setStep("house");
       return;
@@ -67,8 +67,7 @@ export function OnboardingFlow() {
       if (!householdResponse.ok) { setError("Não foi possível recuperar sua casa."); return; }
       const householdData = await householdResponse.json();
       if (householdData.household) {
-        setHouseName(householdData.household.name);
-        setStep("done");
+        router.replace("/today");
         return;
       }
     }
