@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({ router: { push: vi.fn(), replace: vi.fn() } }));
 
 vi.mock("next/navigation", () => ({
