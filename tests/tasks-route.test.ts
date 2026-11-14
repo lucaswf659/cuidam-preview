@@ -62,6 +62,7 @@ describe("POST /api/tasks", () => {
       occurrences: {
         create: {
           periodKey: "2026-09-28",
+          targetCompletions: 1,
           responsibilityTypeSnapshot: "PERSON",
           responsibleMemberIdSnapshot: "member-1",
           loadSnapshot: 2
@@ -71,3 +72,4 @@ describe("POST /api/tasks", () => {
     expect(mocks.prisma).not.toHaveProperty("$transaction");
   });
 });
+

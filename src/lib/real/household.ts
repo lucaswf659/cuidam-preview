@@ -44,12 +44,12 @@ export async function getRealHouseholdSnapshot(): Promise<MockHousehold | null> 
   const household = await prisma.household.findUnique({
     where: { id: context.household.id },
     include: {
-      memberships: { where: { status: "ACTIVE" }, select: { id: true } },
+      memberships: { where: { status: "ACTIVE" }, select: { id: true, user: { select: { id: true, name: true } } } },
       areas: { where: { status: "ACTIVE" }, orderBy: { sortOrder: "asc" } },
       invitations: { where: { status: "PENDING" }, orderBy: { createdAt: "desc" }, take: 1 },
       tasks: {
         include: {
-          occurrences: { orderBy: { scheduledFor: "desc" }, take: 1 }
+          occurrences: { orderBy: { scheduledFor: "desc" }, take: 1, include: { claimedBy: { select: { id: true, name: true } } } }
         },
         orderBy: { createdAt: "asc" }
       }
@@ -66,18 +66,23 @@ export async function getRealHouseholdSnapshot(): Promise<MockHousehold | null> 
   const tasks: MockTask[] = household.tasks.map((task) => {
     const occurrence = task.occurrences[0];
     let responsibility: MockResponsibility = "Outra pessoa";
-    if (task.responsibilityType === "SHARED") responsibility = "Nós";
-    else if (task.responsibleMemberId === context.membership.id) responsibility = "Você";
+    const responsibilityType = occurrence ? occurrence.responsibilityTypeSnapshot : task.responsibilityType;
+    const responsibleMemberId = occurrence ? occurrence.responsibleMemberIdSnapshot : task.responsibleMemberId;
+    if (responsibilityType === "SHARED") responsibility = "Nós";
+    else if (responsibleMemberId === context.membership.id) responsibility = "Você";
     return {
       id: task.id,
       name: task.name,
       areaId: task.areaId,
       responsibility,
       recurrence: recurrenceLabel(task.recurrenceKind, task.recurrenceInterval, task.weeklyTarget),
-      load: task.load,
+      load: occurrence?.loadSnapshot ?? task.load,
       completed: occurrence?.status === "COMPLETED" || Boolean(occurrence && occurrence.completedCount >= occurrence.targetCompletions),
       completedAt: occurrence?.completedAt?.toISOString(),
-      archived: task.status === "ARCHIVED"
+      archived: task.status === "ARCHIVED",
+      claimInProgress: occurrence?.status === "PENDING" && Boolean(occurrence.claimedByUserId),
+      claimOwnedByCurrentUser: occurrence?.status === "PENDING" && occurrence.claimedByUserId === context.dbUser.id,
+      claimOwnerName: occurrence?.claimedBy?.name
     };
   });
 
