@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import type { MockArea, MockResponsibility, MockTask } from "@/lib/mock/store";
+import type { MockHousehold, MockResponsibility, MockTask } from "@/lib/mock/store";
 import { LogoutButton } from "@/components/logout-button";
 
 const frequencyCount: Record<string, number> = { "Diária": 7, "Semanal": 1, "3× por semana": 3, "Mensal": 1 };
@@ -32,7 +32,7 @@ function blankTaskForm(areaId: string): TaskForm {
   return { mode: "add", name: "", areaId, responsibility: "Você", recurrence: "Diária", load: 2 };
 }
 
-export function NosMock({ household }: { household: { name: string; ownerName: string; areas: MockArea[]; tasks: MockTask[] } }) {
+export function NosMock({ household }: { household: MockHousehold }) {
   const searchParams = useSearchParams();
   const areaFromQuery = searchParams.get("area");
   const [tasks, setTasks] = useState(household.tasks);
@@ -55,21 +55,24 @@ export function NosMock({ household }: { household: { name: string; ownerName: s
   }, { you: 0, other: 0, shared: 0 });
   const totalScore = scores.you + scores.other + scores.shared;
   const peopleScore = scores.you + scores.other;
+  const hasOtherMember = household.memberCount > 1;
   const percent = (value: number) => totalScore ? Math.round((value / totalScore) * 100) : 0;
   const youPercent = percent(scores.you);
   const otherPercent = percent(scores.other);
-  const sharedPercent = Math.max(0, 100 - youPercent - otherPercent);
+  const sharedPercent = totalScore ? Math.max(0, 100 - youPercent - otherPercent) : 0;
   const peopleBalance = peopleScore ? Math.round((scores.you / peopleScore) * 100) : 0;
   const relativeDifference = peopleScore ? (Math.abs(scores.you - scores.other) / peopleScore) * 100 : 0;
   const status = !activeTasks.length
     ? "Ainda sem divisão"
-    : !scores.other
-      ? "Ainda falta dividir com outra pessoa"
-      : relativeDifference <= 10
-        ? "Bem equilibrada"
-        : relativeDifference <= 25
-          ? "Um pouco desequilibrada"
-          : "Mais concentrada";
+    : !hasOtherMember
+      ? "Por enquanto, só você"
+      : !scores.other
+        ? "Ainda falta dividir com outra pessoa"
+        : relativeDifference <= 10
+          ? "Bem equilibrada"
+          : relativeDifference <= 25
+            ? "Um pouco desequilibrada"
+            : "Mais concentrada";
 
   const selectedArea = household.areas.find((area) => area.id === selectedAreaId) ?? null;
   const selectedAreaTasks = selectedArea ? tasks.filter((task) => task.areaId === selectedArea.id && !task.archived) : [];
@@ -120,12 +123,12 @@ export function NosMock({ household }: { household: { name: string; ownerName: s
         <div className="nos-balance-panel">
           <div className="balance-card">
             <div className="balance-header">
-              <div><span className="meta-label">Divisão atual</span><strong>{status}</strong></div>
-              <span className="balance-number-wrap"><small>{scores.other ? "Sua parte" : "No total"}</small><span className="balance-number">{totalScore ? `${scores.other ? peopleBalance : youPercent}%` : "—"}</span></span>
+              <div><span className="meta-label">{hasOtherMember ? "Divisão atual" : "Resumo da casa"}</span><strong>{status}</strong></div>
+              <span className="balance-number-wrap"><small>{hasOtherMember ? (scores.other ? "Sua parte" : "No total") : "Suas tarefas"}</small><span className="balance-number">{totalScore ? `${hasOtherMember && scores.other ? peopleBalance : youPercent}%` : "—"}</span></span>
             </div>
-            <div className="balance-bar" role="img" aria-label={`Você ${youPercent} por cento, outra pessoa ${otherPercent} por cento, compartilhadas ${sharedPercent} por cento`}><span className="balance-you" style={{ width: `${youPercent}%` }} /><span className="balance-other" style={{ width: `${otherPercent}%` }} /><i className="balance-shared" style={{ width: `${sharedPercent}%` }} /></div>
-            <div className="balance-legend"><span>Você · {youPercent}%</span><span>Outra pessoa · {otherPercent}%</span><span>Compartilhadas · {sharedPercent}%</span></div>
-            <p>A divisão considera o peso e a frequência. Tarefas compartilhadas ficam visíveis sem pesar contra uma pessoa.</p>
+            <div className="balance-bar" role="img" aria-label={hasOtherMember ? `Você ${youPercent} por cento, outra pessoa ${otherPercent} por cento, compartilhadas ${sharedPercent} por cento` : `Suas tarefas ${youPercent} por cento, compartilhadas ${sharedPercent} por cento`}><span className="balance-you" style={{ width: `${youPercent}%` }} />{hasOtherMember ? <span className="balance-other" style={{ width: `${otherPercent}%` }} /> : null}<i className="balance-shared" style={{ width: `${sharedPercent}%` }} /></div>
+            <div className="balance-legend"><span>Você · {youPercent}%</span>{hasOtherMember ? <span>Outra pessoa · {otherPercent}%</span> : null}<span>Compartilhadas · {sharedPercent}%</span></div>
+            <p>{hasOtherMember ? "A divisão considera o peso e a frequência. Tarefas compartilhadas ficam visíveis sem pesar contra uma pessoa." : "Quando outra pessoa entrar na casa, a divisão entre vocês aparece aqui."}</p>
           </div>
         </div>
         <div className="nos-areas-panel">
