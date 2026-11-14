@@ -1,7 +1,7 @@
 export type MockArea = { id: string; name: string; icon: string; sortOrder: number };
 export type MockResponsibility = "Você" | "Outra pessoa" | "Nós";
 export type MockTask = { id: string; name: string; areaId: string; responsibility: MockResponsibility; recurrence: string; load: number; completed: boolean; completedAt?: string; archived?: boolean };
-export type MockHousehold = { id: string; name: string; ownerName: string; ownerEmail: string; areas: MockArea[]; tasks: MockTask[]; inviteEmail?: string };
+export type MockHousehold = { id: string; name: string; ownerName: string; ownerEmail: string; memberCount: number; areas: MockArea[]; tasks: MockTask[]; inviteEmail?: string };
 
 type MockStore = { households: Map<string, MockHousehold>; sessions: Map<string, string> };
 const globalStore = globalThis as typeof globalThis & { __cuidamMockStore?: MockStore };
@@ -26,7 +26,7 @@ function createMockDemoHousehold(): MockHousehold {
     { id: "mock-demo-task-bathroom", name: "Limpar banheiro", areaId: "bathroom", responsibility: "Você", recurrence: "Semanal", load: 3, completed: false },
     { id: "mock-demo-task-bedroom", name: "Trocar roupa de cama", areaId: "bedroom", responsibility: "Você", recurrence: "Semanal", load: 2, completed: false }
   ];
-  return { id: "mock-household-demo", name: "Nossa casa de teste", ownerName: "Morador de teste", ownerEmail: mockDemoEmail, areas, tasks };
+  return { id: "mock-household-demo", name: "Nossa casa de teste", ownerName: "Morador de teste", ownerEmail: mockDemoEmail, memberCount: 1, areas, tasks };
 }
 
 export function mockHouseholdForSession(sessionId: string | undefined) {
@@ -44,3 +44,4 @@ export function saveMockHousehold(sessionId: string, household: MockHousehold) {
   store.households.set(household.id, household); store.sessions.set(sessionId, household.id); return household;
 }
 export function updateMockHousehold(household: MockHousehold) { store.households.set(household.id, household); return household; }
+
