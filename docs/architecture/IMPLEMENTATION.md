@@ -11,7 +11,7 @@ Este documento acompanha a implementação do MVP e deve ser atualizado quando u
 - O modo mock é o padrão enquanto `NEXT_PUBLIC_CUIDAM_MOCK` não for `false`; ele usa APIs server-side e cookie de sessão, sem localStorage.
 - Prisma/PostgreSQL preparado para persistir usuário, casa, membership e áreas.
 - `GET/POST /api/onboarding` validam a sessão Supabase; o POST grava a casa em transação e é idempotente por conta.
-- `User.activeHouseholdId` impede que a mesma conta crie casas ativas duplicadas; a criação usa lock de linha no banco.
+- `User.activeHouseholdId` aponta a casa ativa da conta; várias contas podem apontar para a mesma casa, respeitando o limite de membros do MVP. A criação usa lock de linha no banco para impedir casas duplicadas por conta.
 - Onboarding visual com caminhos de cadastro e login.
 - `/today` já exige sessão e apresenta o estado vazio da casa.
 - No modo mock, `/today` permite adicionar e concluir tarefas usando o mesmo contrato de API que será ligado ao banco real.
