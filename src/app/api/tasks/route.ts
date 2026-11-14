@@ -66,6 +66,7 @@ export async function POST(request: Request) {
         create: {
           periodKey: periodKeyForRecurrence({ ...recurrence, recurrenceAnchor: now }, now, context.household.timezone)!,
           scheduledFor: now,
+          targetCompletions: recurrence.recurrenceKind === "WEEKLY" ? recurrence.weeklyTarget : 1,
           responsibilityTypeSnapshot: responsibility.responsibilityType,
           responsibleMemberIdSnapshot: responsibility.responsibleMemberId,
           loadSnapshot: parsed.load
@@ -115,34 +116,93 @@ export async function PATCH(request: Request) {
   const now = new Date();
   const periodKey = periodKeyForRecurrence(existing, now, context.household.timezone);
   if (!periodKey) return NextResponse.json({ error: "Esta tarefa ainda não possui uma ocorrência neste período." }, { status: 409 });
-  await prisma.$transaction(async (tx) => {
-    let occurrence = await tx.taskOccurrence.findUnique({ where: { taskId_periodKey: { taskId: existing.id, periodKey } } });
-    if (!occurrence) {
-      occurrence = await tx.taskOccurrence.create({
-        data: {
+
+  if (body.action === "claim") {
+    const claim = await prisma.$transaction(async (tx) => {
+      const occurrence = await tx.taskOccurrence.upsert({
+        where: { taskId_periodKey: { taskId: existing.id, periodKey } },
+        create: {
           taskId: existing.id,
           periodKey,
           scheduledFor: now,
+          targetCompletions: existing.recurrenceKind === "WEEKLY" ? existing.weeklyTarget : 1,
           responsibilityTypeSnapshot: existing.responsibilityType,
           responsibleMemberIdSnapshot: existing.responsibleMemberId,
           loadSnapshot: existing.load
-        }
+        },
+        update: {}
       });
+      if (occurrence.status !== "PENDING") return { ok: false, error: "Esta ocorrência não está mais disponível." };
+      if (occurrence.responsibilityTypeSnapshot !== "SHARED") return { ok: false, error: "Esta tarefa não é compartilhada." };
+      if (occurrence.claimedByUserId === context.dbUser.id) return { ok: true };
+      if (occurrence.claimedByUserId) return { ok: false, error: "Outra pessoa já está cuidando desta tarefa." };
+
+      const updated = await tx.taskOccurrence.updateMany({
+        where: { id: occurrence.id, status: "PENDING", claimedByUserId: null },
+        data: { claimedByUserId: context.dbUser.id, claimedAt: now }
+      });
+      if (updated.count) return { ok: true };
+
+      const latest = await tx.taskOccurrence.findUnique({ where: { id: occurrence.id } });
+      if (latest?.status === "PENDING" && latest.claimedByUserId === context.dbUser.id) return { ok: true };
+      return { ok: false, error: "Outra pessoa acabou de assumir esta tarefa. Atualize para ver o estado atual." };
+    });
+
+    if (!claim.ok) return NextResponse.json({ error: claim.error, task: await taskResponse(existing.id) }, { status: 409 });
+    return NextResponse.json({ task: await taskResponse(existing.id) });
+  }
+
+  const completion = await prisma.$transaction(async (tx) => {
+    const occurrence = await tx.taskOccurrence.upsert({
+      where: { taskId_periodKey: { taskId: existing.id, periodKey } },
+      create: {
+        taskId: existing.id,
+        periodKey,
+        scheduledFor: now,
+        targetCompletions: existing.recurrenceKind === "WEEKLY" ? existing.weeklyTarget : 1,
+        responsibilityTypeSnapshot: existing.responsibilityType,
+        responsibleMemberIdSnapshot: existing.responsibleMemberId,
+        loadSnapshot: existing.load
+      },
+      update: {}
+    });
+    if (occurrence.status === "COMPLETED" || occurrence.completedCount >= occurrence.targetCompletions) return { ok: true };
+    if (occurrence.status !== "PENDING") return { ok: false, error: "Esta ocorrência não está disponível neste período." };
+    if (occurrence.responsibilityTypeSnapshot === "SHARED" && !occurrence.claimedByUserId) {
+      return { ok: false, error: "Toque em “Vou cuidar” antes de concluir esta tarefa." };
     }
+    if (occurrence.responsibilityTypeSnapshot === "SHARED" && occurrence.claimedByUserId !== context.dbUser.id) {
+      return { ok: false, error: "Outra pessoa já está cuidando desta tarefa." };
+    }
+
     const nextCount = Math.min(occurrence.completedCount + 1, occurrence.targetCompletions);
     const completesOccurrence = nextCount >= occurrence.targetCompletions;
+    const starsGranted = completesOccurrence ? occurrence.loadSnapshot : 0;
     const updated = await tx.taskOccurrence.updateMany({
-      where: { id: occurrence.id, status: "PENDING" },
+      where: {
+        id: occurrence.id,
+        status: "PENDING",
+        completedCount: occurrence.completedCount,
+        claimedByUserId: occurrence.claimedByUserId
+      },
       data: {
         status: completesOccurrence ? "COMPLETED" : "PENDING",
         completedAt: completesOccurrence ? now : null,
         completedCount: nextCount,
-        starsGrantedSnapshot: completesOccurrence ? existing.load : 0
+        starsGrantedSnapshot: completesOccurrence ? starsGranted : 0,
+        claimedByUserId: completesOccurrence ? null : occurrence.claimedByUserId,
+        claimedAt: completesOccurrence ? null : occurrence.claimedAt
       }
     });
-    if (updated.count) {
-      await tx.occurrenceCompletion.create({ data: { occurrenceId: occurrence.id, completedById: context.dbUser.id, starsGranted: completesOccurrence ? existing.load : 0 } });
-    }
+    if (!updated.count) return { ok: false, error: "Esta ocorrência foi atualizada. Atualize a tela para ver o estado atual." };
+
+    await tx.occurrenceCompletion.create({
+      data: { occurrenceId: occurrence.id, completedById: context.dbUser.id, starsGranted }
+    });
+    return { ok: true };
   });
+
+  if (!completion.ok) return NextResponse.json({ error: completion.error, task: await taskResponse(existing.id) }, { status: 409 });
   return NextResponse.json({ task: await taskResponse(existing.id) });
 }
+
