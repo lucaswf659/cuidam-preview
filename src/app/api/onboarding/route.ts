@@ -84,6 +84,7 @@ export async function POST(request: Request) {
       name: parsed.data.houseName,
       ownerName: parsed.data.name,
       ownerEmail: decodeURIComponent(sessionId.replace("mock-", "")),
+      memberCount: 1,
       areas,
       tasks
     });
@@ -176,3 +177,4 @@ export async function POST(request: Request) {
 
   return NextResponse.json({ householdId: result.household.id, created: result.created }, { status: result.created ? 201 : 200 });
 }
+
