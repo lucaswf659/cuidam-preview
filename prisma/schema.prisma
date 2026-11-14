@@ -68,7 +68,7 @@ model User {
   authProviderId  String       @unique
   name            String
   email           String       @unique
-  activeHouseholdId String?    @unique
+  activeHouseholdId String?
   createdAt       DateTime     @default(now())
   activeHousehold Household?   @relation("ActiveHousehold", fields: [activeHouseholdId], references: [id], onDelete: Restrict)
   memberships     Membership[]
@@ -83,7 +83,7 @@ model Household {
   name        String
   timezone    String
   createdAt   DateTime     @default(now())
-  activeAccount User?       @relation("ActiveHousehold")
+  activeAccounts User[]     @relation("ActiveHousehold")
   memberships Membership[]
   invitations Invitation[]
   areas       Area[]
