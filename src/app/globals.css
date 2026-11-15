@@ -597,3 +597,25 @@ html, body { overflow-x: hidden; }
 .reward-history > div { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--line); font-size: .85rem; }
 .reward-history small { color: var(--muted); }
 @media (min-width: 960px) { .rewards-shell { margin-left: 220px; } }
+
+.notification-content { max-width: 640px; }
+.notification-entry { margin-top: 16px; }
+.notification-entry .section-heading { margin-bottom: 0; }
+.notification-card { background: #fff; border: 1px solid #e9e3da; border-radius: 22px; padding: 18px; box-shadow: 0 8px 24px rgba(41,42,39,.05); }
+.notification-card fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+.notification-card legend { padding: 0 0 8px; font-size: 15px; font-weight: 650; }
+.notification-option, .notification-quiet { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 72px; padding: 12px 0; border-top: 1px solid #eee9e2; }
+.notification-option > span, .notification-quiet > div:first-child { display: flex; flex-direction: column; gap: 4px; }
+.notification-option strong, .notification-quiet strong { font-size: 13px; font-weight: 600; }
+.notification-option small, .notification-quiet small { color: #777873; font-size: 11px; line-height: 1.45; }
+.notification-option input[type="checkbox"] { width: 22px; height: 22px; min-width: 22px; accent-color: #376b45; }
+.notification-quiet { align-items: flex-start; flex-direction: column; }
+.quiet-times { display: flex; gap: 12px; width: 100%; }
+.quiet-times label { display: flex; align-items: center; gap: 8px; flex: 1; font-size: 12px; }
+.quiet-times input { min-width: 0; width: 100%; min-height: 44px; border: 1px solid #e6dfd6; border-radius: 12px; padding: 8px; color: #292a27; background: #fff; }
+.notification-save { width: 100%; min-height: 48px; margin-top: 16px; }
+.notification-save:disabled { opacity: .65; cursor: wait; }
+.notification-retry { width: 100%; min-height: 44px; margin-top: 8px; }
+.notification-note { margin: 12px 4px; color: #777873; font-size: 12px; line-height: 1.55; }
+.back-link { display: inline-flex; min-height: 44px; align-items: center; color: #376b45; text-decoration: none; font-size: 13px; font-weight: 600; }
+.notification-card .form-error, .notification-card .form-success { display: block; margin: 10px 0 0; }
