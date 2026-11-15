@@ -1,14 +1,22 @@
 export type MockArea = { id: string; name: string; icon: string; sortOrder: number };
 export type MockResponsibility = "Você" | "Outra pessoa" | "Nós";
 export type MockTask = { id: string; name: string; areaId: string; responsibility: MockResponsibility; recurrence: string; load: number; completed: boolean; completedAt?: string; archived?: boolean; claimInProgress?: boolean; claimOwnedByCurrentUser?: boolean; claimOwnerName?: string };
+export type NotificationPreferences = { morningReminder: boolean; activity: boolean; sharedTask: boolean; quietStart: string; quietEnd: string };
 export type MockHousehold = { id: string; name: string; ownerName: string; ownerEmail: string; memberCount: number; areas: MockArea[]; tasks: MockTask[]; inviteEmail?: string };
 
-type MockStore = { households: Map<string, MockHousehold>; sessions: Map<string, string> };
+type MockStore = { households: Map<string, MockHousehold>; sessions: Map<string, string>; notificationPreferences: Map<string, NotificationPreferences> };
 const globalStore = globalThis as typeof globalThis & { __cuidamMockStore?: MockStore };
-const store: MockStore = globalStore.__cuidamMockStore ?? { households: new Map(), sessions: new Map() };
+const store: MockStore = globalStore.__cuidamMockStore ?? { households: new Map(), sessions: new Map(), notificationPreferences: new Map() };
+store.notificationPreferences ??= new Map();
 globalStore.__cuidamMockStore = store;
 
 export function mockSessionId(email: string) { return `mock-${encodeURIComponent(email.trim().toLowerCase())}`; }
+
+export const defaultNotificationPreferences: NotificationPreferences = { morningReminder: true, activity: false, sharedTask: false, quietStart: "22:00", quietEnd: "08:00" };
+export function mockNotificationPreferencesForSession(sessionId: string, preferences?: NotificationPreferences) {
+  if (preferences) store.notificationPreferences.set(sessionId, preferences);
+  return store.notificationPreferences.get(sessionId) ?? defaultNotificationPreferences;
+}
 
 const mockDemoEmail = "morador.teste@cuidam.dev";
 const mockDemoSessionId = mockSessionId(mockDemoEmail);
