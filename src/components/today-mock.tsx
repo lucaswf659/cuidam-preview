@@ -41,8 +41,16 @@ export function TodayMock({ household }: { household: { name: string; ownerName:
     try {
       const response = await fetch(apiTasks, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ taskId, ...(action ? { action } : {}) }) });
       const data = await response.json().catch(() => ({}));
-      if (data.task) setTasks((current) => current.map((task) => task.id === taskId ? data.task : task));
-      if (!response.ok) setError(data.error ?? "Não foi possível atualizar a tarefa.");
+      if (!response.ok) {
+        if (data.task) setTasks((current) => current.map((task) => task.id === taskId ? data.task : task));
+        setError(data.error ?? "Não foi possível atualizar a tarefa.");
+        return;
+      }
+      if (!data.task) {
+        setError("Não recebemos a confirmação desta alteração. Atualize a tela para conferir o estado antes de tentar novamente.");
+        return;
+      }
+      setTasks((current) => current.map((task) => task.id === taskId ? data.task : task));
     } catch {
       setError("Não foi possível atualizar a tarefa. Tente novamente.");
     } finally {
