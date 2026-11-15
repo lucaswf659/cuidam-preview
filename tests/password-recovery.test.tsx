@@ -38,7 +38,7 @@ describe("recuperação de senha", () => {
     fireEvent.click(screen.getByRole("button", { name: "Enviar instruções" }));
 
     await waitFor(() => expect(mocks.resetPasswordForEmail).toHaveBeenCalledWith("pessoa@example.com", {
-      redirectTo: `${window.location.origin}/auth/callback`,
+      redirectTo: `${window.location.origin}/auth/callback?next=%2Fauth%2Freset-password`,
     }));
     expect(await screen.findByRole("status")).toHaveTextContent("Se houver uma conta associada");
   });
