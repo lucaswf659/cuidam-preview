@@ -38,9 +38,20 @@ describe("recuperação de senha", () => {
     fireEvent.click(screen.getByRole("button", { name: "Enviar instruções" }));
 
     await waitFor(() => expect(mocks.resetPasswordForEmail).toHaveBeenCalledWith("pessoa@example.com", {
-      redirectTo: `${window.location.origin}/auth/confirm`,
+      redirectTo: `${window.location.origin}/auth/callback`,
     }));
     expect(await screen.findByRole("status")).toHaveTextContent("Se houver uma conta associada");
+  });
+
+  it("orienta a aguardar quando o Supabase limita o envio", async () => {
+    mocks.resetPasswordForEmail.mockResolvedValue({ error: Object.assign(new Error("rate limit"), { status: 429 }) });
+    render(<OnboardingFlow />);
+    fireEvent.click(screen.getByRole("button", { name: "Já tenho uma conta" }));
+    fireEvent.click(screen.getByRole("button", { name: "Esqueci minha senha" }));
+    fireEvent.change(screen.getByLabelText("E-mail"), { target: { value: "pessoa@example.com" } });
+    fireEvent.click(screen.getByRole("button", { name: "Enviar instruções" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Muitos pedidos em pouco tempo");
   });
 
   it("só troca a senha quando as duas entradas coincidem e então segue para Hoje", async () => {
