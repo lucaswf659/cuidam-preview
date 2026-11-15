@@ -67,3 +67,10 @@ npm run build      # build de produção
 - Preferências reais são isoladas pelo membership autenticado e persistidas no `NotificationPreference` existente; horários inválidos ou iguais são rejeitados.
 - Modo mock mantém as preferências associadas à sessão enquanto a instância do servidor estiver ativa.
 - A regra de quiet hours considera intervalos que cruzam a meia-noite. A integração de entrega push e o agendamento de envios dependem do serviço de notificação e das credenciais de infraestrutura, ausentes nesta etapa.
+
+
+### 2026-11-15 — Recuperação de senha
+
+- O pedido de recuperação usa Supabase Auth PKCE, com retorno em `/auth/callback?next=/auth/reset-password`; após a troca do código, a página atualiza a senha pela sessão autenticada.
+- A confirmação do pedido é neutra para não revelar se existe uma conta para o e-mail. A opção não aparece no modo mock, sem credenciais reais.
+- Testes cobrem pedido, resposta neutra, confirmação da senha e atualização autenticada.
