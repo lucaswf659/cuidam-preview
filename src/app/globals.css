@@ -132,7 +132,7 @@ input:focus { border-color: var(--green); box-shadow: 0 0 0 3px var(--ring); }
 .task-card-main { display: flex; align-items: flex-start; gap: 10px; }
 .task-area-icon { width: 40px; height: 40px; display: grid !important; flex: none; place-items: center; margin: 0 !important; border-radius: 14px; background: #f7f2eb; font-family: "Segoe UI Emoji", "Apple Color Emoji", sans-serif; font-size: 22px !important; line-height: 1; }
 .task-card { animation: task-enter .35s ease both; }
-.bottom-nav { position: fixed; bottom: 0; left: 50%; z-index: 40; display: grid; width: 100%; max-width: 680px; grid-template-columns: repeat(3, 1fr); padding: 8px 8px 10px; transform: translateX(-50%); border-top: 1px solid var(--line); background: var(--white); }
+.bottom-nav { position: fixed; bottom: 0; left: 50%; z-index: 40; display: grid; width: 100%; max-width: 680px; grid-template-columns: repeat(4, 1fr); padding: 8px 8px 10px; transform: translateX(-50%); border-top: 1px solid var(--line); background: var(--white); }
 .bottom-nav a { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 5px; color: var(--muted); font-size: .65rem; text-decoration: none; }
 .bottom-nav a.active { color: var(--graphite); font-weight: 700; }
 .bottom-nav b { font-size: 19px; line-height: 1.1; }
@@ -567,3 +567,33 @@ html, body { overflow-x: hidden; }
   .today-heading h1 { font-size: 1.375rem; line-height: 1.15; }
 }
 
+.bottom-nav { grid-template-columns: repeat(4, 1fr); }
+.rewards-shell { min-height: 100svh; padding: 0 16px 100px; }
+.rewards-content { width: min(100%, 760px); margin: 30px auto 0; }
+.rewards-content h1 { max-width: 620px; }
+.rewards-balance { margin: 28px 0; padding: 22px 24px; display: flex; justify-content: space-between; align-items: center; border-radius: 20px; background: var(--green-dark); color: white; }
+.rewards-balance span { font-weight: 500; }
+.rewards-balance strong { font-size: 2rem; }
+.rewards-balance small { color: #f4c95d; }
+.rewards-section-heading { display: flex; justify-content: space-between; align-items: baseline; margin: 26px 0 12px; }
+.rewards-section-heading h2, .reward-form-card h2, .reward-history h2 { margin: 0; font-size: 1.2rem; }
+.rewards-section-heading span { color: var(--muted); font-size: .8rem; }
+.rewards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr)); gap: 12px; }
+.reward-card, .reward-form-card, .reward-history { padding: 18px; border: 1px solid var(--line); border-radius: 20px; background: white; }
+.reward-card { display: grid; grid-template-columns: 42px 1fr auto; gap: 12px; align-items: center; }
+.reward-card-icon { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 14px; color: #735c16; background: #fff6df; font-size: 1.35rem; }
+.reward-card-info h3 { margin: 0; font-size: .95rem; }
+.reward-card-info p { margin: 3px 0 0; color: var(--muted); font-size: .75rem; }
+.reward-cost { color: var(--green-dark); white-space: nowrap; }
+.reward-card > .button { grid-column: 1 / -1; min-height: 44px; }
+.reward-card-secondary { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 20px; }
+.reward-card-secondary button { min-height: 44px; border: 0; color: var(--muted); background: transparent; }
+.rewards-empty { padding: 20px; border-radius: 18px; color: var(--muted); background: white; }
+.reward-form-card, .reward-history { margin-top: 24px; }
+.reward-form-card form { margin-top: 16px; }
+.reward-form-card label { display: block; margin: 14px 0 6px; font-size: .85rem; font-weight: 600; }
+.reward-form-card input, .reward-form-card select { width: 100%; min-height: 48px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: white; }
+.reward-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.reward-history > div { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--line); font-size: .85rem; }
+.reward-history small { color: var(--muted); }
+@media (min-width: 960px) { .rewards-shell { margin-left: 220px; } }

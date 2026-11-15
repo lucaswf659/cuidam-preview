@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { onboardingPayloadSchema } from "@/app/api/onboarding/route";
+import { onboardingPayloadSchema } from "@/lib/real/onboarding-schema";
 
 describe("onboarding payload", () => {
   it("aceita payload válido", () => {

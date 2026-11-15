@@ -226,6 +226,7 @@ model Reward {
 
 model RewardRedemption {
   id                  String              @id @default(cuid())
+  requestKey          String?             @unique
   rewardId            String
   householdId         String
   redeemedByUserId    String
