@@ -71,6 +71,7 @@ npm run build      # build de produção
 
 ### 2026-11-15 — Recuperação de senha
 
-- O pedido de recuperação usa Supabase Auth PKCE, com retorno em `/auth/callback?next=/auth/reset-password`; após a troca do código, a página atualiza a senha pela sessão autenticada.
-- A confirmação do pedido é neutra para não revelar se existe uma conta para o e-mail. A opção não aparece no modo mock, sem credenciais reais.
-- Testes cobrem pedido, resposta neutra, confirmação da senha e atualização autenticada.
+- O pedido usa `resetPasswordForEmail` e valida `TokenHash` no servidor com `verifyOtp`, sem depender do navegador em que o pedido foi iniciado.
+- A página de confirmação exige uma ação explícita antes de consumir o token; isso evita que pré-visualizações automáticas do e-mail o utilizem.
+- A nova senha só pode ser atualizada com a sessão criada pela confirmação. A resposta do pedido é neutra para não revelar se há uma conta e a opção não aparece no modo mock.
+- O template Reset Password do Supabase precisa seguir `docs/architecture/SUPABASE-AUTH-SETUP.md`.
