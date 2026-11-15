@@ -1,6 +1,6 @@
 # Configuração de e-mail de recuperação do Cuidam
 
-O Cuidam confirma o TokenHash no servidor para não depender de o link ser aberto no mesmo navegador que pediu a recuperação. A página de confirmação exige um clique antes de validar o token, evitando que pré-visualizações automáticas de e-mail o consumam.
+O Cuidam confirma o TokenHash no servidor para não depender de o link ser aberto no mesmo navegador que pediu a recuperação. A página de confirmação exige um clique antes de validar o token, evitando que pré-visualizações automáticas de e-mail o consumam. Se o template padrão do Supabase ainda estiver ativo, o callback PKCE também aceita o fluxo no mesmo navegador. Para abrir o link em outro navegador, configure o template TokenHash abaixo.
 
 ## Configurar o template no Supabase
 
