@@ -83,12 +83,15 @@ export function OnboardingFlow() {
     setRequestingRecovery(true);
     try {
       const { error: recoveryError } = await createClient().auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/confirm`,
+        redirectTo: `${window.location.origin}/auth/callback`,
       });
       if (recoveryError) throw recoveryError;
       setRecoverySent(true);
-    } catch {
-      setError("Não foi possível enviar as instruções agora. Tente novamente mais tarde.");
+    } catch (cause) {
+      const isRateLimited = typeof cause === "object" && cause !== null && "status" in cause && cause.status === 429;
+      setError(isRateLimited
+        ? "Muitos pedidos em pouco tempo. Aguarde um pouco antes de tentar novamente."
+        : "Não foi possível enviar as instruções agora. Tente novamente mais tarde.");
     } finally {
       setRequestingRecovery(false);
     }
