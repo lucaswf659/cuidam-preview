@@ -30,6 +30,9 @@ export function OnboardingFlow() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [recoveringPassword, setRecoveringPassword] = useState(false);
+  const [recoverySent, setRecoverySent] = useState(false);
+  const [requestingRecovery, setRequestingRecovery] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [houseName, setHouseName] = useState("Nossa casa");
   const [error, setError] = useState("");
@@ -74,6 +77,23 @@ export function OnboardingFlow() {
     setStep("house");
   };
 
+  const requestPasswordRecovery = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError("");
+    setRequestingRecovery(true);
+    try {
+      const { error: recoveryError } = await createClient().auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent("/auth/reset-password")}`,
+      });
+      if (recoveryError) throw recoveryError;
+      setRecoverySent(true);
+    } catch {
+      setError("Não foi possível enviar as instruções agora. Tente novamente mais tarde.");
+    } finally {
+      setRequestingRecovery(false);
+    }
+  };
+
   const finishOnboarding = async () => {
     setError("");
     const onboardingName = name.trim() || email.trim().split("@")[0] || "Você";
@@ -114,6 +134,17 @@ export function OnboardingFlow() {
         )}
 
         {step === "signup" && (
+          recoveringPassword ? (
+            <form className="step-content form-step" onSubmit={requestPasswordRecovery}>
+              <button className="back" type="button" onClick={() => { setRecoveringPassword(false); setRecoverySent(false); setError(""); }}>← Voltar para entrar</button>
+              <p className="eyebrow">Acesso à conta</p>
+              <h1>Vamos recuperar seu acesso.</h1>
+              <p className="lead">Informe o e-mail da sua conta. Se houver uma conta associada, enviaremos as instruções para redefinir a senha.</p>
+              <label>E-mail<input type="email" value={email} onChange={(event) => { setEmail(event.target.value); setRecoverySent(false); }} placeholder="voce@email.com" autoComplete="email" required /></label>
+              {recoverySent ? <p className="form-success" role="status">Se houver uma conta associada a esse e-mail, as instruções chegarão em instantes.</p> : <button className="button primary" type="submit" disabled={requestingRecovery}>{requestingRecovery ? "Enviando…" : "Enviar instruções"}</button>}
+              {error && <p className="form-error" role="alert">{error}</p>}
+            </form>
+          ) :
           <form className="step-content form-step" onSubmit={continueSignup}>
             <button className="back" type="button" onClick={() => setStep("welcome")}>← Voltar</button>
             <p className="eyebrow">{authMode === "signup" ? "Começando" : "De volta à casa"}</p>
@@ -121,10 +152,11 @@ export function OnboardingFlow() {
             <p className="lead">{authMode === "signup" ? "Crie sua conta. Você configura a casa em seguida." : "Entre para continuar de onde parou."}</p>
             {authMode === "signup" && <label>Seu nome<input value={name} onChange={(event) => setName(event.target.value)} placeholder="Como podemos te chamar?" autoComplete="name" required /></label>}
             <label>E-mail<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="voce@email.com" autoComplete="email" required /></label>
-            <label>Senha<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Pelo menos 8 caracteres" autoComplete="new-password" minLength={8} required /></label>
+            <label>Senha<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Pelo menos 8 caracteres" autoComplete={authMode === "login" ? "current-password" : "new-password"} minLength={8} required /></label>
             <button className="button primary" type="submit">{authMode === "signup" ? "Continuar" : "Entrar"}</button>
             {error && <p className="form-error" role="alert">{error}</p>}
-            <p className="form-note">Ao continuar, você poderá recuperar a senha pelo e-mail.</p>
+            {authMode === "login" && process.env.NEXT_PUBLIC_CUIDAM_MOCK === "false" && <button className="button text-button" type="button" onClick={() => { setRecoveringPassword(true); setError(""); }}>Esqueci minha senha</button>}
+            {authMode === "signup" && process.env.NEXT_PUBLIC_CUIDAM_MOCK === "false" && <p className="form-note">Você poderá recuperar a senha pelo e-mail.</p>}
           </form>
         )}
 
