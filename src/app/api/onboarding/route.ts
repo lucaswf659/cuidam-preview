@@ -1,19 +1,13 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { mockHouseholdForSession, saveMockHousehold } from "@/lib/mock/store";
 import { recurrenceFromLabel } from "@/lib/real/household";
 import { periodKeyForRecurrence } from "@/lib/real/recurrence";
+import { onboardingPayloadSchema } from "@/lib/real/onboarding-schema";
 
 const mockMode = process.env.NEXT_PUBLIC_CUIDAM_MOCK !== "false";
-
-export const onboardingPayloadSchema = z.object({
-  name: z.string().trim().min(1).max(80),
-  houseName: z.string().trim().min(1).max(80),
-  areas: z.array(z.object({ id: z.string().max(40), name: z.string().max(80), icon: z.string().max(12) })).max(20)
-});
 
 const suggestedTasks: Record<string, Array<{ name: string; responsibility: "Você" | "Nós"; recurrence: string; load: number }>> = {
   kitchen: [
