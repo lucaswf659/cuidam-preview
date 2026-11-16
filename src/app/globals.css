@@ -879,26 +879,27 @@ html, body { height: auto; min-height: 100%; overflow-x: hidden; overflow-y: aut
 .area-symbol--escritorio { color: var(--accent-blue-ink); background: var(--accent-blue-soft) !important; }
 .area-symbol--pets { color: var(--accent-coral-ink); background: var(--accent-coral-soft) !important; }
 
-/* The active destination gets a small tint that helps people orient themselves. */
-.primary-nav__link[href="/today"].is-active { color: var(--accent-yellow-ink); background: var(--accent-yellow-soft); }
-.primary-nav__link[href="/nos"].is-active { color: var(--accent-blue-ink); background: var(--accent-blue-soft); }
-.primary-nav__link[href="/rewards"].is-active { color: var(--accent-coral-ink); background: var(--accent-coral-soft); }
-.primary-nav__link[href="/casa"].is-active { color: var(--green-dark); background: var(--green-soft); }
-.primary-nav__link[href="/today"].is-active:hover { background: #fff1c7; }
-.primary-nav__link[href="/nos"].is-active:hover { background: #e1f0fd; }
-.primary-nav__link[href="/rewards"].is-active:hover { background: #ffe4df; }
+/* Navigation stays in brand green; accents belong to the content itself. */
+.primary-nav__link.is-active { color: var(--green-dark); background: var(--green-soft); }
 
 /* Period labels help Today scan at a glance without adding urgency. */
 .today-period-group:nth-child(1) .today-period-heading > span { color: var(--accent-yellow-ink); background: var(--accent-yellow-soft); }
 .today-period-group:nth-child(2) .today-period-heading > span { color: var(--accent-blue-ink); background: var(--accent-blue-soft); }
 .today-period-group:nth-child(3) .today-period-heading > span { color: var(--accent-coral-ink); background: var(--accent-coral-soft); }
+.today-period-heading > div { position: relative; padding-left: 12px; }
+.today-period-group:nth-child(1) .today-period-heading > div::before,
+.today-period-group:nth-child(2) .today-period-heading > div::before,
+.today-period-group:nth-child(3) .today-period-heading > div::before { position: absolute; top: 3px; bottom: 3px; left: 0; width: 3px; border-radius: 99px; content: ""; }
+.today-period-group:nth-child(1) .today-period-heading > div::before { background: var(--accent-yellow); }
+.today-period-group:nth-child(2) .today-period-heading > div::before { background: var(--accent-blue); }
+.today-period-group:nth-child(3) .today-period-heading > div::before { background: var(--accent-coral); }
 .today-period-group:nth-child(2) .task-period-progress .progress-track { background: var(--accent-blue-soft); }
 .today-period-group:nth-child(2) .task-period-progress .progress-track i { background: var(--accent-blue); }
 .today-period-group:nth-child(3) .task-period-progress .progress-track { background: var(--accent-coral-soft); }
 .today-period-group:nth-child(3) .task-period-progress .progress-track i { background: var(--accent-coral); }
 
-.casa-division-icon { color: var(--accent-blue-ink); background: var(--accent-blue-soft); }
+.casa-division-icon { color: var(--green-dark); background: var(--green-soft); }
 .casa-invitation-icon { color: var(--accent-yellow-ink); background: var(--accent-yellow-soft); }
-.reward-card-icon { color: var(--accent-coral-ink); background: var(--accent-coral-soft); }
+.reward-card-icon { color: var(--accent-yellow-ink); background: var(--accent-yellow-soft); }
 .rewards-balance { background: linear-gradient(115deg, var(--green-dark) 0%, #477d55 100%); }
 .rewards-balance small { color: var(--accent-yellow) !important; }
