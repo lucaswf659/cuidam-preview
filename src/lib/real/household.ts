@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { authDisplayName } from "@/lib/real/auth-display-name";
 import type { MockArea, MockHousehold, MockResponsibility, MockTask } from "@/lib/mock/store";
 import { ensureCurrentOccurrences } from "@/lib/real/occurrences";
+import { periodKeyForRecurrence } from "@/lib/real/recurrence";
 
 export function recurrenceFromLabel(label: string) {
   if (label === "Diária") return { recurrenceKind: "DAILY" as const, recurrenceInterval: 1, weeklyTarget: 1 };
@@ -47,7 +48,8 @@ export async function getRealHouseholdSnapshot(): Promise<MockHousehold | null> 
   const context = await getRealContext();
   if (!context) return null;
 
-  await ensureCurrentOccurrences(context.household.id, new Date(), context.household.timezone);
+  const now = new Date();
+  await ensureCurrentOccurrences(context.household.id, now, context.household.timezone);
   const household = await prisma.household.findUnique({
     where: { id: context.household.id },
     include: {
@@ -85,6 +87,9 @@ export async function getRealHouseholdSnapshot(): Promise<MockHousehold | null> 
       recurrence: recurrenceLabel(task.recurrenceKind, task.recurrenceInterval, task.weeklyTarget),
       load: occurrence?.loadSnapshot ?? task.load,
       completed: occurrence?.status === "COMPLETED" || Boolean(occurrence && occurrence.completedCount >= occurrence.targetCompletions),
+      completedCount: occurrence?.completedCount ?? 0,
+      targetCompletions: occurrence?.targetCompletions ?? (task.recurrenceKind === "WEEKLY" ? task.weeklyTarget : 1),
+      occurrenceAvailable: periodKeyForRecurrence(task, now, household.timezone) === occurrence?.periodKey,
       completedAt: occurrence?.completedAt?.toISOString(),
       archived: task.status === "ARCHIVED",
       claimInProgress: occurrence?.status === "PENDING" && Boolean(occurrence.claimedByUserId),
@@ -115,3 +120,4 @@ export async function getRealHouseholdSnapshot(): Promise<MockHousehold | null> 
     }))
   };
 }
+

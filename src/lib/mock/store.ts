@@ -2,7 +2,7 @@ export type MockArea = { id: string; name: string; icon: string; sortOrder: numb
 export type HouseholdPerson = { id: string; name: string; email?: string; current?: boolean };
 export type HouseholdInvitation = { id: string; email: string; expiresAt: string };
 export type MockResponsibility = "Você" | "Outra pessoa" | "Nós";
-export type MockTask = { id: string; name: string; areaId: string; responsibility: MockResponsibility; recurrence: string; load: number; completed: boolean; completedAt?: string; archived?: boolean; claimInProgress?: boolean; claimOwnedByCurrentUser?: boolean; claimOwnerName?: string };
+export type MockTask = { id: string; name: string; areaId: string; responsibility: MockResponsibility; recurrence: string; load: number; completed: boolean; completedAt?: string; completedCount?: number; targetCompletions?: number; occurrenceAvailable?: boolean; archived?: boolean; claimInProgress?: boolean; claimOwnedByCurrentUser?: boolean; claimOwnerName?: string };
 export type NotificationPreferences = { morningReminder: boolean; activity: boolean; sharedTask: boolean; quietStart: string; quietEnd: string };
 export type MockHousehold = { id: string; name: string; ownerName: string; ownerEmail: string; memberCount: number; areas: MockArea[]; tasks: MockTask[]; inviteEmail?: string; members?: HouseholdPerson[]; invitations?: HouseholdInvitation[] };
 
@@ -54,3 +54,4 @@ export function saveMockHousehold(sessionId: string, household: MockHousehold) {
   store.households.set(household.id, household); store.sessions.set(sessionId, household.id); return household;
 }
 export function updateMockHousehold(household: MockHousehold) { store.households.set(household.id, household); return household; }
+
