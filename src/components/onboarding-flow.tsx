@@ -3,17 +3,11 @@
 import { FormEvent, useState } from "react";
 import { createClient } from "@/lib/supabase/browser";
 import { useRouter } from "next/navigation";
+import { AreaIcon } from "@/components/area-icon";
+import { BrandMark } from "@/components/brand-mark";
 
 type Step = "welcome" | "signup" | "house" | "presets" | "invite" | "done";
 type AuthMode = "signup" | "login";
-
-function CuidamMark({ compact = false }: { compact?: boolean }) {
-  return <svg className={compact ? "cuidam-mark-svg compact" : "cuidam-mark-svg"} viewBox="0 0 48 48" role="img" aria-label="Casa com folha">
-    <path d="M11 23.5 24 11l13 12.5v14H11Z" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinejoin="round" />
-    <path d="M29.2 35.8c.1-5.1 2.8-7.7 7.6-7.9.2 4.7-2.4 7.6-7.6 7.9Z" fill="#68bb7f" stroke="#68bb7f" strokeWidth="1" strokeLinejoin="round" />
-    <path d="M30.2 34.8c1.5-1.2 2.9-2.5 4.2-4" fill="none" stroke="#dcefe0" strokeWidth="1" strokeLinecap="round" />
-  </svg>;
-}
 
 const suggestedAreas = [
   { id: "kitchen", icon: "🍳", name: "Cozinha", selected: true },
@@ -118,13 +112,13 @@ export function OnboardingFlow() {
     <main className="onboarding-shell">
       <section className="onboarding-card" aria-live="polite">
         <div className="brand-lockup" aria-label="cuidam">
-          <span className="brand-mark" aria-hidden="true"><CuidamMark compact /></span>
+          <span className="brand-mark" aria-hidden="true"><BrandMark compact /></span>
           <span>cuidam</span>
         </div>
 
         {step === "welcome" && (
           <div className="welcome-step step-content">
-            <div className="organic-shape" aria-hidden="true"><CuidamMark /></div>
+            <div className="organic-shape" aria-hidden="true"><BrandMark /></div>
             <p className="eyebrow">Uma casa mais leve</p>
             <h1>Cada um cuida do que é seu.</h1>
             <p className="lead">Organizem as responsabilidades da casa sem precisar lembrar ou cobrar um ao outro.</p>
@@ -184,7 +178,7 @@ export function OnboardingFlow() {
               {suggestedAreas.map((area) => {
                 const isSelected = selectedAreas.has(area.id);
                 return <button aria-pressed={isSelected} className={`area-choice ${isSelected ? "selected" : ""}`} key={area.id} onClick={() => setSelectedAreas((current) => { const next = new Set(current); if (next.has(area.id)) next.delete(area.id); else next.add(area.id); return next; })}>
-                  <span aria-hidden="true">{area.icon}</span>{area.name}<b aria-hidden="true">{isSelected ? "✓" : "+"}</b>
+                  <AreaIcon name={area.id} fallback={area.icon} />{area.name}<b aria-hidden="true">{isSelected ? "✓" : "+"}</b>
                 </button>;
               })}
             </div>

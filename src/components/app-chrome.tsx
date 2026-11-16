@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { LogoutButton } from "@/components/logout-button";
+import { BrandMark } from "@/components/brand-mark";
 
 export type AppSection = "today" | "nos" | "rewards" | "casa";
 
@@ -11,14 +12,6 @@ const destinations: Array<{ id: AppSection; href: string; label: string; icon: "
   { id: "rewards", href: "/rewards", label: "Recompensas", icon: "star" },
   { id: "casa", href: "/casa", label: "Casa", icon: "home" }
 ];
-
-function HouseLeafMark() {
-  return <svg className="cuidam-mark-svg" viewBox="0 0 48 48" role="img" aria-label="Casa com folha">
-    <path d="M8 23 24 9l16 14v16H8Z" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinejoin="round" />
-    <path d="M28 36c0-6 3-9 9-9 0 6-3 9-9 9Z" fill="#68bb7f" stroke="#68bb7f" strokeLinejoin="round" />
-    <path d="m30 34 5-5" fill="none" stroke="#dcefe0" strokeWidth="1.5" strokeLinecap="round" />
-  </svg>;
-}
 
 function DestinationIcon({ icon }: { icon: (typeof destinations)[number]["icon"] }) {
   const common = { fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
@@ -32,7 +25,7 @@ function DestinationIcon({ icon }: { icon: (typeof destinations)[number]["icon"]
 
 function BrandLink() {
   return <Link href="/today" className="app-brand-lockup" aria-label="cuidam — ir para Hoje">
-    <span className="app-brand-mark"><HouseLeafMark /></span>
+    <span className="app-brand-mark"><BrandMark /></span>
     <span>cuidam</span>
   </Link>;
 }

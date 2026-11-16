@@ -350,6 +350,37 @@ html, body { overflow-x: hidden; }
   background-clip: content-box;
 }
 
+/* Símbolos de áreas: um traço único, quente e consistente com a marca. */
+.area-symbol { color: var(--green-dark); }
+.area-symbol svg { display: block; width: 23px; height: 23px; }
+.nos-area-button .area-symbol,
+.task-card-main .area-symbol,
+.settings-row .area-symbol { background: #f0f5ed; }
+.area-choice > .area-symbol { width: 30px; height: 30px; display: grid; place-items: center; }
+.area-choice > .area-symbol svg { width: 24px; height: 24px; }
+.nos-area-button .area-symbol.area-icon { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 13px; }
+.task-card-main .area-symbol.task-area-icon { width: 40px; height: 40px; display: grid !important; flex: none; place-items: center; margin: 0 !important; border-radius: 14px; }
+.settings-row .area-symbol.settings-icon { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 12px; }
+.nos-drawer-header h2 { display: flex; align-items: center; gap: 9px; }
+.nos-drawer-header .area-symbol.area-icon-inline { display: inline-grid; width: 30px; height: 30px; flex: none; place-items: center; border-radius: 10px; background: #f0f5ed; }
+.nos-drawer-header .area-symbol.area-icon-inline svg { width: 21px; height: 21px; }
+
+/* Superfícies do app seguem o mesmo papel de papel acolhedor do onboarding. */
+:root { --surface-line: rgba(55, 107, 69, .09); --surface-shadow: 0 8px 26px rgba(41, 42, 39, .045); }
+.today-progress-card, .task-card, .add-task-card, .balance-card, .nos-area,
+.nos-activity-card, .casa-division-card, .casa-card.casa-people-card,
+.casa-card.casa-invite-card, .casa-notifications-panel, .reward-card,
+.reward-form-card, .reward-history {
+  border-color: var(--surface-line);
+  border-radius: 20px;
+  box-shadow: var(--surface-shadow);
+}
+.primary-nav { background: rgba(255, 255, 255, .97); }
+.primary-nav__link { font-weight: 600; }
+.primary-nav__link.is-active { background: #edf6ee; }
+
+
+
 .today-content::-webkit-scrollbar-thumb:hover,
 .nos-content::-webkit-scrollbar-thumb:hover,
 .casa-content::-webkit-scrollbar-thumb:hover,

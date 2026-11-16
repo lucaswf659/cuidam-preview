@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import type { MockHousehold, MockResponsibility, MockTask } from "@/lib/mock/store";
 import { AppChrome } from "@/components/app-chrome";
+import { AreaIcon } from "@/components/area-icon";
 
 const frequencyCount: Record<string, number> = { "Diária": 7, "Semanal": 1, "3× por semana": 3, "Mensal": 1 };
 const recurrenceOptions = ["Diária", "Semanal", "3× por semana", "Mensal"];
@@ -118,7 +119,7 @@ export function NosMock({ household }: { household: MockHousehold }) {
     <section className="nos-content">
       <p className="eyebrow">Nós · {household.name}</p>
       <h1>Como a casa está funcionando?</h1>
-      <p className="lead">Aqui vocês enxergam responsabilidades, não quem está “ganhando”.</p>
+      <p className="lead">Uma visão da divisão e do cuidado de cada pessoa com a casa.</p>
       <div className="nos-layout">
         <div className="nos-balance-panel">
           <div className="balance-card">
@@ -139,7 +140,7 @@ export function NosMock({ household }: { household: MockHousehold }) {
               const owners = Array.from(new Set(areaTasks.map((task) => responsibilityLabel(task.responsibility))));
               return <article className="nos-area" key={area.id}>
                 <button className="nos-area-button" onClick={() => setSelectedAreaId(area.id)} aria-label={`Ver tarefas da área ${area.name}`}>
-                  <span className="area-icon">{area.icon}</span>
+                  <AreaIcon name={area.name || area.id} fallback={area.icon} className="area-icon" />
                   <span><strong>{area.name}</strong><small>{owners.length ? `${owners.length > 1 ? "Responsáveis" : "Responsável"}: ${owners.join(" · ")}` : "Ainda sem tarefas"}</small></span>
                   <span className="area-count" aria-label={`${areaTasks.length} tarefas`}>{areaTasks.length}</span><b aria-hidden="true">›</b>
                 </button>
@@ -159,7 +160,7 @@ export function NosMock({ household }: { household: MockHousehold }) {
     {selectedArea && <div className="nos-drawer-layer">
       <button className="nos-drawer-backdrop" aria-label="Fechar detalhes da área" onClick={closeArea} />
       <aside className="nos-area-drawer" role="dialog" aria-modal="true" aria-labelledby="area-drawer-title">
-        <header className="nos-drawer-header"><div><span className="drawer-kicker">Área da casa</span><h2 id="area-drawer-title">{selectedArea.icon} {selectedArea.name}</h2><p>{selectedAreaTasks.length} {selectedAreaTasks.length === 1 ? "tarefa" : "tarefas"} na rotina</p></div><button className="drawer-close" onClick={closeArea} aria-label="Fechar área">×</button></header>
+        <header className="nos-drawer-header"><div><span className="drawer-kicker">Área da casa</span><h2 id="area-drawer-title"><AreaIcon name={selectedArea.name || selectedArea.id} fallback={selectedArea.icon} className="area-icon-inline" /> {selectedArea.name}</h2><p>{selectedAreaTasks.length} {selectedAreaTasks.length === 1 ? "tarefa" : "tarefas"} na rotina</p></div><button className="drawer-close" onClick={closeArea} aria-label="Fechar área">×</button></header>
         <div className="nos-drawer-body">
           {selectedAreaTasks.length ? <div className="nos-drawer-task-list">{selectedAreaTasks.map((task) => <div className="nos-drawer-task" key={task.id}><div><strong>{task.name}</strong><small>{task.recurrence} · carga {task.load}{task.completed ? " · concluída" : ""}</small></div><div className="nos-drawer-task-actions"><em>{responsibilityLabel(task.responsibility)}</em><button className="task-edit" onClick={() => openEdit(task)}>Editar</button><button className="task-remove" onClick={() => setConfirmTask(task.id)} aria-label={`Remover ${task.name}`}>×</button></div></div>)}</div> : <p className="area-empty drawer-empty">Ainda não tem tarefas aqui.</p>}
         </div>
