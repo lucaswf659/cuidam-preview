@@ -26,5 +26,20 @@ describe("GET /auth/callback", () => {
 
     expect(response.headers.get("location")).toBe("https://cuidam-preview.vercel.app/");
   });
+  it("volta à troca de senha com erro quando o código PKCE é rejeitado", async () => {
+    mocks.exchangeCodeForSession.mockResolvedValue({ error: new Error("invalid code verifier") });
+    const { GET } = await import("@/app/auth/callback/route");
+    const response = await GET(new Request("https://cuidam-preview.vercel.app/auth/callback?code=bad-code&next=%2Fauth%2Freset-password"));
+
+    expect(response.headers.get("location")).toBe("https://cuidam-preview.vercel.app/auth/reset-password?error=link_invalid");
+  });
+
+  it("não abre a troca de senha sem código de confirmação", async () => {
+    const { GET } = await import("@/app/auth/callback/route");
+    const response = await GET(new Request("https://cuidam-preview.vercel.app/auth/callback?next=%2Fauth%2Freset-password"));
+
+    expect(mocks.exchangeCodeForSession).not.toHaveBeenCalled();
+    expect(response.headers.get("location")).toBe("https://cuidam-preview.vercel.app/auth/reset-password?error=link_invalid");
+  });
 });
 

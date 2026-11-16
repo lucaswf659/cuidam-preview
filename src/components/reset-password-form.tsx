@@ -51,8 +51,8 @@ export function ResetPasswordForm() {
         {checkingSession ? <p className="step-content" role="status">Verificando o link…</p> : !hasSession ? (
           <div className="step-content form-step">
             <p className="eyebrow">Acesso à conta</p>
-            <h1>Este link não está mais válido.</h1>
-            <p className="lead">Peça uma nova mensagem de recuperação para continuar.</p>
+            <h1>Não conseguimos validar este link.</h1>
+            <p className="lead">Abra o link no mesmo navegador em que pediu a recuperação. Se ainda não funcionar, peça uma nova mensagem.</p>
             <button className="button primary" onClick={() => router.replace("/")}>Voltar para entrar</button>
           </div>
         ) : (
