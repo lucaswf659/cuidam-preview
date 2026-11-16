@@ -1,33 +1,23 @@
-# Configuração de e-mail de recuperação do Cuidam
+# Recuperação de senha do Cuidam
 
-O Cuidam confirma o TokenHash no servidor para não depender de o link ser aberto no mesmo navegador que pediu a recuperação. A página de confirmação exige um clique antes de validar o token, evitando que pré-visualizações automáticas de e-mail o consumam. Se o template padrão do Supabase ainda estiver ativo, o callback PKCE também aceita o fluxo no mesmo navegador. Para abrir o link em outro navegador, configure o template TokenHash abaixo.
+O app usa o template padrão de recuperação do Supabase. Não é necessário editar o HTML do e-mail nem configurar SMTP próprio para testar esse fluxo.
 
-## Configurar o template no Supabase
+## Configuração no Supabase
 
-No painel do projeto Supabase, abra **Authentication → Email Templates → Reset Password** e ajuste o assunto e o corpo:
+Em **Authentication → URL Configuration**:
 
-**Assunto**
+- Defina **Site URL** como `https://cuidam-preview.vercel.app`.
+- Em **Redirect URLs**, permita `https://cuidam-preview.vercel.app/**`.
+- Para desenvolvimento local, permita também `http://localhost:3000/**`.
+- Em **Authentication → Email Templates → Reset Password**, mantenha o link padrão `{{ .ConfirmationURL }}`.
 
-```text
-Redefina sua senha do Cuidam
-```
+O domínio usado pelo app precisa estar na lista de Redirect URLs. Se a URL de implantação mudar, adicione o novo domínio ali. Solicitações de recuperação já enviadas podem carregar links antigos; peça uma nova mensagem depois de qualquer ajuste.
 
-**Corpo HTML**
+## Fluxo
 
-```html
-<h2>Vamos recuperar seu acesso ao Cuidam</h2>
-<p>Recebemos um pedido para redefinir a senha da sua conta.</p>
-<p>Para continuar, confirme o pedido pelo botão abaixo:</p>
-<p><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery">Continuar para redefinir senha</a></p>
-<p>Se você não pediu essa alteração, ignore esta mensagem. Sua senha não será alterada.</p>
-```
+1. `resetPasswordForEmail` pede ao Supabase um e-mail e aponta o retorno para `/auth/callback?next=/auth/reset-password`.
+2. O template padrão leva a pessoa ao Supabase, que valida o link e redireciona de volta com um código PKCE.
+3. `/auth/callback` troca o código por uma sessão e grava os cookies usando o cliente Supabase do servidor.
+4. `/auth/reset-password` exige essa sessão e permite definir a nova senha.
 
-Em **Authentication → URL Configuration**, confira se **Site URL** é `https://cuidam-preview.vercel.app`. O link usa `.SiteURL` para retornar ao app. Depois de salvar o template, peça um novo e-mail de recuperação; mensagens anteriores continuam com o link antigo.
-
-## Fluxo no app
-
-1. `resetPasswordForEmail` solicita o e-mail. A resposta visual é neutra para não revelar se a conta existe.
-2. O link abre `/auth/confirm` com o TokenHash, sem consumi-lo ao carregar a página.
-3. Ao tocar em “Continuar para trocar a senha”, o app envia o TokenHash por POST para `/api/auth/confirm-recovery`; o backend valida `type: recovery` com `verifyOtp` e grava a sessão Supabase em cookies.
-4. A pessoa define a nova senha em `/auth/reset-password`.
-
+O código PKCE é mantido no navegador que iniciou a solicitação. Por isso, abra o link no mesmo navegador/perfil em que pediu a recuperação. Se o código estiver ausente, expirado ou já tiver sido usado, o app explica como continuar o processo.
