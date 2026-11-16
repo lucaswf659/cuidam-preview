@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import type { MockHousehold, MockResponsibility, MockTask } from "@/lib/mock/store";
-import { LogoutButton } from "@/components/logout-button";
+import { AppChrome } from "@/components/app-chrome";
 
 const frequencyCount: Record<string, number> = { "Diária": 7, "Semanal": 1, "3× por semana": 3, "Mensal": 1 };
 const recurrenceOptions = ["Diária", "Semanal", "3× por semana", "Mensal"];
@@ -114,7 +114,7 @@ export function NosMock({ household }: { household: MockHousehold }) {
   };
 
   return <main className="nos-shell">
-    <div className="topbar"><a className="brand-lockup" href="/today" aria-label="Voltar para Hoje"><span className="brand-mark">⌂</span><span>cuidam</span></a><LogoutButton /></div>
+    <AppChrome current="nos" />
     <section className="nos-content">
       <p className="eyebrow">Nós · {household.name}</p>
       <h1>Como a casa está funcionando?</h1>
@@ -170,7 +170,5 @@ export function NosMock({ household }: { household: MockHousehold }) {
     {taskForm && <div className="modal-backdrop task-form-backdrop"><section className="task-form-modal" role="dialog" aria-modal="true" aria-labelledby="task-form-title"><div className="task-form-heading"><div><span className="drawer-kicker">{taskForm.mode === "add" ? "Nova responsabilidade" : "Editar responsabilidade"}</span><h2 id="task-form-title">{taskForm.mode === "add" ? "O que precisa acontecer?" : "Ajustar tarefa"}</h2></div><button className="drawer-close" type="button" onClick={() => setTaskForm(null)} aria-label="Fechar formulário">×</button></div><form onSubmit={saveTask}><label>Nome da tarefa<input value={taskForm.name} onChange={(event) => updateTaskForm({ name: event.target.value })} placeholder="Ex.: Limpar bancada" required /></label><label>Área<select value={taskForm.areaId} onChange={(event) => updateTaskForm({ areaId: event.target.value })}>{household.areas.map((area) => <option value={area.id} key={area.id}>{area.icon} {area.name}</option>)}</select></label><label>Responsabilidade<select value={taskForm.responsibility} onChange={(event) => updateTaskForm({ responsibility: event.target.value as MockResponsibility })}><option>Você</option><option>Outra pessoa</option><option>Nós</option></select></label><label>Frequência<select value={taskForm.recurrence} onChange={(event) => updateTaskForm({ recurrence: event.target.value })}>{recurrenceOptions.map((option) => <option key={option}>{option}</option>)}</select></label><fieldset className="load-dots"><legend>Carga <span>{taskForm.load} de 5</span></legend><div>{[1, 2, 3, 4, 5].map((value) => <button type="button" className={value <= taskForm.load ? "selected" : ""} aria-label={`Carga ${value} de 5`} aria-pressed={value === taskForm.load} onClick={() => updateTaskForm({ load: value })} key={value} />)}</div></fieldset>{formError && <p className="form-error">{formError}</p>}<div className="form-actions"><button type="button" className="button secondary" onClick={() => setTaskForm(null)}>Cancelar</button><button className="button primary">{taskForm.mode === "add" ? "Adicionar" : "Salvar"}</button></div></form></section></div>}
 
     {confirmTask && <div className="modal-backdrop" role="presentation"><section className="confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="remove-title"><span className="confirm-icon">−</span><h2 id="remove-title">Remover da rotina?</h2><p>Essa tarefa deixa de aparecer no dia a dia, mas o histórico continua preservado.</p><div><button className="button secondary" onClick={() => setConfirmTask(null)}>Cancelar</button><button className="button danger-button" onClick={archive}>Remover tarefa</button></div></section></div>}
-    <nav className="bottom-nav"><a href="/today"><b>☀️</b>Hoje</a><a className="active" href="/nos"><b>🤝</b>Nós</a><a href="/rewards"><b>✦</b>Recompensas</a><a href="/casa"><b>🏡</b>Casa</a></nav>
   </main>;
 }
-

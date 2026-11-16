@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import type { NotificationPreferences } from "@/lib/mock/store";
 import { defaultNotificationPreferences } from "@/lib/real/notifications";
-import { LogoutButton } from "@/components/logout-button";
+import { AppChrome } from "@/components/app-chrome";
 
 type Status = "loading" | "ready" | "saving" | "saved" | "error";
 
@@ -50,7 +50,7 @@ export function NotificationSettings({ householdName }: { householdName: string 
   };
 
   return <main className="casa-shell">
-    <div className="topbar"><a className="brand-lockup" href="/today" aria-label="Voltar para Hoje"><span className="brand-mark">⌂</span><span>cuidam</span></a><LogoutButton /></div>
+    <AppChrome current="casa" />
     <section className="casa-content notification-content">
       <a className="back-link" href="/casa">← Casa</a>
       <div className="casa-heading"><p className="eyebrow">Casa · {householdName}</p><h1>Notificações</h1><p className="lead">Lembrar, nunca cobrar. Ajuste o que faz sentido receber.</p></div>
@@ -69,6 +69,6 @@ export function NotificationSettings({ householdName }: { householdName: string 
       </form>
       <p className="notification-note">O lembrete matinal reúne suas tarefas em uma única notificação. Você pode mudar essas opções quando quiser.</p>
     </section>
-    <nav className="bottom-nav"><a href="/today"><b>☀️</b>Hoje</a><a href="/nos"><b>🤝</b>Nós</a><a href="/rewards"><b>✦</b>Recompensas</a><a className="active" href="/casa"><b>🏡</b>Casa</a></nav>
   </main>;
 }
+

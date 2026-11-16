@@ -44,9 +44,9 @@ export async function getRealHouseholdSnapshot(): Promise<MockHousehold | null> 
   const household = await prisma.household.findUnique({
     where: { id: context.household.id },
     include: {
-      memberships: { where: { status: "ACTIVE" }, select: { id: true, user: { select: { id: true, name: true } } } },
+      memberships: { where: { status: "ACTIVE" }, select: { id: true, user: { select: { id: true, name: true, email: true } } } },
       areas: { where: { status: "ACTIVE" }, orderBy: { sortOrder: "asc" } },
-      invitations: { where: { status: "PENDING" }, orderBy: { createdAt: "desc" }, take: 1 },
+      invitations: { where: { status: "PENDING" }, orderBy: { createdAt: "desc" }, select: { id: true, email: true, expiresAt: true } },
       tasks: {
         include: {
           occurrences: { orderBy: { scheduledFor: "desc" }, take: 1, include: { claimedBy: { select: { id: true, name: true } } } }
@@ -94,7 +94,17 @@ export async function getRealHouseholdSnapshot(): Promise<MockHousehold | null> 
     memberCount: household.memberships.length,
     areas,
     tasks,
-    inviteEmail: household.invitations[0]?.email
+    inviteEmail: household.invitations[0]?.email,
+    members: household.memberships.map((membership) => ({
+      id: membership.id,
+      name: membership.user.name,
+      email: membership.user.email,
+      current: membership.user.id === context.dbUser.id
+    })),
+    invitations: household.invitations.map((invitation) => ({
+      id: invitation.id,
+      email: invitation.email,
+      expiresAt: invitation.expiresAt.toISOString()
+    }))
   };
 }
-
