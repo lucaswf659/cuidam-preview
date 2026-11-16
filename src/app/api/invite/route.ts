@@ -13,9 +13,9 @@ export async function POST(request: Request) {
   const token = randomBytes(32).toString("hex");
   const tokenHash = createHash("sha256").update(token).digest("hex");
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-  await prisma.$transaction(async (tx) => {
+  const invitation = await prisma.$transaction(async (tx) => {
     await tx.invitation.updateMany({ where: { householdId: context.household.id, status: "PENDING" }, data: { status: "CANCELLED" } });
-    await tx.invitation.create({
+    return tx.invitation.create({
       data: {
         householdId: context.household.id,
         email,
@@ -26,6 +26,18 @@ export async function POST(request: Request) {
       }
     });
   });
-  return NextResponse.json({ created: true, inviteUrl: `/convite/${token}`, expiresAt: expiresAt.toISOString() });
+  return NextResponse.json({ created: true, invitation: { id: invitation.id, email, expiresAt: invitation.expiresAt.toISOString() }, inviteUrl: `/convite/${token}`, expiresAt: invitation.expiresAt.toISOString() });
 }
 
+export async function DELETE(request: Request) {
+  const context = await getRealContext();
+  if (!context) return NextResponse.json({ error: "Sua sessão expirou. Entre novamente." }, { status: 401 });
+  const body = await request.json().catch(() => null) as { invitationId?: unknown } | null;
+  if (typeof body?.invitationId !== "string") return NextResponse.json({ error: "Convite não encontrado." }, { status: 400 });
+  const result = await prisma.invitation.updateMany({
+    where: { id: body.invitationId, householdId: context.household.id, status: "PENDING" },
+    data: { status: "CANCELLED" }
+  });
+  if (!result.count) return NextResponse.json({ error: "Este convite não está mais pendente." }, { status: 404 });
+  return NextResponse.json({ cancelled: true, invitationId: body.invitationId });
+}

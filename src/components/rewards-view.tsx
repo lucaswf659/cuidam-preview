@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { LogoutButton } from "@/components/logout-button";
+import { AppChrome } from "@/components/app-chrome";
 
 type Reward = { id: string; name: string; cost: number; recipientType: "HOUSEHOLD" | "MEMBER"; recipientMemberId: string | null };
 type Member = { id: string; name: string };
@@ -56,7 +56,7 @@ export function RewardsView({ householdName }: { householdName: string }) {
   const edit = (reward: Reward) => { setEditing(reward.id); setName(reward.name); setCost(reward.cost); setRecipientType(reward.recipientType); setRecipientMemberId(snapshot.members.find((member) => member.id === reward.recipientMemberId)?.id ?? ""); };
 
   return <main className="rewards-shell">
-    <header className="topbar"><a className="brand-lockup" href="/today"><span className="brand-mark">⌂</span><span>cuidam</span></a><LogoutButton /></header>
+    <AppChrome current="rewards" />
     <section className="rewards-content">
       <p className="eyebrow">Recompensas · {householdName}</p><h1>Um combinado para celebrar.</h1><p className="lead">As estrelas vêm do que vocês fazem juntos. Usem o saldo como fizer sentido para a casa.</p>
       <article className="rewards-balance"><span>Saldo compartilhado</span><strong aria-live="polite">{loading ? "…" : snapshot.balance} <small>★</small></strong></article>
@@ -66,7 +66,6 @@ export function RewardsView({ householdName }: { householdName: string }) {
       <section className="reward-form-card"><h2>{editing ? "Ajustar recompensa" : "Criar recompensa"}</h2><form onSubmit={save}><label>O que vocês gostariam de resgatar?<input value={name} maxLength={80} onChange={(event) => setName(event.target.value)} placeholder="Ex.: Escolher o jantar de sexta" required /></label><div className="reward-form-row"><label>Custo em estrelas<input type="number" min={1} max={999} value={cost} onChange={(event) => setCost(Number(event.target.value))} required /></label><label>Para<select value={recipientType} onChange={(event) => setRecipientType(event.target.value as "HOUSEHOLD" | "MEMBER")}><option value="HOUSEHOLD">A casa</option><option value="MEMBER">Uma pessoa</option></select></label></div>{recipientType === "MEMBER" && <label>Quem recebe?<select value={recipientMemberId} onChange={(event) => setRecipientMemberId(event.target.value)} required><option value="">Escolha uma pessoa</option>{snapshot.members.map((member) => <option key={member.id} value={member.id}>{member.name}</option>)}</select></label>}<div className="form-actions">{editing && <button className="button secondary" type="button" onClick={resetForm}>Cancelar edição</button>}<button className="button primary" disabled={working}>{working ? "Salvando…" : editing ? "Salvar alterações" : "Adicionar recompensa"}</button></div></form></section>
       {snapshot.history.length > 0 && <section className="reward-history"><h2>Resgates recentes</h2>{snapshot.history.map((item) => <div key={item.id}><span>{item.rewardName}<small> · {item.redeemedBy}</small></span><strong>−{item.cost} ★</strong></div>)}</section>}
     </section>
-    <nav className="bottom-nav"><a href="/today"><b>☀️</b>Hoje</a><a href="/nos"><b>🤝</b>Nós</a><a href="/rewards" className="active"><b>✦</b>Recompensas</a><a href="/casa"><b>🏡</b>Casa</a></nav>
   </main>;
 }
 

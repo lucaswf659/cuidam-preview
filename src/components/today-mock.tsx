@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import type { MockArea, MockResponsibility, MockTask } from "@/lib/mock/store";
-import { LogoutButton } from "@/components/logout-button";
+import { AppChrome } from "@/components/app-chrome";
 
 const recurrenceOptions = ["Diária", "Semanal", "3× por semana", "Mensal"];
 const apiTasks = process.env.NEXT_PUBLIC_CUIDAM_MOCK === "false" ? "/api/tasks" : "/api/mock/tasks";
@@ -62,7 +62,7 @@ export function TodayMock({ household }: { household: { name: string; ownerName:
   const complete = (taskId: string) => updateTaskAction(taskId);
 
   return <main className="today-shell">
-    <div className="topbar"><div className="brand-lockup" aria-label="cuidam"><span className="brand-mark">⌂</span><span>cuidam</span></div><LogoutButton /></div>
+    <AppChrome current="today" />
     <section className="today-content">
       <div className="today-heading"><p className="eyebrow">Hoje · {household.name}</p><h1>Bom dia, {household.ownerName.split(" ")[0]} ☀️</h1><p className="lead">O que você cuida hoje?</p></div>
       <div className="today-progress-card"><div><span>Seu progresso</span><strong>{completedCount === routineTasks.length && routineTasks.length ? "Tudo em dia por hoje" : completedCount ? "Sua parte está andando" : "Vamos começar"}</strong></div><b>{completedCount} de {routineTasks.length}</b><div className="progress-track"><i style={{ width: `${progress}%` }} /></div></div>
@@ -70,7 +70,5 @@ export function TodayMock({ household }: { household: { name: string; ownerName:
       <div className="today-action-footer"><button className="button primary" onClick={() => { setError(""); setShowAdd(true); }}>Adicionar tarefa</button></div>
     </section>
     {showAdd && <div className="modal-backdrop today-add-backdrop"><section className="task-form-modal today-add-modal" role="dialog" aria-modal="true" aria-labelledby="today-add-title"><div className="task-form-heading"><div><span className="drawer-kicker">Nova responsabilidade</span><h2 id="today-add-title">O que precisa acontecer?</h2></div><button className="drawer-close" type="button" onClick={() => { resetForm(); setShowAdd(false); }} aria-label="Fechar formulário">×</button></div><form onSubmit={addTask}><label>Nome da tarefa<input value={name} onChange={(event) => setName(event.target.value)} placeholder="Ex.: Trocar roupa de cama" required /></label><label>Área<select value={areaId} onChange={(event) => setAreaId(event.target.value)}>{household.areas.map((area) => <option value={area.id} key={area.id}>{area.icon} {area.name}</option>)}</select></label><label>Responsabilidade<select value={responsibility} onChange={(event) => setResponsibility(event.target.value as MockResponsibility)}><option>Você</option><option>Outra pessoa</option><option>Nós</option></select></label><label>Frequência<select value={recurrence} onChange={(event) => setRecurrence(event.target.value)}>{recurrenceOptions.map((option) => <option key={option}>{option}</option>)}</select></label><fieldset className="load-dots"><legend>Carga <span>{load} de 5</span></legend><div>{[1, 2, 3, 4, 5].map((value) => <button type="button" className={value <= load ? "selected" : ""} aria-label={`Carga ${value} de 5`} aria-pressed={value === load} onClick={() => setLoad(value)} key={value} />)}</div></fieldset>{error && <p className="form-error">{error}</p>}<div className="form-actions"><button type="button" className="button secondary" onClick={() => { resetForm(); setShowAdd(false); }}>Cancelar</button><button className="button primary">Adicionar</button></div></form></section></div>}
-    <nav className="bottom-nav"><a className="active" href="/today"><b>☀️</b>Hoje</a><a href="/nos"><b>🤝</b>Nós</a><a href="/rewards"><b>✦</b>Recompensas</a><a href="/casa"><b>🏡</b>Casa</a></nav>
   </main>;
 }
-
