@@ -1,4 +1,6 @@
 import { expect, test, type Browser, type Page } from "@playwright/test";
+import { PrismaClient } from "@prisma/client";
+import { periodKeyForRecurrence } from "../../src/lib/real/recurrence";
 
 const prefix = process.env.CUIDAM_E2E_EMAIL_PREFIX ?? "cuidam-e2e+";
 const runId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -139,6 +141,97 @@ test("conta, casa, tarefa compartilhada, convite, isolamento e resgate idempoten
     expect(foreignArea.status).toBe(400);
   } finally {
     await Promise.all([owner, guest, isolated].map((context) => context.close().catch(() => undefined)));
+  }
+});
+
+test("virada de período marca pendências como perdidas e preserva snapshots ao editar e arquivar", async ({ browser }: { browser: Browser }) => {
+  const email = `${prefix}${runId}-recurrence@example.com`;
+  const owner = await browser.newContext();
+  const page = await owner.newPage();
+  const prisma = new PrismaClient();
+
+  try {
+    await signUp(page, email, "Pessoa recorrência E2E");
+    await createHouse(page, `E2E ${runId} Recorrência`);
+
+    const onboarding = await api(page, "/api/onboarding", "GET");
+    expect(onboarding.status).toBe(200);
+    const areaId = onboarding.body.household.areas[0].id as string;
+    const name = `E2E tarefa de período ${runId}`;
+    const created = await api(page, "/api/tasks", "POST", {
+      name,
+      areaId,
+      responsibility: "Você",
+      recurrence: "Diária",
+      load: 4
+    });
+    expect(created.status).toBe(201);
+    const taskId = created.body.task.id as string;
+    const task = await prisma.task.findUniqueOrThrow({ where: { id: taskId } });
+    const priorOccurrence = await prisma.taskOccurrence.findFirstOrThrow({ where: { taskId } });
+    const expectedCurrentPeriod = periodKeyForRecurrence(task, new Date(), "America/Sao_Paulo");
+    expect(expectedCurrentPeriod).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+
+    const previousDate = new Date(`${expectedCurrentPeriod}T12:00:00.000Z`);
+    previousDate.setUTCDate(previousDate.getUTCDate() - 1);
+    const previousPeriod = periodKeyForRecurrence(task, previousDate, "America/Sao_Paulo");
+    expect(previousPeriod).not.toBe(expectedCurrentPeriod);
+    await prisma.taskOccurrence.update({
+      where: { id: priorOccurrence.id },
+      data: { periodKey: previousPeriod!, scheduledFor: previousDate, status: "PENDING" }
+    });
+
+    const edited = await api(page, "/api/tasks", "PATCH", {
+      taskId,
+      action: "edit",
+      name: `${name} editada`,
+      areaId,
+      responsibility: "Nós",
+      recurrence: "Diária",
+      load: 1
+    });
+    expect(edited.status).toBe(200);
+
+    const occurrences = await prisma.taskOccurrence.findMany({ where: { taskId }, orderBy: { scheduledFor: "asc" } });
+    expect(occurrences).toHaveLength(2);
+    const missed = occurrences.find((occurrence) => occurrence.periodKey === previousPeriod);
+    const current = occurrences.find((occurrence) => occurrence.periodKey === expectedCurrentPeriod);
+    expect(missed).toMatchObject({
+      status: "MISSED",
+      responsibilityTypeSnapshot: "PERSON",
+      responsibleMemberIdSnapshot: task.responsibleMemberId,
+      loadSnapshot: 4,
+      completedCount: 0
+    });
+    expect(current).toMatchObject({
+      status: "PENDING",
+      responsibilityTypeSnapshot: "SHARED",
+      responsibleMemberIdSnapshot: null,
+      loadSnapshot: 1,
+      completedCount: 0
+    });
+
+    const repeatedEdit = await api(page, "/api/tasks", "PATCH", {
+      taskId,
+      action: "edit",
+      name: `${name} editada`,
+      areaId,
+      responsibility: "Nós",
+      recurrence: "Diária",
+      load: 1
+    });
+    expect(repeatedEdit.status).toBe(200);
+    await expect(prisma.taskOccurrence.count({ where: { taskId } })).resolves.toBe(2);
+
+    const archived = await api(page, "/api/tasks", "PATCH", { taskId, action: "archive" });
+    expect(archived.status).toBe(200);
+    await expect(prisma.task.findUniqueOrThrow({ where: { id: taskId } })).resolves.toMatchObject({ status: "ARCHIVED" });
+    await expect(prisma.taskOccurrence.count({ where: { taskId } })).resolves.toBe(2);
+    await page.goto("/today");
+    await expect(page.locator(".task-card").filter({ hasText: name })).toHaveCount(0);
+  } finally {
+    await prisma.$disconnect();
+    await owner.close().catch(() => undefined);
   }
 });
 
