@@ -852,3 +852,8 @@ html, body { height: auto; min-height: 100%; overflow-x: hidden; overflow-y: aut
   .casa-content > .casa-people-panel, .casa-content > .casa-areas-panel, .casa-content > .casa-notifications-panel { grid-column: 1; }
 }
 
+@media (min-width: 960px) {
+  .casa-content > .casa-people-panel { grid-column: 1; }
+  .casa-content > .casa-areas-panel, .casa-content > .casa-notifications-panel { grid-column: 2; }
+}
+
