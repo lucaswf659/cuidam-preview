@@ -45,12 +45,10 @@ npm run build      # build de produção
 
 ## Próximas etapas
 
-- implementar ocorrências e recorrência mockadas;
-- completar a UI de edição de tarefas em Nós;
-- depois configurar ambiente Supabase/PostgreSQL e trocar o repositório mock pelo persistido;
-- implementar convites com token, expiração e envio;
-- adicionar testes de autorização, concorrência e recorrência;
-- adicionar testes E2E do fluxo cadastro → casa → tarefa → Hoje.
+- Adicionar uma suíte E2E contra um projeto Supabase isolado para cadastro/login, retomada da casa, tarefas, convite com uma segunda conta e conclusão compartilhada.
+- Cobrir com PostgreSQL as garantias de concorrência/idempotência de reserva e resgate, mais autorização entre casas.
+- Validar em integração com banco a recorrência, ocorrências perdidas, snapshots do histórico e arquivamento.
+- Validar a entrega real de lembretes e o comportamento de silêncio; a tela salva preferências, mas a entrega ainda precisa ser demonstrada ponta a ponta.
 
 ## Registro de alterações
 
@@ -60,7 +58,6 @@ npm run build      # build de produção
 - Adicionados testes do onboarding e validação do payload.
 - Documentada a arquitetura e o estado atual do MVP.
 
-
 ### 2026-11-15 — Preferências de notificação
 
 - Adicionada tela `Casa → Notificações` para configurar lembrete matinal agrupado, atividade, tarefas compartilhadas e quiet hours.
@@ -68,10 +65,19 @@ npm run build      # build de produção
 - Modo mock mantém as preferências associadas à sessão enquanto a instância do servidor estiver ativa.
 - A regra de quiet hours considera intervalos que cruzam a meia-noite. A integração de entrega push e o agendamento de envios dependem do serviço de notificação e das credenciais de infraestrutura, ausentes nesta etapa.
 
-
 ### 2026-11-15 — Recuperação de senha
 
 - O pedido usa o template padrão (`.ConfirmationURL`) do Supabase e troca o código PKCE em `/auth/callback`. A sessão de recuperação fica nos cookies; o link deve ser aberto no mesmo navegador/perfil que iniciou o pedido.
 - A página de confirmação exige uma ação explícita antes de consumir o token; isso evita que pré-visualizações automáticas do e-mail o utilizem.
 - A nova senha só pode ser atualizada com a sessão criada pela confirmação. A resposta do pedido é neutra para não revelar se há uma conta e a opção não aparece no modo mock.
 - O template Reset Password do Supabase precisa seguir `docs/architecture/SUPABASE-AUTH-SETUP.md`.
+
+### 2026-11-16 — Auditoria de aceite do preview
+
+- `npm test`: 51 testes passaram em 18 arquivos; `npm run lint` passou.
+- No preview, foram conferidos Hoje, áreas e tarefas em Nós, criação/edição com a área selecionada, preferências de notificação e Recompensas.
+- A reserva compartilhada de teste foi concluída até a meta semanal e creditou estrelas. Um resgate de recompensa de teste debitou o saldo e apareceu no histórico; a recompensa de teste foi arquivada.
+- A rota de Recompensas respondeu com sucesso, mas levou cerca de 2,7 s nesta sessão. Não houve erro de runtime reportado para a rota no período consultado.
+- O fluxo de recuperação de senha foi validado pelo usuário no preview. A auditoria atual não repetiu o fluxo de duas contas/navegadores para convite.
+- Ainda não há evidência de E2E real contra o banco para isolamento entre casas, corridas concorrentes, preservação de snapshots/arquivamento ou entrega de notificações. Os testes unitários existentes não substituem essas verificações integradas.
+- Próximo marco: automatizar os fluxos críticos num projeto de teste isolado, começando por autorização entre casas e concorrência de reserva/resgate; em seguida fechar recorrência/histórico e entrega de notificações.
