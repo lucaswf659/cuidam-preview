@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
+import { authDisplayName } from "@/lib/real/auth-display-name";
 import type { MockArea, MockHousehold, MockResponsibility, MockTask } from "@/lib/mock/store";
 import { ensureCurrentOccurrences } from "@/lib/real/occurrences";
 
@@ -30,6 +31,12 @@ export async function getRealContext() {
     }
   });
   if (!dbUser?.activeHousehold) return null;
+
+  const displayName = authDisplayName(user);
+  if (displayName && displayName !== dbUser.name) {
+    await prisma.user.update({ where: { id: dbUser.id }, data: { name: displayName } });
+    dbUser.name = displayName;
+  }
 
   const membership = dbUser.memberships.find((item) => item.householdId === dbUser.activeHouseholdId);
   if (!membership) return null;

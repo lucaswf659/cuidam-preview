@@ -43,7 +43,7 @@ describe("POST /api/invite/[token]", () => {
       household: { id: "house-1", name: "Casa de teste" }
     });
     mocks.createClient.mockResolvedValue({
-      auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: "auth-2", email: "convidado@example.com", user_metadata: { name: "Convidado" } } } }) }
+      auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: "auth-2", email: "convidado@example.com", user_metadata: { display_name: "Convidado WF", name: "convidado" } } } }) }
     });
     mocks.tx.user.upsert.mockResolvedValue({ id: "user-2", activeHouseholdId: null });
     mocks.tx.membership.findUnique.mockResolvedValue(null);
@@ -56,6 +56,11 @@ describe("POST /api/invite/[token]", () => {
 
     expect(response.status).toBe(200);
     expect(body).toEqual({ accepted: true, householdId: "house-1" });
+    expect(mocks.tx.user.upsert).toHaveBeenCalledWith({
+      where: { authProviderId: "auth-2" },
+      update: { email: "convidado@example.com", name: "Convidado WF" },
+      create: { authProviderId: "auth-2", email: "convidado@example.com", name: "Convidado WF" }
+    });
     expect(mocks.tx.membership.create).toHaveBeenCalledWith({ data: { householdId: "house-1", userId: "user-2", role: "MEMBER", status: "ACTIVE" } });
     expect(mocks.tx.user.update).toHaveBeenCalledWith({ where: { id: "user-2" }, data: { activeHouseholdId: "house-1" } });
     expect(mocks.tx.invitation.update).toHaveBeenCalledWith({ where: { id: "invite-1" }, data: { status: "ACCEPTED", acceptedAt: expect.any(Date) } });
