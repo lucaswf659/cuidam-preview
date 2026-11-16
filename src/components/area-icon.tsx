@@ -27,7 +27,7 @@ const defaultIcons: Record<string, string> = {
 
 export function AreaIcon({ name, fallback, className = "" }: AreaIconProps) {
   const key = keys[name.trim().toLocaleLowerCase("pt-BR")];
-  return <span className={`area-symbol ${className}`.trim()} aria-hidden="true">
+  return <span className={`area-symbol${key ? ` area-symbol--${key}` : ""} ${className}`.trim()} aria-hidden="true">
     {key && (!fallback || fallback === defaultIcons[key]) ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">{paths[key]}</svg> : fallback}
   </span>;
 }
