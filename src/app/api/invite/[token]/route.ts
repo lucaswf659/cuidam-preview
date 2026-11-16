@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
+import { authDisplayNameOrEmail } from "@/lib/real/auth-display-name";
 
 type RouteContext = { params: Promise<{ token: string }> };
 
@@ -42,10 +43,11 @@ export async function POST(_request: Request, context: RouteContext) {
 
   const invitation = result.invitation;
   const accepted = await prisma.$transaction(async (tx) => {
+    const displayName = authDisplayNameOrEmail(user);
     const dbUser = await tx.user.upsert({
       where: { authProviderId: user.id },
-      update: { email: user.email!, name: typeof user.user_metadata?.name === "string" ? user.user_metadata.name : user.email!.split("@")[0] },
-      create: { authProviderId: user.id, email: user.email!, name: typeof user.user_metadata?.name === "string" ? user.user_metadata.name : user.email!.split("@")[0] }
+      update: { email: user.email!, name: displayName },
+      create: { authProviderId: user.id, email: user.email!, name: displayName }
     });
     if (dbUser.activeHouseholdId && dbUser.activeHouseholdId !== invitation.householdId) return { error: "Sua conta já está vinculada a outra casa." };
     const existingMembership = await tx.membership.findUnique({ where: { householdId_userId: { householdId: invitation.householdId, userId: dbUser.id } } });
