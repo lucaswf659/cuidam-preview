@@ -38,6 +38,13 @@ describe("NosMock balance summary", () => {
     expect(screen.queryByText("Por enquanto, só você")).not.toBeInTheDocument();
   });
 
+  it("uses neutral wording when the other member has no personal responsibilities yet", () => {
+    render(<NosMock household={{ ...household, memberCount: 2 }} />);
+    expect(screen.getByText("A divisão pessoal ainda não começou")).toBeInTheDocument();
+    expect(screen.getByText("A divisão considera o peso e a frequência. As tarefas compartilhadas também fazem parte do cuidado da casa.")).toBeInTheDocument();
+    expect(screen.queryByText("Ainda falta dividir com outra pessoa")).not.toBeInTheDocument();
+  });
+
   it("does not count an empty house as entirely shared work", () => {
     render(<NosMock household={{ ...household, tasks: [] }} />);
 
@@ -45,4 +52,3 @@ describe("NosMock balance summary", () => {
     expect(screen.getByRole("img", { name: "Suas tarefas 0 por cento, compartilhadas 0 por cento" })).toBeInTheDocument();
   });
 });
-

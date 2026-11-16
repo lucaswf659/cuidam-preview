@@ -17,7 +17,7 @@ describe("real onboarding persistence", () => {
     vi.stubEnv("NEXT_PUBLIC_CUIDAM_MOCK", "false");
   });
 
-  it("creates suggested areas, tasks, and occurrences in batches without relying on return order", async () => {
+  it("persists only the task suggestions selected and edited by the new household", async () => {
     const tx = {
       user: {
         upsert: vi.fn().mockResolvedValue({ id: "db-user-1" }),
@@ -37,7 +37,7 @@ describe("real onboarding persistence", () => {
         )
       },
       task: {
-        createManyAndReturn: vi.fn(async ({ data }: { data: Array<{ areaId: string; name: string }> }) =>
+        createManyAndReturn: vi.fn(async ({ data }: { data: Array<{ areaId: string; name: string; responsibleMemberId: string | null; load: number }> }) =>
           data.map((task, index) => ({ id: `task-${index}`, ...task })).reverse()
         )
       },
@@ -61,6 +61,10 @@ describe("real onboarding persistence", () => {
           { id: "living", name: "Sala", icon: "🛋️" },
           { id: "bathroom", name: "Banheiro", icon: "🫧" },
           { id: "bedroom", name: "Quartos", icon: "🛏️" }
+        ],
+        tasks: [
+          { areaId: "kitchen", name: "Limpar bancada", responsibility: "Outra pessoa", recurrence: "Diária", load: 4 },
+          { areaId: "living", name: "Aspirar sala", responsibility: "Nós", recurrence: "Semanal", load: 2 }
         ]
       })
     }));
@@ -71,7 +75,7 @@ describe("real onboarding persistence", () => {
     expect(tx.task.createManyAndReturn).toHaveBeenCalledOnce();
 
     const taskInputs = tx.task.createManyAndReturn.mock.calls[0][0].data;
-    expect(taskInputs).toHaveLength(10);
+    expect(taskInputs).toHaveLength(2);
     expect(taskInputs.every((task) => ["area-0", "area-1", "area-2", "area-3"].includes(task.areaId))).toBe(true);
 
     expect(tx.taskOccurrence.createMany).toHaveBeenCalledOnce();
@@ -79,12 +83,14 @@ describe("real onboarding persistence", () => {
       taskId: string;
       responsibilityTypeSnapshot: string;
     }>;
-    expect(occurrences).toHaveLength(10);
-    expect(new Set(occurrences.map((occurrence) => occurrence.taskId)).size).toBe(10);
+    expect(occurrences).toHaveLength(2);
+    expect(new Set(occurrences.map((occurrence) => occurrence.taskId)).size).toBe(2);
 
     const taskIdByName = new Map(taskInputs.map((task, index) => [task.name, `task-${index}`]));
     const occurrenceByTaskId = new Map(occurrences.map((occurrence) => [occurrence.taskId, occurrence]));
     expect(occurrenceByTaskId.get(taskIdByName.get("Limpar bancada")!)?.responsibilityTypeSnapshot).toBe("PERSON");
-    expect(occurrenceByTaskId.get(taskIdByName.get("Esvaziar lava-louças")!)?.responsibilityTypeSnapshot).toBe("SHARED");
+    expect(occurrenceByTaskId.get(taskIdByName.get("Aspirar sala")!)?.responsibilityTypeSnapshot).toBe("SHARED");
+    expect(taskInputs.find((task) => task.name === "Limpar bancada")?.responsibleMemberId).toBeNull();
+    expect(taskInputs.find((task) => task.name === "Limpar bancada")?.load).toBe(4);
   });
 });

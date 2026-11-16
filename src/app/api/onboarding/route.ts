@@ -9,32 +9,6 @@ import { onboardingPayloadSchema } from "@/lib/real/onboarding-schema";
 
 const mockMode = process.env.NEXT_PUBLIC_CUIDAM_MOCK !== "false";
 
-const suggestedTasks: Record<string, Array<{ name: string; responsibility: "Você" | "Nós"; recurrence: string; load: number }>> = {
-  kitchen: [
-    { name: "Limpar bancada", responsibility: "Você", recurrence: "Diária", load: 2 },
-    { name: "Esvaziar lava-louças", responsibility: "Nós", recurrence: "Diária", load: 2 },
-    { name: "Limpar geladeira", responsibility: "Nós", recurrence: "Mensal", load: 3 }
-  ],
-  living: [
-    { name: "Aspirar sala", responsibility: "Nós", recurrence: "Semanal", load: 2 },
-    { name: "Organizar sala", responsibility: "Você", recurrence: "3× por semana", load: 1 }
-  ],
-  bedroom: [
-    { name: "Trocar roupa de cama", responsibility: "Você", recurrence: "Semanal", load: 2 },
-    { name: "Aspirar quartos", responsibility: "Nós", recurrence: "Semanal", load: 2 }
-  ],
-  bathroom: [
-    { name: "Limpar banheiro", responsibility: "Você", recurrence: "Semanal", load: 3 },
-    { name: "Repor papel higiênico", responsibility: "Você", recurrence: "Semanal", load: 1 },
-    { name: "Limpar espelho", responsibility: "Nós", recurrence: "Semanal", load: 1 }
-  ],
-  office: [{ name: "Organizar mesa", responsibility: "Você", recurrence: "Semanal", load: 1 }],
-  pets: [
-    { name: "Alimentar pets", responsibility: "Nós", recurrence: "Diária", load: 2 },
-    { name: "Comprar ração", responsibility: "Você", recurrence: "Mensal", load: 2 }
-  ]
-};
-
 async function getAuthenticatedUser() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -67,12 +41,11 @@ export async function POST(request: Request) {
     const existing = mockHouseholdForSession(sessionId);
     if (existing) return NextResponse.json({ householdId: existing.id, created: false }, { status: 200 });
     const areas = parsed.data.areas.map((area, index) => ({ ...area, sortOrder: index }));
-    const tasks = areas.flatMap((area) => (suggestedTasks[area.id] ?? []).map((task, index) => ({
+    const tasks = parsed.data.tasks.map((task, index) => ({
       ...task,
-      id: `mock-task-${area.id}-${index}`,
-      areaId: area.id,
+      id: `mock-task-${task.areaId}-${index}`,
       completed: false
-    })));
+    }));
     const household = saveMockHousehold(sessionId, {
       id: `mock-household-${Date.now()}`,
       name: parsed.data.houseName,
@@ -121,21 +94,22 @@ export async function POST(request: Request) {
       const areaId = areaIdBySortOrder.get(index);
       if (!areaId) throw new Error("An onboarding area was not returned after creation.");
 
-      return (suggestedTasks[area.id] ?? []).map((suggestion) => {
+      return parsed.data.tasks.filter((task) => task.areaId === area.id).map((suggestion) => {
         const recurrence = recurrenceFromLabel(suggestion.recurrence);
         const responsibilityType = suggestion.responsibility === "Nós" ? "SHARED" as const : "PERSON" as const;
+        const responsibleMemberId = suggestion.responsibility === "Você" ? membership.id : null;
         return {
           key: JSON.stringify([areaId, suggestion.name]),
           recurrence,
           responsibilityType,
-          responsibleMemberId: responsibilityType === "PERSON" ? membership.id : null,
+          responsibleMemberId,
           load: suggestion.load,
           data: {
             householdId: household.id,
             areaId,
             name: suggestion.name,
             responsibilityType,
-            responsibleMemberId: responsibilityType === "PERSON" ? membership.id : null,
+            responsibleMemberId,
             ...recurrence,
             recurrenceAnchor: now,
             load: suggestion.load,
@@ -171,4 +145,3 @@ export async function POST(request: Request) {
 
   return NextResponse.json({ householdId: result.household.id, created: result.created }, { status: result.created ? 201 : 200 });
 }
-

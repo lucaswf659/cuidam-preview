@@ -90,7 +90,7 @@ export default function InvitePage({ params }: { params: Promise<{ token: string
         const onboardingResponse = await fetch("/api/onboarding", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ name: "Morador de teste", houseName: "Nossa casa de teste", areas: mockDemoAreas })
+          body: JSON.stringify({ name: "Morador de teste", houseName: "Nossa casa de teste", areas: mockDemoAreas, tasks: [] })
         });
         if (!onboardingResponse.ok) throw new Error("Não foi possível preparar a casa de demonstração.");
       }

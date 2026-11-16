@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/browser";
 import { useRouter } from "next/navigation";
 import { AreaIcon } from "@/components/area-icon";
 import { BrandMark } from "@/components/brand-mark";
+import { onboardingSuggestionsForAreas, type OnboardingSuggestion } from "@/lib/onboarding-suggestions";
 
 type Step = "welcome" | "signup" | "house" | "presets" | "invite" | "done";
 type AuthMode = "signup" | "login";
@@ -28,11 +29,14 @@ export function OnboardingFlow() {
   const [recoverySent, setRecoverySent] = useState(false);
   const [requestingRecovery, setRequestingRecovery] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteUrl, setInviteUrl] = useState("");
   const [houseName, setHouseName] = useState("Nossa casa");
   const [error, setError] = useState("");
   const [selectedAreas, setSelectedAreas] = useState(() =>
     new Set(suggestedAreas.filter((area) => area.selected).map((area) => area.id))
   );
+  const [suggestedTasks, setSuggestedTasks] = useState<OnboardingSuggestion[]>(() => onboardingSuggestionsForAreas(suggestedAreas.filter((area) => area.selected).map((area) => area.id)));
+  const [selectedTaskKeys, setSelectedTaskKeys] = useState(() => new Set(onboardingSuggestionsForAreas(suggestedAreas.filter((area) => area.selected).map((area) => area.id)).map((task) => task.id)));
   const router = useRouter();
   const inviteEndpoint = process.env.NEXT_PUBLIC_CUIDAM_MOCK === "false" ? "/api/invite" : "/api/mock/invite";
 
@@ -94,7 +98,7 @@ export function OnboardingFlow() {
   const finishOnboarding = async () => {
     setError("");
     const onboardingName = name.trim() || email.trim().split("@")[0] || "Você";
-    const response = await fetch("/api/onboarding", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: onboardingName, houseName, areas: suggestedAreas.filter((area) => selectedAreas.has(area.id)) }) });
+    const response = await fetch("/api/onboarding", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: onboardingName, houseName, areas: suggestedAreas.filter((area) => selectedAreas.has(area.id)), tasks: suggestedTasks.filter((task) => selectedAreas.has(task.areaId) && selectedTaskKeys.has(task.id)) }) });
     if (!response.ok) { const body = await response.json().catch(() => null); setError(body?.error ?? "Não foi possível salvar sua casa."); return; }
     setStep("invite");
   };
@@ -102,8 +106,30 @@ export function OnboardingFlow() {
   const sendInvite = async () => {
     if (!inviteEmail.trim()) { setStep("done"); return; }
     const response = await fetch(inviteEndpoint, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email: inviteEmail }) });
-    if (!response.ok) { setError("Informe um e-mail válido."); return; }
+    if (!response.ok) { setError("Não foi possível gerar o convite. Confira o e-mail e tente novamente."); return; }
+    const data = await response.json().catch(() => null);
+    setInviteUrl(data?.inviteUrl ? new URL(data.inviteUrl, window.location.origin).toString() : "");
     setStep("done");
+  };
+
+  const copyInvite = async () => {
+    if (!inviteUrl) return;
+    try { await navigator.clipboard.writeText(inviteUrl); setError("Link copiado."); }
+    catch { setError("Não foi possível copiar automaticamente. Selecione e copie o link abaixo."); }
+  };
+
+  const toggleArea = (areaId: string) => {
+    setSelectedAreas((current) => {
+      const next = new Set(current);
+      if (next.has(areaId)) next.delete(areaId);
+      else next.add(areaId);
+      return next;
+    });
+    if (!selectedAreas.has(areaId)) {
+      const defaults = onboardingSuggestionsForAreas([areaId]);
+      setSuggestedTasks((current) => [...current, ...defaults.filter((task) => !current.some((item) => item.areaId === task.areaId && item.name === task.name))]);
+      setSelectedTaskKeys((current) => new Set([...current, ...defaults.map((task) => task.id)]));
+    }
   };
 
   const greeting = name.trim() ? name.trim().split(" ")[0] : "você";
@@ -173,15 +199,26 @@ export function OnboardingFlow() {
             <button className="back" type="button" onClick={() => setStep("house")}>← Voltar</button>
             <p className="eyebrow">Por onde começar</p>
             <h1>O que faz parte da casa?</h1>
-            <p className="lead">Escolha algumas áreas. Você ajusta tudo quando quiser.</p>
+            <p className="lead">As sugestões vêm prontas, mas vocês decidem o que entra e como dividir.</p>
             <div className="area-grid">
               {suggestedAreas.map((area) => {
                 const isSelected = selectedAreas.has(area.id);
-                return <button aria-pressed={isSelected} className={`area-choice ${isSelected ? "selected" : ""}`} key={area.id} onClick={() => setSelectedAreas((current) => { const next = new Set(current); if (next.has(area.id)) next.delete(area.id); else next.add(area.id); return next; })}>
+                return <button aria-pressed={isSelected} className={`area-choice ${isSelected ? "selected" : ""}`} key={area.id} onClick={() => toggleArea(area.id)}>
                   <AreaIcon name={area.id} fallback={area.icon} />{area.name}<b aria-hidden="true">{isSelected ? "✓" : "+"}</b>
                 </button>;
               })}
             </div>
+            {selectedAreas.size > 0 && <section className="onboarding-task-suggestions" aria-label="Sugestões de responsabilidades">
+              <h2>Primeira divisão</h2>
+              <p>Desmarque o que não faz sentido e ajuste quem cuida, a frequência e a carga.</p>
+              {suggestedTasks.filter((task) => selectedAreas.has(task.areaId)).map((task) => { const taskKey = task.id; const checked = selectedTaskKeys.has(taskKey); return <div className={`onboarding-suggestion-row ${checked ? "" : "suggestion-disabled"}`} key={taskKey}>
+                <div className="onboarding-suggestion-name"><input type="checkbox" aria-label={`Incluir ${task.name}`} checked={checked} onChange={() => setSelectedTaskKeys((current) => { const next = new Set(current); if (next.has(taskKey)) next.delete(taskKey); else next.add(taskKey); return next; })} /><span><small>{suggestedAreas.find((area) => area.id === task.areaId)?.name}</small><input aria-label={`${task.name}: nome`} disabled={!checked} value={task.name} onChange={(event) => setSuggestedTasks((current) => current.map((item) => item.id === task.id ? { ...item, name: event.target.value } : item))} /></span></div>
+                <label className="onboarding-suggestion-field"><span>Responsabilidade</span><select disabled={!checked} aria-label={`${task.name}: responsabilidade`} value={task.responsibility} onChange={(event) => setSuggestedTasks((current) => current.map((item) => item === task ? { ...item, responsibility: event.target.value as OnboardingSuggestion["responsibility"] } : item))}><option>Você</option><option>Outra pessoa</option><option>Nós</option></select></label>
+                <label className="onboarding-suggestion-field"><span>Frequência</span><select disabled={!checked} aria-label={`${task.name}: frequência`} value={task.recurrence} onChange={(event) => setSuggestedTasks((current) => current.map((item) => item === task ? { ...item, recurrence: event.target.value } : item))}><option>Diária</option><option>Semanal</option><option>3× por semana</option><option>Mensal</option></select></label>
+                <label className="onboarding-suggestion-field"><span>Carga</span><select disabled={!checked} aria-label={`${task.name}: carga`} value={task.load} onChange={(event) => setSuggestedTasks((current) => current.map((item) => item === task ? { ...item, load: Number(event.target.value) } : item))}>{[1, 2, 3, 4, 5].map((value) => <option key={value} value={value}>{value} de 5</option>)}</select></label>
+              </div>; })}
+              {!suggestedTasks.some((task) => selectedAreas.has(task.areaId) && selectedTaskKeys.has(task.id)) && <p className="form-note">Nenhuma sugestão selecionada. Vocês podem adicionar tarefas depois.</p>}
+            </section>}
             <button className="button primary" onClick={finishOnboarding} disabled={selectedAreas.size === 0}>Continuar</button>
             {error && <p className="form-error" role="alert">{error}</p>}
           </section>
@@ -192,9 +229,9 @@ export function OnboardingFlow() {
             <button className="back" type="button" onClick={() => setStep("presets")}>← Voltar</button>
             <p className="eyebrow">Pessoas</p>
             <h1>Convide alguém da casa.</h1>
-            <p className="lead">A pessoa entra direto nessa divisão quando aceitar. Você também pode fazer isso depois.</p>
+            <p className="lead">Gere um link e compartilhe por onde quiser. Nenhum e-mail será enviado; você pode fazer isso depois.</p>
             <label>E-mail de quem mora com você<input type="email" value={inviteEmail} onChange={(event) => setInviteEmail(event.target.value)} placeholder="alguem@email.com" autoComplete="email" /></label>
-            <button className="button primary" onClick={sendInvite}>Enviar convite</button>
+            <button className="button primary" onClick={sendInvite}>Gerar link do convite</button>
             <button className="button text-button" onClick={() => setStep("done")}>Fazer depois</button>
             {error && <p className="form-error" role="alert">{error}</p>}
           </section>
@@ -206,6 +243,7 @@ export function OnboardingFlow() {
             <p className="eyebrow">Tudo pronto</p>
             <h1>Bem-vindo à {houseName || "sua casa"}, {greeting}.</h1>
             <p className="lead">Agora vamos começar pelo que precisa acontecer — sem transformar a casa numa lista gigante.</p>
+            {inviteUrl && <div className="onboarding-invite-link"><p>Link pronto para compartilhar. Nenhum e-mail foi enviado.</p><input aria-label="Link do convite" readOnly value={inviteUrl} onFocus={(event) => event.currentTarget.select()} /><button className="button secondary" onClick={copyInvite}>Copiar link</button>{error && <p className="form-note" role="status">{error}</p>}</div>}
             <button className="button primary" onClick={() => router.push("/today")}>Ir para Hoje</button>
           </section>
         )}

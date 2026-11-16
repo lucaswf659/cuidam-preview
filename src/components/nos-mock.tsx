@@ -68,7 +68,7 @@ export function NosMock({ household }: { household: MockHousehold }) {
     : !hasOtherMember
       ? "Por enquanto, só você"
       : !scores.other
-        ? "Ainda falta dividir com outra pessoa"
+        ? "A divisão pessoal ainda não começou"
         : relativeDifference <= 10
           ? "Bem equilibrada"
           : relativeDifference <= 25
@@ -129,7 +129,7 @@ export function NosMock({ household }: { household: MockHousehold }) {
             </div>
             <div className="balance-bar" role="img" aria-label={hasOtherMember ? `Você ${youPercent} por cento, outra pessoa ${otherPercent} por cento, compartilhadas ${sharedPercent} por cento` : `Suas tarefas ${youPercent} por cento, compartilhadas ${sharedPercent} por cento`}><span className="balance-you" style={{ width: `${youPercent}%` }} />{hasOtherMember ? <span className="balance-other" style={{ width: `${otherPercent}%` }} /> : null}<i className="balance-shared" style={{ width: `${sharedPercent}%` }} /></div>
             <div className="balance-legend"><span>Você · {youPercent}%</span>{hasOtherMember ? <span>Outra pessoa · {otherPercent}%</span> : null}<span>Compartilhadas · {sharedPercent}%</span></div>
-            <p>{hasOtherMember ? "A divisão considera o peso e a frequência. Tarefas compartilhadas ficam visíveis sem pesar contra uma pessoa." : "Quando outra pessoa entrar na casa, a divisão entre vocês aparece aqui."}</p>
+            <p>{hasOtherMember ? "A divisão considera o peso e a frequência. As tarefas compartilhadas também fazem parte do cuidado da casa." : "Quando outra pessoa entrar na casa, a divisão entre vocês aparece aqui."}</p>
           </div>
         </div>
         <div className="nos-areas-panel">
