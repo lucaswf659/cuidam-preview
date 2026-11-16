@@ -838,3 +838,17 @@ html, body { height: auto; min-height: 100%; overflow-x: hidden; overflow-y: aut
 .today-content, .nos-content, .casa-content, .rewards-content { height: auto; max-height: none; overflow: visible; }
 .casa-content { gap: 22px 28px; }
 
+@media (min-width: 820px) and (max-width: 959px) {
+  .today-shell, .nos-shell, .casa-shell, .rewards-shell { padding: 18px 20px calc(100px + env(safe-area-inset-bottom)); }
+  .app-topbar { min-height: 48px; justify-content: space-between; }
+  .app-topbar > .app-brand-lockup { display: inline-flex; }
+  .primary-nav { top: auto; right: 0; bottom: 0; left: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2px; width: 100%; height: auto; flex-direction: row; align-items: stretch; padding: 8px 8px calc(8px + env(safe-area-inset-bottom)); border: 0; border-top: 1px solid rgba(55, 107, 69, .1); border-radius: 0; background: rgba(255, 255, 255, .96); box-shadow: 0 -8px 24px rgba(41, 42, 39, .06); }
+  .primary-nav__brand, .primary-nav__note { display: none; }
+  .primary-nav__links { display: contents; }
+  .primary-nav__link { min-width: 0; min-height: 54px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 0; border-radius: 14px; font-size: .66rem; }
+  .primary-nav__link.is-active { box-shadow: none; }
+  .primary-nav__icon { width: 21px; height: 21px; }
+  .casa-content { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  .casa-content > .casa-people-panel, .casa-content > .casa-areas-panel, .casa-content > .casa-notifications-panel { grid-column: 1; }
+}
+
