@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { Prisma } from "@prisma/client";
 
 const mocks = vi.hoisted(() => {
   const reward = { findFirst: vi.fn(), findMany: vi.fn(), create: vi.fn(), update: vi.fn() };
@@ -56,6 +57,20 @@ describe("/api/rewards", () => {
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toMatchObject({ redemption: { id: "redemption-existing" } });
     expect(mocks.prisma.$transaction).not.toHaveBeenCalled();
+  });
+
+  it("returns the committed redemption after a concurrent serializable conflict", async () => {
+    const prior = { id: "redemption-concurrent", costSnapshot: 5 };
+    mocks.rewardRedemption.findFirst.mockResolvedValueOnce(null).mockResolvedValueOnce(prior);
+    mocks.prisma.$transaction.mockRejectedValueOnce(new Prisma.PrismaClientKnownRequestError("serialization conflict", {
+      code: "P2034",
+      clientVersion: Prisma.prismaVersion.client
+    }));
+
+    const response = await PATCH(new Request("http://localhost/api/rewards", { method: "PATCH", body: JSON.stringify({ rewardId: "reward-1", action: "redeem", idempotencyKey: "stable-test-key-0004" }) }));
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({ redemption: { id: "redemption-concurrent" } });
   });
 });
 
