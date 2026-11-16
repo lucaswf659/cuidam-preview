@@ -69,5 +69,12 @@ describe("recuperação de senha", () => {
     expect(mocks.router.replace).toHaveBeenCalledWith("/today");
     expect(mocks.router.refresh).toHaveBeenCalled();
   });
+  it("orienta a abrir o link de recuperação no mesmo navegador", async () => {
+    mocks.getSession.mockResolvedValue({ data: { session: null } });
+    render(<ResetPasswordForm />);
+
+    expect(await screen.findByRole("heading", { name: "Não conseguimos validar este link." })).toBeInTheDocument();
+    expect(screen.getByText(/mesmo navegador em que pediu a recuperação/)).toBeInTheDocument();
+  });
 });
 
