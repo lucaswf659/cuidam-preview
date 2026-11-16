@@ -5,4 +5,11 @@ playwright-report/
 test-results/
 .env
 .env.local
+.env.e2e
+*.tsbuildinfo
+dev.log
+dev.err.log
+tmp-regression-cookies.txt
 !.env.example
+!.env.e2e.example
+
