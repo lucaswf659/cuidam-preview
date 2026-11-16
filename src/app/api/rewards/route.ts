@@ -98,10 +98,10 @@ export async function PATCH(request: Request) {
     const message = error instanceof Error ? error.message : "";
     if (message === "INSUFFICIENT_BALANCE") return NextResponse.json({ error: "Ainda não há estrelas suficientes para esse resgate." }, { status: 409 });
     if (message === "REWARD_UNAVAILABLE") return NextResponse.json({ error: "Essa recompensa não está mais disponível." }, { status: 409 });
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034") return NextResponse.json({ error: "O saldo acabou de mudar. Atualize e tente novamente." }, { status: 409 });
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && (error.code === "P2034" || error.code === "P2002")) {
       const prior = await prisma.rewardRedemption.findFirst({ where: { requestKey: idempotencyKey, householdId: context.household.id } });
       if (prior) return NextResponse.json({ redemption: prior });
+      if (error.code === "P2034") return NextResponse.json({ error: "O saldo acabou de mudar. Atualize e tente novamente." }, { status: 409 });
     }
     throw error;
   }
