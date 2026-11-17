@@ -17,6 +17,14 @@ const household: MockHousehold = {
 };
 
 describe("NosMock balance summary", () => {
+  it("opens areas with a centered chevron and keeps the card free of redundant task counts", () => {
+    const { container } = render(<NosMock household={household} />);
+    const areaButton = screen.getByRole("button", { name: "Ver tarefas da área Cozinha" });
+
+    expect(areaButton.querySelector(".nos-area-chevron svg")).toBeInTheDocument();
+    expect(container.querySelector(".area-count")).not.toBeInTheDocument();
+  });
+
   it("does not show a second-person comparison while the household has one member", () => {
     render(<NosMock household={household} />);
 

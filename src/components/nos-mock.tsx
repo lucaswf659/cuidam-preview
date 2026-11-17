@@ -142,7 +142,7 @@ export function NosMock({ household }: { household: MockHousehold }) {
                 <button className="nos-area-button" onClick={() => setSelectedAreaId(area.id)} aria-label={`Ver tarefas da área ${area.name}`}>
                   <AreaIcon name={area.name || area.id} fallback={area.icon} className="area-icon" />
                   <span><strong>{area.name}</strong><small>{owners.length ? `${owners.length > 1 ? "Responsáveis" : "Responsável"}: ${owners.join(" · ")}` : "Ainda sem tarefas"}</small></span>
-                  <span className="area-count" aria-label={`${areaTasks.length} tarefas`}>{areaTasks.length}</span><b aria-hidden="true">›</b>
+                  <span className="nos-area-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="m9 5 7 7-7 7" /></svg></span>
                 </button>
               </article>;
             })}

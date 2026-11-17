@@ -18,4 +18,12 @@ describe("AreaIcon", () => {
     expect(container).toHaveTextContent("🌙");
     expect(container.querySelector("svg")).not.toBeInTheDocument();
   });
+
+  it("draws Pets as one clear paw print", () => {
+    const { container } = render(<AreaIcon name="Pets" fallback="🐾" />);
+    const icon = container.querySelector(".area-symbol--pets svg");
+
+    expect(icon?.querySelectorAll(".area-icon-accent")).toHaveLength(4);
+    expect(icon?.querySelector(".area-icon-soft")).toBeInTheDocument();
+  });
 });

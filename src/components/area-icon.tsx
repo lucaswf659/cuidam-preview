@@ -38,12 +38,11 @@ const icons: Record<string, ReactNode> = {
     <path className="area-icon-detail" d="m10 9 1.5 1.5" />
   </>,
   pets: <>
-    <path className="area-icon-soft" d="M16 15c-2.5-2.8-6.5-.6-7.6 2.8-.7 2.3.6 3.8 2.8 3.5 1-.2 1.8-.7 2.8-.7s1.8.5 2.8.7c2.2.3 3.5-1.2 2.8-3.5-.3-1.1-1-2.1-1.8-2.8Z" />
-    <ellipse className="area-icon-accent" cx="8" cy="10" rx="2.1" ry="2.8" transform="rotate(-25 8 10)" />
-    <ellipse className="area-icon-accent" cx="14" cy="7.8" rx="2" ry="2.7" />
-    <ellipse className="area-icon-accent" cx="20" cy="10" rx="2.1" ry="2.8" transform="rotate(25 20 10)" />
-    <path className="area-icon-detail" d="M8 10.2c.7 1.4 1.5 2.4 2.7 3.1m3.3-5.2v4m6-2c-.6 1.4-1.5 2.4-2.7 3.1" />
-    <path d="M10.5 21.3c.4-.6.8-1.1 1.4-1.4m4.2 1.4c-.4-.6-.8-1.1-1.4-1.4" />
+    <ellipse className="area-icon-accent" cx="7.5" cy="10.8" rx="2.6" ry="3.2" transform="rotate(-24 7.5 10.8)" />
+    <ellipse className="area-icon-accent" cx="13.3" cy="7.4" rx="2.7" ry="3.2" transform="rotate(-8 13.3 7.4)" />
+    <ellipse className="area-icon-accent" cx="19.2" cy="7.9" rx="2.7" ry="3.2" transform="rotate(10 19.2 7.9)" />
+    <ellipse className="area-icon-accent" cx="24" cy="11.6" rx="2.5" ry="3.1" transform="rotate(25 24 11.6)" />
+    <path className="area-icon-soft" d="M15.8 13.4c-1.6-1.8-4.4-1.6-5.5.5-.9 1.7-.1 4.1 1.6 5.6 1.3 1.2 2.4 1.4 3.9 1.4s2.6-.2 3.9-1.4c1.7-1.5 2.5-3.9 1.6-5.6-1.1-2.1-3.9-2.3-5.5-.5Z" />
   </>
 };
 
