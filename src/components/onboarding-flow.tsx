@@ -10,7 +10,7 @@ import { onboardingSuggestionsForAreas, type OnboardingSuggestion } from "@/lib/
 type Step = "welcome" | "signup" | "house" | "presets" | "invite" | "done";
 type AuthMode = "signup" | "login";
 
-type OnboardingFlowProps = { initialStep?: Step; initialMode?: AuthMode; initialName?: string; initialEmail?: string; };
+type OnboardingFlowProps = { initialStep?: Step; initialMode?: AuthMode; initialName?: string; initialEmail?: string; confirmationCompleted?: boolean; };
 
 const suggestedAreas = [
   { id: "kitchen", icon: "🍳", name: "Cozinha", selected: true },
@@ -21,7 +21,7 @@ const suggestedAreas = [
   { id: "pets", icon: "🐾", name: "Pets", selected: false }
 ];
 
-export function OnboardingFlow({ initialStep = "welcome", initialMode = "signup", initialName = "", initialEmail = "" }: OnboardingFlowProps) {
+export function OnboardingFlow({ initialStep = "welcome", initialMode = "signup", initialName = "", initialEmail = "", confirmationCompleted = false }: OnboardingFlowProps) {
   const [step, setStep] = useState<Step>(initialStep);
   const [authMode, setAuthMode] = useState<AuthMode>(initialMode);
   const [name, setName] = useState(initialName);
@@ -34,6 +34,7 @@ export function OnboardingFlow({ initialStep = "welcome", initialMode = "signup"
   const [inviteUrl, setInviteUrl] = useState("");
   const [houseName, setHouseName] = useState("Nossa casa");
   const [error, setError] = useState("");
+  const [signupConfirmationSent, setSignupConfirmationSent] = useState(false);
   const [selectedAreas, setSelectedAreas] = useState(() =>
     new Set(suggestedAreas.filter((area) => area.selected).map((area) => area.id))
   );
@@ -58,11 +59,19 @@ export function OnboardingFlow({ initialStep = "welcome", initialMode = "signup"
     }
     const auth = createClient();
     const result = authMode === "signup"
-      ? await auth.auth.signUp({ email, password, options: { data: { name }, emailRedirectTo: `${window.location.origin}/auth/callback` } })
+      ? await auth.auth.signUp({ email, password, options: { data: { name }, emailRedirectTo: `${window.location.origin}/entrar` } })
       : await auth.auth.signInWithPassword({ email, password });
-    if (result.error) { setError(result.error.message); return; }
-    if (!result.data.session) {
-      setError("Confira seu e-mail para confirmar a conta antes de continuar.");
+    if (result.error) {
+      const code = "code" in result.error ? result.error.code : undefined;
+      setError(code === "email_not_confirmed"
+        ? "Confirme seu e-mail pelo link que enviamos antes de entrar."
+        : "Não foi possível entrar. Confira seu e-mail e sua senha.");
+      return;
+    }
+    if (!result.data.session && authMode === "signup") {
+      setAuthMode("login");
+      setPassword("");
+      setSignupConfirmationSent(true);
       return;
     }
     if (authMode === "login") {
@@ -169,12 +178,13 @@ export function OnboardingFlow({ initialStep = "welcome", initialMode = "signup"
             </form>
           ) :
           <form className="step-content form-step" onSubmit={continueSignup}>
-            <button className="back" type="button" onClick={() => setStep("welcome")}>← Voltar</button>
+            <button className="back" type="button" onClick={() => { setStep("welcome"); setSignupConfirmationSent(false); setError(""); }}>← Voltar</button>
             <p className="eyebrow">{authMode === "signup" ? "Começando" : "De volta à casa"}</p>
             <h1>{authMode === "signup" ? "Vamos deixar isso fácil." : "Que bom ter você de volta."}</h1>
             <p className="lead">{authMode === "signup" ? "Crie sua conta. Você configura a casa em seguida." : "Entre para continuar de onde parou."}</p>
+            {signupConfirmationSent && <p className="form-success" role="status">Enviamos um link de confirmação para <strong>{email}</strong>. Abra o e-mail para confirmar; o link volta ao Cuidam e continua a configuração da casa.</p>}
             {authMode === "signup" && <label>Seu nome<input value={name} onChange={(event) => setName(event.target.value)} placeholder="Como podemos te chamar?" autoComplete="name" required /></label>}
-            <label>E-mail<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="voce@email.com" autoComplete="email" required /></label>
+            <label>E-mail<input type="email" value={email} onChange={(event) => { setEmail(event.target.value); setSignupConfirmationSent(false); }} placeholder="voce@email.com" autoComplete="email" required /></label>
             <label>Senha<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Pelo menos 8 caracteres" autoComplete={authMode === "login" ? "current-password" : "new-password"} minLength={8} required /></label>
             <button className="button primary" type="submit">{authMode === "signup" ? "Continuar" : "Entrar"}</button>
             {error && <p className="form-error" role="alert">{error}</p>}
@@ -185,6 +195,7 @@ export function OnboardingFlow({ initialStep = "welcome", initialMode = "signup"
 
         {step === "house" && (
           <form className="step-content form-step" onSubmit={(event) => { event.preventDefault(); setStep("presets"); }}>
+            {confirmationCompleted && <p className="form-success" role="status">E-mail confirmado. Agora vamos configurar sua casa.</p>}
             <button className="back" type="button" onClick={() => setStep("signup")}>← Voltar</button>
             <p className="eyebrow">Sua casa</p>
             <h1>Como vocês chamam a casa?</h1>

@@ -86,4 +86,5 @@ npm run build      # build de produção
 ### 2026-11-17
 
 - Recuperação de senha passou a usar `TokenHash` no template do Supabase e valida o token em `/api/auth/confirm-recovery`, criando uma sessão no navegador que abriu o link. Isso permite continuar em outro navegador ou dispositivo; o template personalizado está documentado em `docs/architecture/SUPABASE-AUTH-SETUP.md`.
+- Após cadastro, a tela de autenticação agora informa claramente que a confirmação foi enviada. O link confirma a conta no app e continua o onboarding; quando o cadastro vem de um convite, retorna ao convite. O template e as recomendações de entrega estão documentados em `docs/architecture/SUPABASE-AUTH-SETUP.md`.
 

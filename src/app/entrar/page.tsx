@@ -6,11 +6,11 @@ import { getRealHouseholdSnapshot } from "@/lib/real/household";
 import { createClient } from "@/lib/supabase/server";
 
 type EnterPageProps = {
-  searchParams: Promise<{ mode?: string }>;
+  searchParams: Promise<{ mode?: string; confirmed?: string }>;
 };
 
 export default async function EnterPage({ searchParams }: EnterPageProps) {
-  const { mode } = await searchParams;
+  const { mode, confirmed } = await searchParams;
   const initialMode = mode === "login" ? "login" : "signup";
 
   if (process.env.NEXT_PUBLIC_CUIDAM_MOCK !== "false") {
@@ -29,6 +29,7 @@ export default async function EnterPage({ searchParams }: EnterPageProps) {
       initialMode="signup"
       initialName={typeof user.user_metadata?.name === "string" ? user.user_metadata.name : ""}
       initialEmail={user.email ?? ""}
+      confirmationCompleted={confirmed === "1"}
     />;
   }
 

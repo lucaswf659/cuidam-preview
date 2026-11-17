@@ -122,13 +122,15 @@ export default function InvitePage({ params }: { params: Promise<{ token: string
     setMessage("");
     try {
       const auth = createClient();
-      const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(`/convite/${token}`)}`;
+      const redirectTo = `${window.location.origin}/convite/${token}`;
       const result = authMode === "signup"
         ? await auth.auth.signUp({ email: email.trim(), password, options: { data: { name: name.trim() }, emailRedirectTo: redirectTo } })
         : await auth.auth.signInWithPassword({ email: email.trim(), password });
       if (result.error) throw new Error(result.error.message);
       if (!result.data.session) {
-        setMessage("Confira seu e-mail para confirmar a conta. Depois, volte por este mesmo convite.");
+        setAuthMode("login");
+        setPassword("");
+        setMessage("Enviamos um link de confirmação para este e-mail. Ao confirmar, você volta direto para este convite.");
         return;
       }
       await acceptInvite(token);
