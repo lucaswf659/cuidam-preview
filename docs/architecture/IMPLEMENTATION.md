@@ -71,7 +71,7 @@ npm run build      # build de produção
 
 ### 2026-11-15
 
-- Recuperação de senha usa o template padrão do Supabase (`.ConfirmationURL`), troca o código PKCE em `/auth/callback` no servidor e permite atualizar a senha apenas com a sessão de recuperação. Isso funciona sem custom SMTP ou edição do HTML do e-mail; o link precisa ser aberto no mesmo navegador/perfil que pediu a recuperação.
+- Recuperação de senha usava o template padrão do Supabase (`.ConfirmationURL`) e trocava o código PKCE em `/auth/callback` no servidor.
 - A página de redefinição valida a sessão antes de permitir `auth.updateUser`; a confirmação do pedido não revela se existe uma conta para o e-mail. A opção não aparece no modo mock.
 - O projeto Supabase precisa usar o template de recuperação documentado em `docs/architecture/SUPABASE-AUTH-SETUP.md`. Testes cobrem solicitação, confirmação, erros, senha e atualização autenticada.
 
@@ -82,4 +82,8 @@ npm run build      # build de produção
 - Configuração E2E exige `.env.e2e` e bloqueia reuso de URL/credenciais do projeto normal. O servidor Next recebe apenas a chave anon e credenciais do banco isolado; service role fica apenas na limpeza dos dados E2E.
 - Documentadas preparação e execução em `docs/architecture/E2E-TESTS.md`.
 - E2E executado no banco isolado: cadastro/casa/tarefa/convite, concorrência de reserva e resgate, isolamento, virada de período diária, ocorrência `MISSED` sem dívida, novos snapshots após edição, idempotência de geração e preservação do histórico ao arquivar. As contas de teste foram removidas pelo teardown.
+
+### 2026-11-17
+
+- Recuperação de senha passou a usar `TokenHash` no template do Supabase e valida o token em `/api/auth/confirm-recovery`, criando uma sessão no navegador que abriu o link. Isso permite continuar em outro navegador ou dispositivo; o template personalizado está documentado em `docs/architecture/SUPABASE-AUTH-SETUP.md`.
 

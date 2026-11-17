@@ -37,9 +37,7 @@ describe("recuperação de senha", () => {
     fireEvent.change(screen.getByLabelText("E-mail"), { target: { value: "pessoa@example.com" } });
     fireEvent.click(screen.getByRole("button", { name: "Enviar instruções" }));
 
-    await waitFor(() => expect(mocks.resetPasswordForEmail).toHaveBeenCalledWith("pessoa@example.com", {
-      redirectTo: `${window.location.origin}/auth/callback?next=%2Fauth%2Freset-password`,
-    }));
+    await waitFor(() => expect(mocks.resetPasswordForEmail).toHaveBeenCalledWith("pessoa@example.com"));
     expect(await screen.findByRole("status")).toHaveTextContent("Se houver uma conta associada");
   });
 
@@ -69,12 +67,12 @@ describe("recuperação de senha", () => {
     expect(mocks.router.replace).toHaveBeenCalledWith("/today");
     expect(mocks.router.refresh).toHaveBeenCalled();
   });
-  it("orienta a abrir o link de recuperação no mesmo navegador", async () => {
+  it("explica quando o link de recuperação não pode ser confirmado", async () => {
     mocks.getSession.mockResolvedValue({ data: { session: null } });
     render(<ResetPasswordForm />);
 
     expect(await screen.findByRole("heading", { name: "Não conseguimos validar este link." })).toBeInTheDocument();
-    expect(screen.getByText(/mesmo navegador em que pediu a recuperação/)).toBeInTheDocument();
+    expect(screen.getByText(/Este link expirou, já foi usado ou não pôde ser confirmado/)).toBeInTheDocument();
   });
 });
 

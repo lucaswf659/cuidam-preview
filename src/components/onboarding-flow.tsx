@@ -82,9 +82,7 @@ export function OnboardingFlow({ initialStep = "welcome", initialMode = "signup"
     setError("");
     setRequestingRecovery(true);
     try {
-      const { error: recoveryError } = await createClient().auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent("/auth/reset-password")}`,
-      });
+      const { error: recoveryError } = await createClient().auth.resetPasswordForEmail(email);
       if (recoveryError) throw recoveryError;
       setRecoverySent(true);
     } catch (cause) {
