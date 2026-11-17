@@ -1,4 +1,4 @@
-import { expect, test, type APIRequestContext, type Browser, type Page } from "@playwright/test";
+import { expect, test, type Browser, type Page } from "@playwright/test";
 import { PrismaClient } from "@prisma/client";
 import { periodKeyForRecurrence } from "../../src/lib/real/recurrence";
 
@@ -6,7 +6,7 @@ const prefix = process.env.CUIDAM_E2E_EMAIL_PREFIX ?? "cuidam-e2e+";
 const runId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 const password = "CuidamE2e!2026";
 
-test("Supabase Data API anon não consegue ler dados de casas", async ({ request }: { request: APIRequestContext }) => {
+test("papel anon do PostgreSQL não consegue ler dados de casas", async () => {
   const prisma = new PrismaClient();
   const marker = `E2E RLS ${runId}`;
   let householdId: string | undefined;
@@ -14,18 +14,16 @@ test("Supabase Data API anon não consegue ler dados de casas", async ({ request
   try {
     const household = await prisma.household.create({ data: { name: marker, timezone: "America/Sao_Paulo" } });
     householdId = household.id;
-    const apiUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
-    const response = await request.get(`${apiUrl}/rest/v1/Household?select=id&name=eq.${encodeURIComponent(marker)}`, {
-      headers: { apikey: publishableKey, authorization: `Bearer ${publishableKey}` },
+    const visibleRows = await prisma.$transaction(async (tx) => {
+      // Simulate Supabase's Data API table grant, then verify RLS itself blocks rows.
+      await tx.$executeRawUnsafe('GRANT SELECT ON TABLE public."Household" TO anon');
+      await tx.$executeRawUnsafe("SET LOCAL ROLE anon");
+      const rows = await tx.household.findMany({ where: { name: marker }, select: { id: true } });
+      await tx.$executeRawUnsafe("RESET ROLE");
+      await tx.$executeRawUnsafe('REVOKE SELECT ON TABLE public."Household" FROM anon');
+      return rows;
     });
-
-    if (response.ok()) {
-      const visibleRows = await response.json();
-      expect(visibleRows).not.toContainEqual(expect.objectContaining({ id: household.id }));
-    } else {
-      expect([401, 403, 404]).toContain(response.status());
-    }
+    expect(visibleRows).toEqual([]);
   } finally {
     if (householdId) await prisma.household.delete({ where: { id: householdId } });
     await prisma.$disconnect();

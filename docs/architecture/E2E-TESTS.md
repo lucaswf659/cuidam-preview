@@ -30,7 +30,7 @@ npm run test:e2e
 npm run test:e2e:report
 ```
 
-A suíte percorre cadastro/login e retomada da casa, criação/conclusão de tarefas, convite e entrada da segunda conta, disputa concorrente pela reserva, isolamento entre duas casas, resgate idempotente, virada de recorrência e bloqueio de leitura anônima pela Supabase Data API. Trace, vídeo e captura de tela são guardados em `test-results/` em caso de falha; o relatório HTML fica em `playwright-report/`.
+A suíte percorre cadastro/login e retomada da casa, criação/conclusão de tarefas, convite e entrada da segunda conta, disputa concorrente pela reserva, isolamento entre duas casas, resgate idempotente, virada de recorrência e bloqueio de leitura para o papel PostgreSQL `anon` mesmo com privilégio temporário de `SELECT`. Trace, vídeo e captura de tela são guardados em `test-results/` em caso de falha; o relatório HTML fica em `playwright-report/`.
 
 Não execute os E2E contra o banco de preview ou produção. O runner mantém a execução bloqueada até encontrar `.env.e2e` válida e diferente da configuração normal.
 
