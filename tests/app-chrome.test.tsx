@@ -19,7 +19,7 @@ describe("AppChrome", () => {
   it("uses the Cuidam house and leaf mark in the shared navigation", () => {
     render(<AppChrome current="today" />);
 
-    expect(screen.getAllByRole("img", { name: "Casa com folha" })).toHaveLength(2);
+    expect(screen.getAllByRole("img", { name: "Casa com broto" })).toHaveLength(2);
   });
 });
 

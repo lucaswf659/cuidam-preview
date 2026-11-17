@@ -15,10 +15,11 @@ const household: MockHousehold = {
 
 describe("Hoje por período", () => {
   it("separa o que precisa ser feito hoje do que cabe no período", () => {
-    render(<TodayMock household={household} />);
+    const { container } = render(<TodayMock household={household} />);
     expect(screen.getByText("1 tarefa para cuidar hoje")).toBeInTheDocument();
     expect(screen.getByText("1 tarefa durante esta semana · 1 tarefa durante este mês")).toBeInTheDocument();
     expect(screen.queryByText("3 responsabilidades para cuidar")).not.toBeInTheDocument();
+    expect(container.querySelectorAll(".today-period-heading > span")).toHaveLength(0);
   });
 
   it("explica quando não há tarefas diárias pendentes", () => {

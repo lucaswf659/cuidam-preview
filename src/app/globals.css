@@ -820,10 +820,10 @@ html, body { height: auto; min-height: 100%; overflow-x: hidden; overflow-y: aut
 .today-period-summary { color: var(--green-dark); font-size: .75rem; font-weight: 600; text-align: right; }
 .today-period-groups { display: grid; gap: 22px; }
 .today-period-group { min-width: 0; }
-.today-period-heading { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin: 0 2px 9px; }
+.today-period-heading { display: flex; align-items: center; justify-content: flex-start; gap: 14px; margin: 0 2px 9px; }
 .today-period-heading h2 { margin: 0; color: var(--graphite); font-size: 1.02rem; font-weight: 650; letter-spacing: -.025em; }
 .today-period-heading p { margin: 3px 0 0; color: var(--muted); font-size: .72rem; }
-.today-period-heading > span { display: grid; min-width: 28px; height: 28px; place-items: center; padding: 0 8px; border-radius: 999px; color: var(--green-dark); background: #e7f3e9; font-size: .72rem; font-weight: 700; }
+
 .today-period-group .task-list { max-height: none; height: auto; min-height: 0; overflow: visible; padding: 0; gap: 9px; }
 .today-period-group .task-card { min-height: 72px; padding: 14px 16px; border: 1px solid #e8e9e2; border-radius: 16px; box-shadow: 0 2px 10px rgba(41, 42, 39, .025); }
 .today-period-group .task-card strong { font-size: .9rem; font-weight: 650; }
@@ -939,9 +939,9 @@ html, body { height: auto; min-height: 100%; overflow-x: hidden; overflow-y: aut
 .primary-nav__link.is-active { color: var(--green-dark); background: var(--green-soft); }
 
 /* Period labels help Today scan at a glance without adding urgency. */
-.today-period-group:nth-child(1) .today-period-heading > span { color: var(--accent-yellow-ink); background: var(--accent-yellow-soft); }
-.today-period-group:nth-child(2) .today-period-heading > span { color: var(--accent-blue-ink); background: var(--accent-blue-soft); }
-.today-period-group:nth-child(3) .today-period-heading > span { color: var(--accent-coral-ink); background: var(--accent-coral-soft); }
+
+
+
 .today-period-heading > div { position: relative; padding-left: 12px; }
 .today-period-group:nth-child(1) .today-period-heading > div::before,
 .today-period-group:nth-child(2) .today-period-heading > div::before,
@@ -1256,10 +1256,10 @@ html, body { height: auto; min-height: 100%; overflow-x: hidden; overflow-y: aut
 .today-period-summary { color: var(--green-dark); font-size: .75rem; font-weight: 600; text-align: right; }
 .today-period-groups { display: grid; gap: 22px; }
 .today-period-group { min-width: 0; }
-.today-period-heading { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin: 0 2px 9px; }
+.today-period-heading { display: flex; align-items: center; justify-content: flex-start; gap: 14px; margin: 0 2px 9px; }
 .today-period-heading h2 { margin: 0; color: var(--graphite); font-size: 1.02rem; font-weight: 650; letter-spacing: -.025em; }
 .today-period-heading p { margin: 3px 0 0; color: var(--muted); font-size: .72rem; }
-.today-period-heading > span { display: grid; min-width: 28px; height: 28px; place-items: center; padding: 0 8px; border-radius: 999px; color: var(--green-dark); background: #e7f3e9; font-size: .72rem; font-weight: 700; }
+
 .today-period-group .task-list { max-height: none; height: auto; min-height: 0; overflow: visible; padding: 0; gap: 9px; }
 .today-period-group .task-card { min-height: 72px; padding: 14px 16px; border: 1px solid #e8e9e2; border-radius: 16px; box-shadow: 0 2px 10px rgba(41, 42, 39, .025); }
 .today-period-group .task-card strong { font-size: .9rem; font-weight: 650; }
@@ -1352,9 +1352,9 @@ html, body { height: auto; min-height: 100%; overflow-x: hidden; overflow-y: aut
 .primary-nav__link.is-active { color: var(--green-dark); background: var(--green-soft); }
 
 /* Period labels help Today scan at a glance without adding urgency. */
-.today-period-group:nth-child(1) .today-period-heading > span { color: var(--accent-yellow-ink); background: var(--accent-yellow-soft); }
-.today-period-group:nth-child(2) .today-period-heading > span { color: var(--accent-blue-ink); background: var(--accent-blue-soft); }
-.today-period-group:nth-child(3) .today-period-heading > span { color: var(--accent-coral-ink); background: var(--accent-coral-soft); }
+
+
+
 .today-period-heading > div { position: relative; padding-left: 12px; }
 .today-period-group:nth-child(1) .today-period-heading > div::before,
 .today-period-group:nth-child(2) .today-period-heading > div::before,
