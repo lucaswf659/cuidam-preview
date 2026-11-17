@@ -204,7 +204,7 @@ export function OnboardingFlow({ initialStep = "welcome", initialMode = "signup"
           <section className="step-content form-step">
             <button className="back" type="button" onClick={() => { setSignupConfirmationSent(false); setConfirmationResent(false); setAuthMode("signup"); setPassword(""); setError(""); }}>← Corrigir e-mail</button>
             <p className="eyebrow">Confirmação de e-mail</p>
-            <h1>Confira seu e-mail.</h1>
+            <h1>Mensagem enviada.</h1>
             <p className="lead">Enviamos um link de confirmação para <strong>{email}</strong>.</p>
             <p className="form-note">Abra a mensagem para confirmar sua conta. Se não encontrar, confira a pasta de spam. O link abre o Cuidam e continua a configuração da casa.</p>
             {confirmationResent && <p className="form-success" role="status">Enviamos outra mensagem de confirmação.</p>}
