@@ -12,6 +12,8 @@ describe("AppChrome", () => {
     expect(screen.getByRole("link", { name: "Hoje" })).not.toHaveAttribute("aria-current", "page");
     expect(screen.getByRole("link", { name: "Recompensas" })).toHaveAttribute("href", "/rewards");
     expect(screen.getByRole("link", { name: "Casa" })).toHaveAttribute("href", "/casa");
+    expect(navigation.querySelectorAll(".primary-nav__icon-shell")).toHaveLength(4);
+    expect(navigation.querySelector(".primary-nav__icon-shell--people svg")).toBeInTheDocument();
   });
 
   it("uses the Cuidam house and leaf mark in the shared navigation", () => {

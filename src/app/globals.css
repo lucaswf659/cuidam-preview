@@ -910,6 +910,29 @@ html, body { height: auto; min-height: 100%; overflow-x: hidden; overflow-y: aut
 .area-symbol--escritorio { color: var(--accent-blue-ink); background: var(--accent-blue-soft) !important; }
 .area-symbol--pets { color: var(--accent-coral-ink); background: var(--accent-coral-soft) !important; }
 
+/* Ilustrações de áreas: pequenos detalhes coloridos com leitura imediata. */
+.area-symbol { --area-soft: #f4c95d; --area-accent: #f58e8e; --area-detail: currentColor; }
+.area-symbol svg { width: 28px; height: 28px; overflow: visible; }
+.area-symbol svg .area-icon-soft { fill: var(--area-soft); stroke: none; }
+.area-symbol svg .area-icon-accent { fill: var(--area-accent); stroke: none; }
+.area-symbol svg .area-icon-detail { fill: none; stroke: var(--area-detail); stroke-width: 1.15; }
+.area-symbol--cozinha { --area-soft: #f7c6bd; --area-accent: #e88872; --area-detail: #a55d4e; }
+.area-symbol--sala { --area-soft: #f8e4a0; --area-accent: #e9b94c; --area-detail: #927125; }
+.area-symbol--banheiro { --area-soft: #cae4f7; --area-accent: #8ec8ff; --area-detail: #4c7591; }
+.area-symbol--quartos { --area-soft: #cfe8d3; --area-accent: #f4c95d; --area-detail: #4e7657; }
+.area-symbol--escritorio { --area-soft: #cfe7f8; --area-accent: #f58e8e; --area-detail: #4c7591; }
+.area-symbol--pets { --area-soft: #f6c5bc; --area-accent: #f58e8e; --area-detail: #a55d4e; }
+.area-choice > .area-symbol svg { width: 27px; height: 27px; }
+
+/* Navegação ilustrada: uma cor reconhecível para cada destino. */
+.primary-nav__icon-shell { width: 34px; height: 34px; display: grid; flex: none; place-items: center; border-radius: 12px; transition: transform .18s ease, box-shadow .18s ease; }
+.primary-nav__icon-shell--sun, .primary-nav__icon-shell--star { background: #fff4d5; }
+.primary-nav__icon-shell--people { background: #fff0ed; }
+.primary-nav__icon-shell--home { background: #e4f2e6; }
+.primary-nav__icon { width: 25px; height: 25px; }
+.primary-nav__link:hover .primary-nav__icon-shell { transform: translateY(-1px) rotate(-3deg); }
+.primary-nav__link.is-active .primary-nav__icon-shell { box-shadow: 0 0 0 2px rgba(55, 107, 69, .15); }
+
 /* Navigation stays in brand green; accents belong to the content itself. */
 .primary-nav__link.is-active { color: var(--green-dark); background: var(--green-soft); }
 
