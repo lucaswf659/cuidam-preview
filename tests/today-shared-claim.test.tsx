@@ -26,8 +26,10 @@ describe("TodayMock shared task claim", () => {
     vi.stubGlobal("fetch", fetchMock);
     render(<TodayMock household={household} />);
 
+    expect(screen.getByRole("button", { name: "Vou cuidar" })).toHaveClass("claim-action");
     fireEvent.click(screen.getByRole("button", { name: "Vou cuidar" }));
     await waitFor(() => expect(screen.getByRole("button", { name: "✓ Concluir" })).toBeInTheDocument());
+    expect(screen.getByRole("button", { name: "✓ Concluir" })).toHaveClass("complete-action");
     expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ taskId: "task-1", action: "claim" });
 
     fireEvent.click(screen.getByRole("button", { name: "✓ Concluir" }));
