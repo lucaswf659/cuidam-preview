@@ -35,6 +35,8 @@ export function OnboardingFlow({ initialStep = "welcome", initialMode = "signup"
   const [houseName, setHouseName] = useState("Nossa casa");
   const [error, setError] = useState("");
   const [signupConfirmationSent, setSignupConfirmationSent] = useState(false);
+  const [confirmationResent, setConfirmationResent] = useState(false);
+  const [resendingConfirmation, setResendingConfirmation] = useState(false);
   const [selectedAreas, setSelectedAreas] = useState(() =>
     new Set(suggestedAreas.filter((area) => area.selected).map((area) => area.id))
   );
@@ -101,6 +103,27 @@ export function OnboardingFlow({ initialStep = "welcome", initialMode = "signup"
         : "Não foi possível enviar as instruções agora. Tente novamente mais tarde.");
     } finally {
       setRequestingRecovery(false);
+    }
+  };
+
+  const resendSignupConfirmation = async () => {
+    setError("");
+    setResendingConfirmation(true);
+    try {
+      const { error: resendError } = await createClient().auth.resend({
+        type: "signup",
+        email: email.trim(),
+        options: { emailRedirectTo: `${window.location.origin}/entrar` },
+      });
+      if (resendError) throw resendError;
+      setConfirmationResent(true);
+    } catch (cause) {
+      const isRateLimited = typeof cause === "object" && cause !== null && "status" in cause && cause.status === 429;
+      setError(isRateLimited
+        ? "Muitos pedidos em pouco tempo. Aguarde um pouco antes de tentar novamente."
+        : "Não foi possível reenviar agora. Tente novamente mais tarde.");
+    } finally {
+      setResendingConfirmation(false);
     }
   };
 
@@ -177,12 +200,23 @@ export function OnboardingFlow({ initialStep = "welcome", initialMode = "signup"
               {error && <p className="form-error" role="alert">{error}</p>}
             </form>
           ) :
-          <form className="step-content form-step" onSubmit={continueSignup}>
+          signupConfirmationSent ? (
+          <section className="step-content form-step">
+            <button className="back" type="button" onClick={() => { setSignupConfirmationSent(false); setConfirmationResent(false); setAuthMode("signup"); setPassword(""); setError(""); }}>← Corrigir e-mail</button>
+            <p className="eyebrow">Confirmação de e-mail</p>
+            <h1>Confira seu e-mail.</h1>
+            <p className="lead">Enviamos um link de confirmação para <strong>{email}</strong>.</p>
+            <p className="form-note">Abra a mensagem para confirmar sua conta. Se não encontrar, confira a pasta de spam. O link abre o Cuidam e continua a configuração da casa.</p>
+            {confirmationResent && <p className="form-success" role="status">Enviamos outra mensagem de confirmação.</p>}
+            <button className="button primary" type="button" onClick={resendSignupConfirmation} disabled={resendingConfirmation}>{resendingConfirmation ? "Reenviando…" : "Reenviar confirmação"}</button>
+            <button className="button text-button" type="button" onClick={() => { setSignupConfirmationSent(false); setConfirmationResent(false); setAuthMode("login"); setPassword(""); setError(""); }}>Já confirmei meu e-mail</button>
+            {error && <p className="form-error" role="alert">{error}</p>}
+          </section>
+          ) : <form className="step-content form-step" onSubmit={continueSignup}>
             <button className="back" type="button" onClick={() => { setStep("welcome"); setSignupConfirmationSent(false); setError(""); }}>← Voltar</button>
             <p className="eyebrow">{authMode === "signup" ? "Começando" : "De volta à casa"}</p>
             <h1>{authMode === "signup" ? "Vamos deixar isso fácil." : "Que bom ter você de volta."}</h1>
             <p className="lead">{authMode === "signup" ? "Crie sua conta. Você configura a casa em seguida." : "Entre para continuar de onde parou."}</p>
-            {signupConfirmationSent && <p className="form-success" role="status">Enviamos um link de confirmação para <strong>{email}</strong>. Abra o e-mail para confirmar; o link volta ao Cuidam e continua a configuração da casa.</p>}
             {authMode === "signup" && <label>Seu nome<input value={name} onChange={(event) => setName(event.target.value)} placeholder="Como podemos te chamar?" autoComplete="name" required /></label>}
             <label>E-mail<input type="email" value={email} onChange={(event) => { setEmail(event.target.value); setSignupConfirmationSent(false); }} placeholder="voce@email.com" autoComplete="email" required /></label>
             <label>Senha<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Pelo menos 8 caracteres" autoComplete={authMode === "login" ? "current-password" : "new-password"} minLength={8} required /></label>
