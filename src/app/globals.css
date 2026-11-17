@@ -22,7 +22,7 @@ button { cursor: pointer; }
 .brand-lockup { display: flex; align-items: center; gap: 8px; color: var(--green-dark); font-size: 1.05rem; font-weight: 700; letter-spacing: -.03em; }
 .brand-mark { width: 25px; height: 25px; display: grid; place-items: center; border-radius: 9px; color: var(--white); background: var(--green-dark); line-height: 1; }
 .cuidam-mark-svg { width: 100%; height: 100%; display: block; }
-.cuidam-mark-svg.compact { width: 18px; height: 18px; }
+.cuidam-mark-svg.compact { width: 20px; height: 20px; }
 .step-content { width: min(100%, 470px); margin: auto; padding: 28px 0 12px; animation: appear .22s ease-out; }
 .welcome-step { text-align: center; }
 .eyebrow { margin: 0 0 10px; color: var(--green-dark); font-size: .75rem; font-weight: 700; letter-spacing: .11em; text-transform: uppercase; }
