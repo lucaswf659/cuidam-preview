@@ -87,4 +87,6 @@ npm run build      # build de produção
 
 - Recuperação de senha passou a usar `TokenHash` no template do Supabase e valida o token em `/api/auth/confirm-recovery`, criando uma sessão no navegador que abriu o link. Isso permite continuar em outro navegador ou dispositivo; o template personalizado está documentado em `docs/architecture/SUPABASE-AUTH-SETUP.md`.
 - Após cadastro, a tela de autenticação agora informa claramente que a confirmação foi enviada. O link confirma a conta no app e continua o onboarding; quando o cadastro vem de um convite, retorna ao convite. O template e as recomendações de entrega estão documentados em `docs/architecture/SUPABASE-AUTH-SETUP.md`.
+- O alerta do Supabase sobre tabelas públicas sem RLS levou a uma migration que habilita RLS em todas as tabelas atuais do Cuidam no schema `public`, sem políticas para `anon`/`authenticated`. O app usa Prisma no backend para os dados de negócio; a suíte E2E verifica que uma chave pública não consegue ler uma casa. A migration foi aplicada ao projeto Supabase isolado de E2E; ela ainda precisa ser aplicada ao banco do projeto Preview/produção.
+- Atualizados os testes E2E para os nomes atuais da landing e da navegação; unitários e E2E executados após a mudança de RLS.
 

@@ -1,4 +1,4 @@
-import { expect, test, type Browser, type Page } from "@playwright/test";
+import { expect, test, type APIRequestContext, type Browser, type Page } from "@playwright/test";
 import { PrismaClient } from "@prisma/client";
 import { periodKeyForRecurrence } from "../../src/lib/real/recurrence";
 
@@ -6,9 +6,35 @@ const prefix = process.env.CUIDAM_E2E_EMAIL_PREFIX ?? "cuidam-e2e+";
 const runId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 const password = "CuidamE2e!2026";
 
+test("Supabase Data API anon não consegue ler dados de casas", async ({ request }: { request: APIRequestContext }) => {
+  const prisma = new PrismaClient();
+  const marker = `E2E RLS ${runId}`;
+  let householdId: string | undefined;
+
+  try {
+    const household = await prisma.household.create({ data: { name: marker, timezone: "America/Sao_Paulo" } });
+    householdId = household.id;
+    const apiUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
+    const response = await request.get(`${apiUrl}/rest/v1/Household?select=id&name=eq.${encodeURIComponent(marker)}`, {
+      headers: { apikey: publishableKey, authorization: `Bearer ${publishableKey}` },
+    });
+
+    if (response.ok()) {
+      const visibleRows = await response.json();
+      expect(visibleRows).not.toContainEqual(expect.objectContaining({ id: household.id }));
+    } else {
+      expect([401, 403, 404]).toContain(response.status());
+    }
+  } finally {
+    if (householdId) await prisma.household.delete({ where: { id: householdId } });
+    await prisma.$disconnect();
+  }
+});
+
 async function signUp(page: Page, email: string, name: string) {
   await page.goto("/");
-  await page.getByRole("button", { name: "Criar conta" }).click();
+  await page.getByRole("link", { name: "Organizar nossa casa" }).click();
   await expect(page.getByRole("heading", { name: "Vamos deixar isso fácil." })).toBeVisible();
   await page.getByLabel("Seu nome").fill(name);
   await page.getByLabel("E-mail").fill(email);
@@ -17,12 +43,8 @@ async function signUp(page: Page, email: string, name: string) {
 }
 
 async function openLoginForm(page: Page) {
-  const loginButton = page.getByRole("button", { name: "Já tenho uma conta" });
+  await page.goto("/entrar?mode=login");
   const loginHeading = page.getByRole("heading", { name: "Que bom ter você de volta." });
-  await loginButton.click();
-  if (!(await loginHeading.isVisible().catch(() => false)) && await loginButton.isVisible().catch(() => false)) {
-    await loginButton.click();
-  }
   await expect(loginHeading).toBeVisible();
 }
 
@@ -88,7 +110,7 @@ test("conta, casa, tarefa compartilhada, convite, isolamento e resgate idempoten
     await expect(ownerPage.locator(".task-card").filter({ hasText: `E2E tarefa estrelas ${runId}` })).toHaveCount(0);
 
     const sharedTaskId = await addTask(ownerPage, `E2E tarefa compartilhada ${runId}`, "Nós");
-    await ownerPage.getByRole("link", { name: "Casa" }).click();
+    await ownerPage.getByRole("link", { name: "Configurações" }).click();
     await ownerPage.getByLabel("E-mail", { exact: true }).fill(guestEmail);
     await ownerPage.getByRole("button", { name: "Gerar link do convite" }).click();
     await expect(ownerPage.getByRole("status")).toContainText("Link do convite pronto");
