@@ -69,6 +69,13 @@ describe("CasaMock invitation link", () => {
     expect(screen.getByText("Esta casa já tem as duas pessoas previstas no MVP.")).toBeInTheDocument();
   });
 
+  it("keeps notification settings out of the web house configuration", () => {
+    render(<CasaMock household={household} />);
+
+    expect(screen.queryByRole("heading", { name: "Notificações" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Configurar" })).not.toBeInTheDocument();
+  });
+
   it("explains the effect of archiving an area and keeps it reversible until confirmed", () => {
     render(<CasaMock household={{
       ...household,

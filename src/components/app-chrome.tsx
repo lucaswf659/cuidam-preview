@@ -10,7 +10,7 @@ const destinations: Array<{ id: AppSection; href: string; label: string; icon: "
   { id: "today", href: "/today", label: "Hoje", icon: "sun" },
   { id: "nos", href: "/nos", label: "Nós", icon: "people" },
   { id: "rewards", href: "/rewards", label: "Recompensas", icon: "star" },
-  { id: "casa", href: "/casa", label: "Casa", icon: "home" }
+  { id: "casa", href: "/casa", label: "Configurações", icon: "home" }
 ];
 
 function DestinationIcon({ icon }: { icon: (typeof destinations)[number]["icon"] }) {
