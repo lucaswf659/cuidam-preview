@@ -49,7 +49,7 @@ npm run build      # build de produção
 
 ## Próximas etapas
 
-- validar a entrega real de lembretes e o comportamento de silêncio; hoje a tela salva preferências, mas a entrega de notificações ainda precisa ser demonstrada ponta a ponta.
+- retomar notificações ao iniciar a versão mobile; até lá, `/casa/notificacoes` redireciona para `/casa` e os dados existentes ficam preservados para uso futuro.
 
 ### Auditoria de aceite — 2026-11-16
 

@@ -1,11 +1,11 @@
 # Revisão de produto, UI, marca e mercado — Cuidam
 
 **Data:** 16 de novembro de 2026  
-**Escopo:** avaliação do MVP e direção visual para Hoje, Nós e Casa. Referências públicas consultadas em 16/11/2026.
+**Escopo:** avaliação do MVP e direção visual para Hoje, Nós e Configurações. Referências públicas consultadas em 16/11/2026.
 
 ## Síntese
 
-O produto faz sentido quando explica que organiza **quem mantém cada responsabilidade ao longo do tempo**, em vez de funcionar como uma lista avulsa de tarefas. O MVP já tem um mapa de navegação coerente: Hoje orienta a execução, Nós mostra a divisão e Casa configura pessoas e espaços.
+O produto faz sentido quando explica que organiza **quem mantém cada responsabilidade ao longo do tempo**, em vez de funcionar como uma lista avulsa de tarefas. O MVP já tem um mapa de navegação coerente: Hoje orienta a execução, Nós mostra a divisão e Configurações organiza pessoas e espaços da casa.
 
 O maior problema de experiência identificado era temporal: tarefas com vencimentos diferentes apareciam misturadas sob o título Hoje e compartilhavam um mesmo contador. A nova hierarquia separa tarefas de hoje, da semana e do mês. Uma tarefa semanal continua disponível durante a semana, e uma meta semanal continua em um único cartão com progresso contextual. Isso respeita as decisões do MVP: semana começando na segunda, sem dias fixos para metas semanais e sem levar pendências para o período seguinte.
 
@@ -86,7 +86,7 @@ Essas linhas são hipóteses de copy para futura validação. Não foram tratada
 
 1. Observar se moradores distinguem, sem explicação, o que é para hoje, para esta semana e para este mês.
 2. Perguntar se a tela Nós ajuda a iniciar uma conversa sobre divisão sem parecer um placar.
-3. Verificar se Pessoas, convite, áreas e notificações são encontrados em Casa sem ajuda.
+3. Verificar se Pessoas, convite e áreas são encontrados em Configurações sem ajuda.
 4. Fazer um teste de primeira sessão em celular antes de ampliar o sistema visual ou investir em campanhas.
 
 Essas são tarefas de validação de UX; não acrescentam escopo ao MVP.

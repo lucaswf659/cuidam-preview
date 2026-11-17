@@ -18,7 +18,7 @@ Assinatura: “Cada um cuida do que é seu.”  |  Linha: “Menos cobrança. Ma
 
 Dividir responsabilidades, não apenas tarefas.
 
-Hoje = execução; Nós = percepção; Casa = configuração.
+Hoje = execução; Nós = percepção; Configurações = configuração da casa.
 
 Ação rápida com mínima carga cognitiva.
 
@@ -56,11 +56,9 @@ Hoje: ocorrências da pessoa, progresso, concluir em 1 toque.
 
 Nós: balanceamento, áreas, atividade recente.
 
-Casa: Divisão, Pessoas, Áreas, Notificações; sem menu Tarefas.
+Configurações: Divisão, Pessoas e Áreas; sem menu Tarefas.
 
 Recompensas: saldo compartilhado, CRUD e resgate.
-
-Notificações: lembretes agrupados, atividade opcional, quiet hours.
 
 Histórico: persistido no backend; UI completa fora do MVP.
 
@@ -72,7 +70,7 @@ Nós: como a casa está funcionando?
 
 Recompensas: saldo e recompensas.
 
-Casa: como configuramos?
+Configurações: como organizamos esta casa?
 
 Não existe Casa → Tarefas nem uma lista global obrigatória de todas as tarefas. Tarefas são descobertas em Nós → Área → Tarefa ou criadas por Hoje → +.
 
@@ -200,7 +198,7 @@ Atividade é secundária.
 
 Sem ranking, vencedor ou lista gigante.
 
-## 13. Casa
+## 13. Configurações da casa
 
 Divisão.
 
@@ -242,7 +240,9 @@ Recompensa arquivada não pode ser resgatada, histórico permanece.
 
 Sem XP, níveis, streaks ou ranking.
 
-## 16. Notificações
+## 16. Notificações — pós-MVP
+
+Fora do escopo da versão web do MVP. Retomar ao desenvolver o app mobile.
 
 Lembrete matinal agrupado e configurável.
 
@@ -340,7 +340,7 @@ Nunca usar localStorage como fonte de verdade.
 
 ## 22. Arquitetura
 
-Requisitos: responsive web, persistência real, backend para regras de negócio, jobs para recorrência/notificações, armazenamento com integridade transacional.
+Requisitos: responsive web, persistência real, backend para regras de negócio, jobs para recorrência, armazenamento com integridade transacional.
 
 O Codex escolhe framework, ORM, provider de auth, hospedagem e estrutura de código. Regras críticas não podem ficar apenas no frontend.
 
@@ -396,7 +396,7 @@ Redeem não deixa saldo negativo.
 
 Casa não possui menu Tarefas.
 
-Notificações respeitam preferências/quiet hours.
+Notificações ficam fora do escopo web; retomar ao desenvolver o app mobile.
 
 ## 25. Testes obrigatórios
 
