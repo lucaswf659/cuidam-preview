@@ -1,8 +1,7 @@
 export function BrandMark({ compact = false }: { compact?: boolean }) {
-  return <svg className={compact ? "cuidam-mark-svg compact" : "cuidam-mark-svg"} viewBox="0 0 48 48" role="img" aria-label="Casa com broto">
-    <path d="M7 22 24 7.5 41 22v15.5a3 3 0 0 1-3 3H10a3 3 0 0 1-3-3Z" fill="none" stroke="currentColor" strokeWidth="4.4" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M19.5 40.5V30a4.5 4.5 0 0 1 9 0v10.5" fill="none" stroke="currentColor" strokeWidth="4.4" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M24 24c-6.2-.6-9-4.9-7.4-9.8C22 14 26 18.2 24 24Z" fill="#68bb7f" />
-    <path d="M19.1 17.3c1.8 1.7 3.2 3.5 4.5 5.8" fill="none" stroke="#376b45" strokeWidth="1.8" strokeLinecap="round" />
+  return <svg className={compact ? "cuidam-mark-svg compact" : "cuidam-mark-svg"} viewBox="0 0 48 48" role="img" aria-label="Casa com folha">
+    <path d="M11 23.5 24 11l13 12.5v14H11Z" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinejoin="round" />
+    <path d="M29.2 35.8c.1-5.1 2.8-7.7 7.6-7.9.2 4.7-2.4 7.6-7.6 7.9Z" fill="#68bb7f" stroke="#68bb7f" strokeWidth="1" strokeLinejoin="round" />
+    <path d="M30.2 34.8c1.5-1.2 2.9-2.5 4.2-4" fill="none" stroke="#dcefe0" strokeWidth="1" strokeLinecap="round" />
   </svg>;
 }
