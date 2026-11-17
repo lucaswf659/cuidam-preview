@@ -48,7 +48,7 @@ describe("NosMock balance summary", () => {
 
   it("uses neutral wording when the other member has no personal responsibilities yet", () => {
     render(<NosMock household={{ ...household, memberCount: 2 }} />);
-    expect(screen.getByText("A divisão pessoal ainda não começou")).toBeInTheDocument();
+    expect(screen.getByText("Ainda não há tarefas atribuídas à outra pessoa")).toBeInTheDocument();
     expect(screen.getByText("A divisão considera o peso e a frequência. As tarefas compartilhadas também fazem parte do cuidado da casa.")).toBeInTheDocument();
     expect(screen.queryByText("Ainda falta dividir com outra pessoa")).not.toBeInTheDocument();
   });

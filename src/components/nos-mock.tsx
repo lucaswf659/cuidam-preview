@@ -68,7 +68,7 @@ export function NosMock({ household }: { household: MockHousehold }) {
     : !hasOtherMember
       ? "Por enquanto, só você"
       : !scores.other
-        ? "A divisão pessoal ainda não começou"
+        ? "Ainda não há tarefas atribuídas à outra pessoa"
         : relativeDifference <= 10
           ? "Bem equilibrada"
           : relativeDifference <= 25
