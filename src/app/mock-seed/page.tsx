@@ -8,7 +8,7 @@ const recurrences = ["Diária", "Semanal", "3× por semana", "Mensal"];
 export default async function MockSeedPage() {
   const session = (await cookies()).get("cuidam_mock_session")?.value;
   const household = mockHouseholdForSession(session);
-  if (!household) redirect("/");
+  if (!household) redirect("/entrar?mode=login");
   const areas = household.areas;
   const extra = names.map((name, index) => ({ id: `seed-task-${Date.now()}-${index}`, name, areaId: areas[index % areas.length].id, responsibility: index % 3 === 0 ? "Nós" as const : index % 3 === 1 ? "Outra pessoa" as const : "Você" as const, recurrence: recurrences[index % recurrences.length], load: (index % 5) + 1, completed: index % 7 === 0 }));
   updateMockHousehold({ ...household, tasks: [...household.tasks, ...extra] });

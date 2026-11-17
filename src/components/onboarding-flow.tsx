@@ -10,6 +10,8 @@ import { onboardingSuggestionsForAreas, type OnboardingSuggestion } from "@/lib/
 type Step = "welcome" | "signup" | "house" | "presets" | "invite" | "done";
 type AuthMode = "signup" | "login";
 
+type OnboardingFlowProps = { initialStep?: Step; initialMode?: AuthMode; initialName?: string; initialEmail?: string; };
+
 const suggestedAreas = [
   { id: "kitchen", icon: "🍳", name: "Cozinha", selected: true },
   { id: "living", icon: "🛋️", name: "Sala", selected: true },
@@ -19,11 +21,11 @@ const suggestedAreas = [
   { id: "pets", icon: "🐾", name: "Pets", selected: false }
 ];
 
-export function OnboardingFlow() {
-  const [step, setStep] = useState<Step>("welcome");
-  const [authMode, setAuthMode] = useState<AuthMode>("signup");
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+export function OnboardingFlow({ initialStep = "welcome", initialMode = "signup", initialName = "", initialEmail = "" }: OnboardingFlowProps) {
+  const [step, setStep] = useState<Step>(initialStep);
+  const [authMode, setAuthMode] = useState<AuthMode>(initialMode);
+  const [name, setName] = useState(initialName);
+  const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState("");
   const [recoveringPassword, setRecoveringPassword] = useState(false);
   const [recoverySent, setRecoverySent] = useState(false);

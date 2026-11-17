@@ -53,7 +53,7 @@ export function ResetPasswordForm() {
             <p className="eyebrow">Acesso à conta</p>
             <h1>Não conseguimos validar este link.</h1>
             <p className="lead">Abra o link no mesmo navegador em que pediu a recuperação. Se ainda não funcionar, peça uma nova mensagem.</p>
-            <button className="button primary" onClick={() => router.replace("/")}>Voltar para entrar</button>
+            <button className="button primary" onClick={() => router.replace("/entrar?mode=login")}>Voltar para entrar</button>
           </div>
         ) : (
           <form className="step-content form-step" onSubmit={updatePassword}>

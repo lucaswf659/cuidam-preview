@@ -8,6 +8,6 @@ export default async function NotificationSettingsPage() {
   const household = process.env.NEXT_PUBLIC_CUIDAM_MOCK !== "false"
     ? mockHouseholdForSession((await cookies()).get("cuidam_mock_session")?.value)
     : await getRealHouseholdSnapshot();
-  if (!household) redirect("/");
+  if (!household) redirect("/entrar?mode=login");
   return <NotificationSettings householdName={household.name} />;
 }
