@@ -151,7 +151,7 @@ test("conta, casa, tarefa compartilhada, convite, isolamento e resgate idempoten
     const mobileLayout = await settingsContent.evaluate((element) => ({ width: element.getBoundingClientRect().width, scrollWidth: element.scrollWidth }));
     expect(mobileLayout.scrollWidth).toBeLessThanOrEqual(mobileLayout.width + 2);
     await ownerPage.setViewportSize({ width: 1280, height: 800 });
-    await ownerPage.getByRole("button", { name: `Gerenciar ${sharedArea.name}` }).click();
+    await ownerPage.getByRole("button", { name: `Ver tarefas de ${sharedArea.name}` }).click();
     const taskRow = ownerPage.getByRole("group", { name: `Tarefa E2E tarefa compartilhada ${runId}` });
     await taskRow.getByRole("button", { name: "Editar" }).click();
     await ownerPage.getByLabel("Nome da tarefa").fill(`E2E tarefa compartilhada editada ${runId}`);
@@ -238,6 +238,7 @@ test("pessoa pode sair da casa atual e aceitar convite de outra casa", async ({ 
     await expect(invitedPage.locator("p[role=alert]")).toContainText("saia da casa atual em Configurações e abra o link novamente");
 
     await invitedPage.goto("/casa");
+    await invitedPage.getByText("Ações da casa", { exact: true }).click();
     await invitedPage.getByRole("button", { name: "Sair da casa" }).click();
     await expect(invitedPage.getByRole("alertdialog").getByRole("heading", { name: "Sair de E2E" })).toBeVisible();
     await invitedPage.getByRole("alertdialog").getByRole("button", { name: "Sair da casa" }).click();
@@ -252,12 +253,14 @@ test("pessoa pode sair da casa atual e aceitar convite de outra casa", async ({ 
     const sharedHouse = await api(invitedPage, "/api/onboarding", "GET");
     sharedHouseId = sharedHouse.body.household.id as string;
     await inviterPage.goto("/casa");
+    await inviterPage.getByText("Ações da casa", { exact: true }).click();
     await inviterPage.getByRole("button", { name: "Sair da casa" }).click();
     await inviterPage.getByRole("alertdialog").getByRole("button", { name: "Sair da casa" }).click();
     await expect(inviterPage).toHaveURL(/\/entrar\?mode=login$/);
     await expect(prisma.household.findUniqueOrThrow({ where: { id: sharedHouseId } })).resolves.toMatchObject({ status: "ACTIVE" });
 
     await invitedPage.goto("/casa");
+    await invitedPage.getByText("Ações da casa", { exact: true }).click();
     await invitedPage.getByRole("button", { name: "Sair da casa" }).click();
     await invitedPage.getByRole("alertdialog").getByRole("button", { name: "Sair da casa" }).click();
     await expect(invitedPage).toHaveURL(/\/entrar\?mode=login$/);
@@ -308,7 +311,7 @@ test("excluir área encerra a rotina e preserva o histórico de tarefas", async 
     expect(completion.status).toBe(200);
 
     await page.getByRole("link", { name: "Configurações" }).click();
-    await page.getByRole("button", { name: `Gerenciar ${areaName}` }).click();
+    await page.getByRole("button", { name: `Ver tarefas de ${areaName}` }).click();
     await page.getByRole("button", { name: "Excluir área" }).click();
     const confirmation = page.getByRole("alertdialog");
     await expect(confirmation).toContainText("O histórico continua guardado.");
