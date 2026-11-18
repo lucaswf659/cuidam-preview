@@ -56,9 +56,17 @@ Este documento mantém o plano de evolução do produto. A especificação de es
 - Rever política de privacidade, retenção e exclusão de conta/dados antes de abrir cadastro para mais pessoas.
 - Manter testes E2E apontados somente ao projeto isolado.
 
+### 7. Mapear a jornada e a navegação dos usuários — prioridade para o piloto
+
+- Entender de onde as pessoas chegam (convite, landing page, busca orgânica, indicação ou anúncio) e em quais etapas avançam ou desistem.
+- Acompanhar o caminho até o primeiro valor: abrir o app, concluir cadastro, criar/entrar em uma casa, criar e concluir a primeira tarefa, convidar/receber a segunda pessoa e voltar a usar a casa.
+- Usar os eventos de produto definidos no MVP, como `onboarding_completed`, `first_task_created`, `first_task_completed`, `invitation_accepted` e `household_active_week`; confirmar a lista completa na instrumentação antes de lançar.
+- Avaliar ativação e retenção por casa, além de usuários individuais, para saber se a divisão doméstica está funcionando para o grupo.
+- Medir origem, conversão e pontos de abandono com dados agregados. Não registrar e-mails, nomes de tarefas ou outros conteúdos privados em ferramentas de analytics; avaliar consentimento, retenção e política de privacidade antes de ativar coleta.
+
 ## Prioridade 2 — validar valor e modelo de negócio
 
-### 7. Pesquisar monetização — explorar, sem decisão tomada
+### 8. Pesquisar monetização — explorar, sem decisão tomada
 
 - Comparar freemium e anúncios com conversas e testes com usuários; não implementar nenhum modelo até entender o valor que as pessoas usam e pelo que pagariam.
 - Investigar primeiro benefícios premium compatíveis com a proposta, como recursos adicionais para casas, sem limitar o uso essencial de Hoje e tarefas.
@@ -67,21 +75,23 @@ Este documento mantém o plano de evolução do produto. A especificação de es
 
 ## Prioridade 3 — app móvel e publicação
 
-### 8. Planejar o app React Native/Expo — depois da validação web
+### 9. Planejar o app React Native/Expo — depois da validação web
 
 - Reaproveitar Supabase, regras de negócio e APIs sempre que adequado; redesenhar os fluxos e componentes para uso nativo em iOS e Android.
 - Definir navegação, sessão segura, links profundos para convites e recuperação, estados offline/rede e processo de atualização.
 - Retomar notificações push nesta etapa, conforme o MVP; elas permanecem fora do produto web.
 - Implementar autenticação Google nativa com retorno por deep link.
 
-### 9. Publicar no Google Play — depois do beta móvel
+### 10. Publicar no Google Play — depois do beta móvel
 
 - Criar conta Play Console, cadastro da loja, política de privacidade, declarações de dados e material visual.
 - Gerar e assinar o Android App Bundle, testar em trilhas internas e fechadas e cumprir os requisitos vigentes da conta.
 - Preparar conta ou modo de demonstração para revisão, além de fluxo de exclusão de conta quando exigido pelas políticas aplicáveis.
 - Fazer o lançamento gradual e monitorar erros e feedback.
+- A publicação e a descoberta orgânica não exigem compra de anúncios; considerar campanhas pagas só se os dados mostrarem que vale ampliar aquisição.
+- Acompanhar no Play Console visitas à página da loja e instalações por busca, exploração, anúncios e indicações, e comparar com ativação e retenção medidas no produto.
 
-### 10. Considerar iOS — etapa futura
+### 11. Considerar iOS — etapa futura
 
 - Retomar requisitos, autenticação Sign in with Apple, testes TestFlight e publicação na App Store quando o app móvel e o modelo de negócio estiverem validados.
 
