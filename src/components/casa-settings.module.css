@@ -1,9 +1,126 @@
 .content {
-  width: min(100%, 1280px);
+  width: min(100%, 1320px);
+  margin-inline: auto;
+  box-sizing: border-box;
 }
 
-:global(.casa-shell) :global(.casa-content).content {
-  width: min(100%, 1280px);
+.content:global(.casa-content) {
+  width: min(100%, 1320px);
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  gap: 22px;
+}
+
+.content > :global(.casa-heading),
+.content > :global(.casa-people-panel),
+.content > :global(.casa-leave-panel),
+.content > :global(.casa-areas-panel) {
+  grid-column: 1 / -1;
+}
+
+.content :global(.casa-people-panel) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, .9fr);
+  align-items: start;
+  gap: 10px 28px;
+}
+
+.content :global(.casa-people-panel > .casa-section-heading) {
+  grid-column: 1 / -1;
+  margin-bottom: 0;
+}
+
+.content :global(.casa-people-panel > .casa-people-card) {
+  grid-column: 1;
+  min-height: 100%;
+  padding: 8px 18px;
+  border: 1px solid #e8e9e2;
+  border-radius: 18px;
+  background: #fff;
+}
+
+.content :global(.casa-people-panel > .casa-share-panel) {
+  grid-column: 2;
+  grid-row: 2;
+  min-width: 0;
+  margin: 0;
+  padding: 16px 18px 18px;
+  border: 1px solid #e8e9e2;
+  border-radius: 18px;
+  background: #fff;
+}
+
+.content :global(.casa-people-panel .casa-invite-heading) {
+  margin: 0 0 8px;
+}
+
+.content :global(.casa-people-panel > .casa-share-panel .casa-card.casa-invite-card) {
+  display: grid;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.content :global(.casa-people-panel .casa-invite-card p) {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.content :global(.casa-people-panel .casa-invite-card label) {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+}
+
+.content :global(.casa-people-panel .casa-invite-card .button) {
+  width: 100%;
+  min-height: 48px;
+  margin: 0;
+}
+
+.content :global(.casa-areas-panel) {
+  min-width: 0;
+  margin-top: 2px;
+}
+
+.content :global(.casa-areas-panel > .casa-section-heading) {
+  margin-bottom: 12px;
+}
+
+.content :global(.casa-areas-panel .settings-list) {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 14px;
+  height: auto;
+  max-height: none;
+  overflow: visible;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.content :global(.casa-areas-panel .settings-group) {
+  min-width: 0;
+  align-self: start;
+  overflow: hidden;
+  margin: 0 0 12px;
+  border: 1px solid #e8e9e2;
+  border-radius: 16px;
+  background: #fff;
+}
+
+.content :global(.casa-areas-panel .settings-group .settings-row) {
+  border: 0;
+}
+
+.content :global(.casa-areas-panel .settings-group) .areaManagement {
+  border-top: 1px solid #efeee9;
+}
+
+.content :global(.casa-leave-panel) {
+  margin: 0;
 }
 
 .areaActions {
@@ -272,4 +389,39 @@
   .taskHeading small { max-width: 24ch; }
   .areaTaskRow { align-items: flex-start; }
   .areaTaskRow > div { flex-direction: column; }
+}
+
+@media (max-width: 760px) {
+  .content:global(.casa-content) {
+    gap: 18px;
+    padding-bottom: 28px;
+  }
+
+  .content :global(.casa-people-panel) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .content :global(.casa-people-panel > .casa-section-heading),
+  .content :global(.casa-people-panel > .casa-people-card),
+  .content :global(.casa-people-panel > .casa-share-panel) {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .content :global(.casa-areas-panel .settings-list) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .content :global(.casa-areas-panel .settings-group) {
+    margin-bottom: 10px;
+  }
+}
+
+@media (min-width: 761px) and (max-width: 1000px) {
+  .content :global(.casa-people-panel) {
+    grid-template-columns: minmax(0, 1fr) minmax(260px, .85fr);
+    gap: 10px 16px;
+  }
 }

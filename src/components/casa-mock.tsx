@@ -1,7 +1,6 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import Link from "next/link";
 import type { HouseholdInvitation, HouseholdPerson, MockArea, MockHousehold, MockResponsibility, MockTask } from "@/lib/mock/store";
 import { AppChrome } from "@/components/app-chrome";
 import { AreaIcon } from "@/components/area-icon";
@@ -198,7 +197,6 @@ export function CasaMock({ household }: { household: MockHousehold }) {
     <AppChrome current="casa" />
     <section className={`casa-content ${styles.content}`}>
       <div className="casa-heading"><p className="eyebrow">Casa</p><h1>{household.name}</h1><p className="lead">Um lugar simples para ajustar como vocês cuidam da casa.</p></div>
-      <Link className="casa-division-card" href="/nos"><span className="casa-division-icon" aria-hidden="true">↗</span><span><b>Responsabilidades</b><small>Veja quem cuida de cada área da casa.</small></span><span className="casa-division-link">Ver resumo</span></Link>
       <section className="casa-people-panel" aria-labelledby="people-title">
         <div className="section-heading casa-section-heading"><div><h2 id="people-title">Pessoas</h2><span>{memberCount} de 2 pessoas na casa</span></div></div>
         <div className="casa-card casa-people-card">

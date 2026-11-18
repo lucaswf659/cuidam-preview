@@ -1,20 +1,140 @@
 .content {
-  width: min(100%, 1040px);
+  width: min(100%, 1120px);
+  padding-bottom: 32px;
 }
 
-.content :global(.nos-area-list) {
-  height: auto;
-  max-height: none;
-  min-height: 0;
-  overflow: visible;
+.responsibilityGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 28px;
 }
 
-.content :global(.nos-areas-panel .section-heading) {
-  margin-top: 26px;
+.group {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #e8e9e2;
+  border-radius: 20px;
+  background: #fff;
 }
 
-.content :global(.nos-area) {
-  min-height: 82px;
+.sharedGroup {
+  grid-column: 1 / -1;
+}
+
+.otherGroup .groupHeading {
+  background: linear-gradient(110deg, #eff6fd, #fff 78%);
+}
+
+.sharedGroup .groupHeading {
+  background: linear-gradient(110deg, #fff6df, #fff 78%);
+}
+
+.groupHeading {
+  min-height: 84px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 18px 20px;
+  border-bottom: 1px solid #efeee9;
+  background: linear-gradient(110deg, #f1f8f2, #fff 78%);
+}
+
+.groupHeading h2 {
+  margin: 0;
+  color: #292a27;
+  font-size: 1.05rem;
+  font-weight: 650;
+  letter-spacing: -.025em;
+}
+
+.groupHeading p {
+  margin: 5px 0 0;
+  color: #777873;
+  font-size: .76rem;
+  line-height: 1.4;
+}
+
+.taskCount {
+  flex: none;
+  padding: 7px 10px;
+  border-radius: 999px;
+  color: #376b45;
+  background: #eaf4eb;
+  font-size: .68rem;
+  font-weight: 650;
+}
+
+.taskList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  list-style: none;
+  margin: 0;
+  padding: 6px 16px;
+}
+
+.taskRow {
+  min-width: 0;
+  min-height: 68px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 8px;
+}
+
+.taskRow + .taskRow {
+  border-top: 1px solid #f0ede8;
+}
+
+.taskRow:nth-child(2) {
+  border-top: 0;
+}
+
+.taskRow:nth-child(even) {
+  border-left: 1px solid #f0ede8;
+  padding-left: 16px;
+}
+
+.taskIcon {
+  width: 40px;
+  height: 40px;
+  flex: none;
+}
+
+.taskCopy {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.taskCopy strong {
+  overflow-wrap: anywhere;
+  color: #292a27;
+  font-size: .84rem;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.taskCopy span {
+  overflow-wrap: anywhere;
+  color: #777873;
+  font-size: .7rem;
+  line-height: 1.35;
+}
+
+.taskCopy i {
+  padding: 0 2px;
+  color: #b1aaa0;
+  font-style: normal;
+}
+
+.emptyGroup {
+  margin: 0;
+  padding: 20px;
+  color: #777873;
+  font-size: .78rem;
+  line-height: 1.5;
 }
 
 @media (max-width: 760px) {
@@ -22,7 +142,43 @@
     padding-bottom: 24px;
   }
 
-  .content :global(.nos-area-list) {
+  .responsibilityGrid {
     grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    margin-top: 22px;
+  }
+
+  .sharedGroup {
+    grid-column: auto;
+  }
+
+  .groupHeading {
+    min-height: 76px;
+    padding: 15px 16px;
+  }
+
+  .taskList {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 4px 12px;
+  }
+
+  .taskRow:nth-child(2) {
+    border-top: 1px solid #f0ede8;
+  }
+
+  .taskRow:nth-child(even) {
+    border-left: 0;
+    padding-left: 8px;
+  }
+}
+
+@media (max-width: 380px) {
+  .taskCount {
+    padding: 6px 8px;
+    font-size: .63rem;
+  }
+
+  .groupHeading h2 {
+    font-size: .96rem;
   }
 }

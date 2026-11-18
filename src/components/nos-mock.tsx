@@ -1,64 +1,65 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import type { MockHousehold, MockResponsibility } from "@/lib/mock/store";
+import type { MockHousehold, MockResponsibility, MockTask } from "@/lib/mock/store";
 import { AppChrome } from "@/components/app-chrome";
 import { AreaIcon } from "@/components/area-icon";
 import styles from "@/components/nos-overview.module.css";
 
-function responsibilityLabel(responsibility: MockResponsibility) {
-  return responsibility === "Nós" ? "Compartilhada" : responsibility;
+function taskListFor(household: MockHousehold, responsibility: MockResponsibility) {
+  const areaOrder = new Map(household.areas.map((area, index) => [area.id, index]));
+  return household.tasks
+    .filter((task) => !task.archived && task.responsibility === responsibility)
+    .sort((a, b) => (areaOrder.get(a.areaId) ?? Number.MAX_SAFE_INTEGER) - (areaOrder.get(b.areaId) ?? Number.MAX_SAFE_INTEGER) || a.name.localeCompare(b.name, "pt-BR"));
+}
+
+function ResponsibilityGroup({
+  id,
+  title,
+  description,
+  tasks,
+  household
+}: {
+  id: string;
+  title: string;
+  description: string;
+  tasks: MockTask[];
+  household: MockHousehold;
+}) {
+  const groupStyle = id === "shared" ? styles.sharedGroup : id === "other" ? styles.otherGroup : "";
+  return <section className={`${styles.group} ${groupStyle}`} aria-labelledby={`${id}-title`}>
+    <header className={styles.groupHeading}>
+      <div><h2 id={`${id}-title`}>{title}</h2><p>{description}</p></div>
+      <span className={styles.taskCount}>{tasks.length} {tasks.length === 1 ? "tarefa" : "tarefas"}</span>
+    </header>
+    {tasks.length ? <ul className={styles.taskList}>
+      {tasks.map((task) => {
+        const area = household.areas.find((item) => item.id === task.areaId);
+        return <li className={styles.taskRow} key={task.id}>
+          <AreaIcon name={area?.name ?? task.areaId} fallback={area?.icon} className={styles.taskIcon} />
+          <div className={styles.taskCopy}><strong>{task.name}</strong><span>{area?.name ?? "Área da casa"} <i aria-hidden="true">·</i> {task.recurrence}</span></div>
+        </li>;
+      })}
+    </ul> : <p className={styles.emptyGroup}>Nenhuma tarefa nesta divisão por enquanto.</p>}
+  </section>;
 }
 
 export function NosMock({ household }: { household: MockHousehold }) {
-  const searchParams = useSearchParams();
-  const areaFromQuery = searchParams.get("area");
-  const [selectedAreaId, setSelectedAreaId] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (areaFromQuery && household.areas.some((area) => area.id === areaFromQuery)) setSelectedAreaId(areaFromQuery);
-  }, [areaFromQuery, household.areas]);
-
-  const selectedArea = household.areas.find((area) => area.id === selectedAreaId) ?? null;
-  const selectedAreaTasks = selectedArea ? household.tasks.filter((task) => task.areaId === selectedArea.id && !task.archived) : [];
-
-  const closeArea = () => setSelectedAreaId(null);
+  const currentPerson = household.members?.find((member) => member.current)?.name || household.ownerName || "Você";
+  const otherPerson = household.members?.find((member) => !member.current)?.name || "Outra pessoa";
+  const personalTasks = taskListFor(household, "Você");
+  const otherTasks = taskListFor(household, "Outra pessoa");
+  const sharedTasks = taskListFor(household, "Nós");
+  const showOtherPerson = household.memberCount > 1 || otherTasks.length > 0;
 
   return <main className="nos-shell">
     <AppChrome current="nos" />
     <section className={`nos-content ${styles.content}`}>
       <p className="eyebrow">Nós · {household.name}</p>
       <h1>Quem cuida do quê?</h1>
-      <p className="lead">Veja as responsabilidades por área e o que é compartilhado.</p>
-      <div className="nos-layout">
-        <div className="nos-areas-panel">
-          <div className="section-heading"><h2>Responsabilidades por área</h2><span>{household.areas.length} áreas</span></div>
-          <div className="nos-area-list">
-            {household.areas.map((area) => {
-              const areaTasks = household.tasks.filter((task) => task.areaId === area.id && !task.archived);
-              const owners = Array.from(new Set(areaTasks.map((task) => responsibilityLabel(task.responsibility))));
-              return <article className="nos-area" key={area.id}>
-                <button className="nos-area-button" onClick={() => setSelectedAreaId(area.id)} aria-label={`Ver tarefas da área ${area.name}`}>
-                  <AreaIcon name={area.name || area.id} fallback={area.icon} className="area-icon" />
-                  <span><strong>{area.name}</strong><small>{owners.length ? `${owners.length > 1 ? "Responsáveis" : "Responsável"}: ${owners.join(" · ")}` : "Ainda sem tarefas"}</small></span>
-                  <span className="nos-area-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="m9 5 7 7-7 7" /></svg></span>
-                </button>
-              </article>;
-            })}
-          </div>
-        </div>
+      <p className="lead">As tarefas ficam reunidas por responsabilidade, para ficar fácil ver o que está com cada pessoa.</p>
+      <div className={styles.responsibilityGrid}>
+        <ResponsibilityGroup id="you" title={`${currentPerson} cuida`} description={`Responsabilidade de ${currentPerson}`} tasks={personalTasks} household={household} />
+        {showOtherPerson && <ResponsibilityGroup id="other" title={`${otherPerson} cuida`} description={`Responsabilidade de ${otherPerson}`} tasks={otherTasks} household={household} />}
+        <ResponsibilityGroup id="shared" title="Vocês cuidam juntos" description="Responsabilidade compartilhada" tasks={sharedTasks} household={household} />
       </div>
     </section>
-
-    {selectedArea && <div className="nos-drawer-layer">
-      <button className="nos-drawer-backdrop" aria-label="Fechar detalhes da área" onClick={closeArea} />
-      <aside className="nos-area-drawer" role="dialog" aria-modal="true" aria-labelledby="area-drawer-title">
-        <header className="nos-drawer-header"><div><span className="drawer-kicker">Área da casa</span><h2 id="area-drawer-title"><AreaIcon name={selectedArea.name || selectedArea.id} fallback={selectedArea.icon} className="area-icon-inline" /> {selectedArea.name}</h2><p>{selectedAreaTasks.length} {selectedAreaTasks.length === 1 ? "tarefa" : "tarefas"} na rotina</p></div><button className="drawer-close" onClick={closeArea} aria-label="Fechar área">×</button></header>
-        <div className="nos-drawer-body">
-          {selectedAreaTasks.length ? <div className="nos-drawer-task-list">{selectedAreaTasks.map((task) => <div className="nos-drawer-task" key={task.id}><div><strong>{task.name}</strong><small>{task.recurrence}{task.completed ? " · concluída" : ""}</small></div><div className="nos-drawer-task-actions"><em>{responsibilityLabel(task.responsibility)}</em></div></div>)}</div> : <p className="area-empty drawer-empty">Ainda não tem tarefas nesta área.</p>}
-        </div>
-      </aside>
-    </div>}
   </main>;
 }

@@ -54,7 +54,7 @@ Ocorrências: geração por recorrência, conclusão e missed.
 
 Hoje: ocorrências da pessoa, progresso, concluir em 1 toque.
 
-Nós: visão das responsabilidades por área, sem pontuação ou feed de atividade.
+Nós: visão direta de quem cuida de cada tarefa, agrupada por pessoa e responsabilidades compartilhadas, sem pontuação ou feed de atividade.
 
 Configurações: Pessoas e organização de áreas com suas tarefas; sem menu global de Tarefas.
 
@@ -188,9 +188,11 @@ Não manter permanentemente “Feitas hoje”, “Hoje na sua responsabilidade�
 
 ## 12. Nós
 
-Visão de leitura das responsabilidades da casa, organizada por área.
+Visão de leitura das responsabilidades da casa, organizada por pessoa.
 
-Cada área abre somente as tarefas daquela área, mostrando frequência e responsabilidade.
+Mostrar as tarefas sob responsabilidade da pessoa atual, da outra pessoa e as compartilhadas em grupos separados. Em cada tarefa, mostrar também a área e a frequência para que seja fácil entender o que está com cada pessoa.
+
+Quando a casa tiver uma pessoa, mostrar somente o grupo da pessoa atual e o grupo de tarefas compartilhadas. Se uma tarefa estiver atribuída à outra pessoa antes de ela entrar, mostrar também esse grupo.
 
 Não exibir percentuais, notas ou julgamentos de equilíbrio. A carga é interna e não deve transformar a visão em uma medida de justiça.
 
@@ -382,7 +384,7 @@ Convite → segunda pessoa entra sem refazer onboarding.
 
 Ao sair a última pessoa, a casa é desativada e uma antiga pessoa membro pode reabri-la sem perder o histórico.
 
-Nós → qualquer área abre somente a lista de leitura das tarefas daquela área.
+Nós → tarefas aparecem em grupos claros por pessoa e responsabilidade compartilhada, com área e frequência em cada item.
 
 Configurações → área permite criar, editar, remover tarefas da rotina e ajustar opcionalmente seu esforço.
 
@@ -412,7 +414,7 @@ E2E: cadastro → casa → tarefa → Hoje → concluir.
 
 E2E: convite → segunda pessoa.
 
-E2E: Nós → cada área → lista correta, sem ações de edição.
+E2E: Nós → tarefas agrupadas pela pessoa responsável e pelas compartilhadas, sem ações de edição.
 
 E2E: Configurações → área → criar/editar/remover tarefa.
 
