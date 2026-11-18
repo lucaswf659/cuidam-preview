@@ -76,16 +76,18 @@ describe("CasaMock invitation link", () => {
     expect(screen.queryByRole("link", { name: "Configurar" })).not.toBeInTheDocument();
   });
 
-  it("explains the effect of archiving an area and keeps it reversible until confirmed", () => {
+  it("explains the effect of deleting an area and requires confirmation", () => {
     render(<CasaMock household={{
       ...household,
       areas: [{ id: "kitchen", name: "Cozinha", icon: "🍳", sortOrder: 0 }]
     }} />);
 
-    fireEvent.click(screen.getByRole("button", { name: /Cozinha/ }));
-    fireEvent.click(screen.getByRole("button", { name: "Arquivar área" }));
+    fireEvent.click(screen.getByRole("button", { name: "Gerenciar Cozinha" }));
+    fireEvent.click(screen.getByRole("button", { name: "Excluir área" }));
 
-    expect(screen.getByRole("alertdialog")).toHaveTextContent("As tarefas ativas dessa área também saem da rotina.");
+    expect(screen.getByRole("alertdialog")).toHaveTextContent("A área e as tarefas ativas dela saem da rotina.");
+    expect(screen.getByRole("alertdialog")).toHaveTextContent("O histórico continua guardado.");
+    expect(screen.queryByRole("button", { name: /Mover .* para/ })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Voltar" })).toBeInTheDocument();
   });
 

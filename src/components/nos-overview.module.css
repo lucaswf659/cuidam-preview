@@ -10,6 +10,10 @@
   margin-top: 28px;
 }
 
+.singlePersonGrid .group:not(.sharedGroup) {
+  grid-column: 1 / -1;
+}
+
 .group {
   min-width: 0;
   overflow: hidden;
@@ -149,6 +153,10 @@
   }
 
   .sharedGroup {
+    grid-column: auto;
+  }
+
+  .singlePersonGrid .group:not(.sharedGroup) {
     grid-column: auto;
   }
 

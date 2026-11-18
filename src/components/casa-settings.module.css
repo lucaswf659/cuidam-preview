@@ -124,10 +124,9 @@
 }
 
 .areaActions {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  margin-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0;
 }
 
 .areaManagement {
@@ -255,16 +254,8 @@
   font-size: .74rem;
 }
 
-.orderHeading {
-  grid-column: 1 / -1;
-  color: #777873;
-  font-size: 0.68rem;
-  font-weight: 600;
-}
-
-.orderButton,
-.archiveButton {
-  min-width: 0;
+.deleteAreaButton {
+  min-width: 112px;
   min-height: 44px;
   display: inline-flex;
   align-items: center;
@@ -273,7 +264,8 @@
   padding: 0 10px;
   border: 1px solid #e5e0d8;
   border-radius: 12px;
-  color: #376b45;
+  color: #9b3d35;
+  border-color: #f0d8d3;
   background: #fff;
   font: inherit;
   font-size: 0.7rem;
@@ -281,28 +273,14 @@
   cursor: pointer;
 }
 
-.orderButton:disabled {
-  color: #aaa9a3;
-  background: #f6f5f2;
-  cursor: not-allowed;
-}
-
-.orderButton:focus-visible,
-.archiveButton:focus-visible,
+.deleteAreaButton:focus-visible,
 .iconChoice:focus-visible {
   outline: 3px solid rgba(55, 107, 69, .24);
   outline-offset: 2px;
 }
 
-.archiveButton {
-  grid-column: 1 / -1;
-  color: #9b3d35;
-  border-color: #f0d8d3;
+.deleteAreaButton:hover {
   background: #fffaf9;
-}
-
-.archiveButton:hover {
-  background: #fff0ed;
 }
 
 .iconPicker {
@@ -376,19 +354,13 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .orderButton {
-    flex-direction: column;
-    gap: 0;
-    padding: 4px;
-    font-size: .66rem;
-  }
-
   .areaManagement { padding-right: 12px; padding-left: 12px; }
   .taskHeading { align-items: flex-start; }
   .taskHeading > div { padding-top: 5px; }
   .taskHeading small { max-width: 24ch; }
   .areaTaskRow { align-items: flex-start; }
   .areaTaskRow > div { flex-direction: column; }
+  .deleteAreaButton { width: 100%; }
 }
 
 @media (max-width: 760px) {

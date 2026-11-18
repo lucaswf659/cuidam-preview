@@ -96,35 +96,18 @@ export function CasaMock({ household }: { household: MockHousehold }) {
     setAreaForm(null);
   };
 
-  const moveArea = async (areaId: string, direction: -1 | 1) => {
-    setAreaManagerError("");
-    const index = areas.findIndex((area) => area.id === areaId);
-    const nextIndex = index + direction;
-    if (index < 0 || nextIndex < 0 || nextIndex >= areas.length) return;
-    const reorderedAreas = [...areas];
-    [reorderedAreas[index], reorderedAreas[nextIndex]] = [reorderedAreas[nextIndex], reorderedAreas[index]];
-    try {
-      const response = await fetch(apiAreas, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "reorder", areaIds: reorderedAreas.map((area) => area.id) }) });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error ?? "Não foi possível reorganizar as áreas.");
-      setAreas(data.areas as MockArea[]);
-    } catch (cause) {
-      setAreaManagerError(cause instanceof Error ? cause.message : "Não foi possível reorganizar as áreas.");
-    }
-  };
-
-  const archiveArea = async () => {
+  const deleteArea = async () => {
     if (!confirmArea) return;
     setAreaManagerError("");
     try {
-      const response = await fetch(apiAreas, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "archive", areaId: confirmArea.id }) });
+      const response = await fetch(apiAreas, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "delete", areaId: confirmArea.id }) });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error ?? "Não foi possível arquivar a área.");
+      if (!response.ok) throw new Error(data.error ?? "Não foi possível excluir a área.");
       setAreas((current) => current.filter((area) => area.id !== confirmArea.id));
       if (openArea === confirmArea.id) setOpenArea(null);
       setConfirmArea(null);
     } catch (cause) {
-      setAreaManagerError(cause instanceof Error ? cause.message : "Não foi possível arquivar a área.");
+      setAreaManagerError(cause instanceof Error ? cause.message : "Não foi possível excluir a área.");
       setConfirmArea(null);
     }
   };
@@ -215,18 +198,18 @@ export function CasaMock({ household }: { household: MockHousehold }) {
       <div className="casa-areas-panel">
         <div className="section-heading casa-section-heading"><div><h2>Áreas da casa</h2><span>{areas.length} áreas</span></div><button className="button secondary compact-button" onClick={openCreateArea}>Adicionar área</button></div>
         {areaManagerError && <p className="form-error" role="alert">{areaManagerError}</p>}
-        <div className="settings-list">{areas.length ? areas.map((area, index) => {
+        <div className="settings-list">{areas.length ? areas.map((area) => {
           const isOpen = openArea === area.id;
           const areaTasks = tasks.filter((task) => task.areaId === area.id && !task.archived);
           return <div className="settings-group" key={area.id}>
             <div className="settings-row"><AreaIcon name={area.name || area.id} fallback={area.icon} className="settings-icon" /><span className="settings-copy"><b>{area.name}</b><small>Área ativa · {areaTasks.length} {areaTasks.length === 1 ? "tarefa" : "tarefas"}</small></span><button className="area-edit-button" type="button" onClick={() => openEditArea(area)}>Editar área</button><button className="settings-row-button settings-expand-button" onClick={() => setOpenArea(isOpen ? null : area.id)} aria-label={`${isOpen ? "Fechar" : "Gerenciar"} ${area.name}`} aria-expanded={isOpen}><span className={`settings-chevron ${isOpen ? "open" : ""}`} aria-hidden="true">›</span></button></div>
             {isOpen && <div className={styles.areaManagement}>
-              <div className={styles.areaActions}><span className={styles.orderHeading}>Organizar esta área</span><button className={styles.orderButton} type="button" disabled={index === 0} aria-label={`Mover ${area.name} para cima`} onClick={() => void moveArea(area.id, -1)}>↑ <span>Mover para cima</span></button><button className={styles.orderButton} type="button" disabled={index === areas.length - 1} aria-label={`Mover ${area.name} para baixo`} onClick={() => void moveArea(area.id, 1)}>↓ <span>Mover para baixo</span></button><button className={styles.archiveButton} type="button" onClick={() => setConfirmArea(area)}>Arquivar área</button></div>
               <div className={styles.taskManagement}>
                 <div className={styles.taskHeading}><div><strong>Tarefas desta área</strong><small>Defina o que precisa acontecer e quem cuida.</small></div><button type="button" className="button secondary compact-button" onClick={() => openAddTask(area.id)}>Adicionar tarefa</button></div>
                 {areaTasks.length ? <div className={styles.areaTaskList}>{areaTasks.map((task) => <div className={styles.areaTaskRow} role="group" aria-label={`Tarefa ${task.name}`} key={task.id}><span><strong>{task.name}</strong><small>{task.recurrence} · {task.responsibility === "Nós" ? "Compartilhada" : task.responsibility}</small></span><div><button type="button" className={styles.taskEditButton} onClick={() => openEditTask(task)}>Editar</button><button type="button" className={styles.taskArchiveButton} aria-label={`Remover ${task.name} da rotina`} onClick={() => setConfirmTask(task)}>Remover</button></div></div>)}</div> : <p className={styles.noTasks}>Ainda não há tarefas nesta área.</p>}
                 {taskError && openArea === area.id && <p role="alert" className="form-error">{taskError}</p>}
               </div>
+              <div className={styles.areaActions}><button className={styles.deleteAreaButton} type="button" onClick={() => setConfirmArea(area)}>Excluir área</button></div>
             </div>}
           </div>;
         }) : <p className="area-empty casa-area-empty">Ainda não há áreas. Adicione uma quando fizer sentido para a casa.</p>}</div>
@@ -236,7 +219,7 @@ export function CasaMock({ household }: { household: MockHousehold }) {
     {areaForm && <div className="modal-backdrop"><section className="task-form-modal area-form-modal" role="dialog" aria-modal="true" aria-labelledby="area-form-title"><div className="task-form-heading"><div><span className="drawer-kicker">{areaForm.mode === "add" ? "Nova área" : "Editar área"}</span><h2 id="area-form-title">Como chamar esse espaço?</h2></div><button className="drawer-close" type="button" onClick={() => setAreaForm(null)} aria-label="Fechar formulário">×</button></div><form onSubmit={saveArea}><label>Nome da área<input value={areaForm.name} onChange={(event) => updateAreaForm({ name: event.target.value })} placeholder="Ex.: Varanda" required /></label><div className={styles.iconPicker}><span className={styles.iconPickerLabel}>Escolha um ícone</span><div className={styles.iconChoices} role="group" aria-label="Ícone da área">{areaIconChoices.map((choice) => <button className={styles.iconChoice} key={choice.icon} type="button" aria-label={choice.label} aria-pressed={areaForm.icon === choice.icon} title={choice.label} onClick={() => updateAreaForm({ icon: choice.icon })}><AreaIcon name={choice.areaName ?? choice.label} fallback={choice.icon} className={styles.iconPreview} /><small>{choice.label}</small></button>)}</div></div>{areaError && <p className="form-error">{areaError}</p>}<div className="form-actions"><button className="button secondary" type="button" onClick={() => setAreaForm(null)}>Cancelar</button><button className="button primary" type="submit">{areaForm.mode === "add" ? "Adicionar área" : "Salvar"}</button></div></form></section></div>}
     {taskForm && <div className="modal-backdrop task-form-backdrop"><section className="task-form-modal" role="dialog" aria-modal="true" aria-labelledby="task-form-title"><div className="task-form-heading"><div><span className="drawer-kicker">{taskForm.mode === "add" ? "Nova tarefa" : "Editar tarefa"}</span><h2 id="task-form-title">O que precisa acontecer?</h2></div><button className="drawer-close" type="button" onClick={() => setTaskForm(null)} aria-label="Fechar formulário">×</button></div><form onSubmit={saveTask}><label>Nome da tarefa<input value={taskForm.name} onChange={(event) => updateTaskForm({ name: event.target.value })} placeholder="Ex.: Limpar bancada" required /></label><label>Área<select value={taskForm.areaId} onChange={(event) => updateTaskForm({ areaId: event.target.value })}>{areas.map((area) => <option value={area.id} key={area.id}>{area.icon} {area.name}</option>)}</select></label><label>Responsabilidade<select value={taskForm.responsibility} onChange={(event) => updateTaskForm({ responsibility: event.target.value as MockResponsibility })}><option>Você</option><option>Outra pessoa</option><option>Nós</option></select></label><label>Frequência<select value={taskForm.recurrence} onChange={(event) => updateTaskForm({ recurrence: event.target.value })}>{recurrenceOptions.map((option) => <option key={option}>{option}</option>)}</select></label>{taskForm.mode === "edit" && <details className={effortStyles.details}><summary>Ajustar esforço da tarefa</summary><p>A gente sugere o esforço para a rotina começar pronta. Ajuste se esta tarefa tiver um esforço diferente na sua casa. Isso define as estrelas recebidas ao concluir.</p><fieldset><legend>Esforço estimado <span>{taskForm.load} de 5</span></legend><div className={effortStyles.choices}>{[1, 2, 3, 4, 5].map((value) => <button type="button" className={value <= taskForm.load ? effortStyles.selected : ""} aria-label={`Esforço estimado ${value} de 5`} aria-pressed={value === taskForm.load} onClick={() => updateTaskForm({ load: value })} key={value} />)}</div></fieldset></details>}{taskError && <p className="form-error" role="alert">{taskError}</p>}<div className="form-actions"><button type="button" className="button secondary" onClick={() => setTaskForm(null)}>Cancelar</button><button className="button primary" type="submit">{taskForm.mode === "add" ? "Adicionar tarefa" : "Salvar"}</button></div></form></section></div>}
     {confirmTask && <div className="modal-backdrop" role="presentation"><section className="confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="remove-task-title"><span className="confirm-icon">−</span><h2 id="remove-task-title">Remover da rotina?</h2><p>“{confirmTask.name}” deixa de aparecer no dia a dia, mas o histórico continua guardado.</p><div><button className="button secondary" onClick={() => setConfirmTask(null)}>Cancelar</button><button className="button danger-button" onClick={() => void archiveTask()}>Remover tarefa</button></div></section></div>}
-    {confirmArea && <div className="modal-backdrop" role="presentation"><section className="confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="archive-area-title"><span className="confirm-icon">−</span><h2 id="archive-area-title">Arquivar {confirmArea.name}?</h2><p>As tarefas ativas dessa área também saem da rotina. O histórico delas continua guardado.</p><div><button className="button secondary" onClick={() => setConfirmArea(null)}>Voltar</button><button className="button danger-button" onClick={() => void archiveArea()}>Arquivar área</button></div></section></div>}
+    {confirmArea && <div className="modal-backdrop" role="presentation"><section className="confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="delete-area-title"><span className="confirm-icon">−</span><h2 id="delete-area-title">Excluir {confirmArea.name}?</h2><p>A área e as tarefas ativas dela saem da rotina. O histórico continua guardado.</p><div><button className="button secondary" onClick={() => setConfirmArea(null)}>Voltar</button><button className="button danger-button" onClick={() => void deleteArea()}>Excluir área</button></div></section></div>}
     {confirmLeave && <div className="modal-backdrop" role="presentation"><section className="confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="leave-house-confirm-title"><span className="confirm-icon">↗</span><h2 id="leave-house-confirm-title">Sair de {household.name}?</h2><p>Você perderá acesso a esta casa. Se for a última pessoa, ela será desativada; os dados e o histórico ficam guardados e você poderá reabri-la depois. Para entrar em outra casa, abra novamente o link do convite.</p><div><button className="button secondary" type="button" disabled={leavePending} onClick={() => setConfirmLeave(false)}>Continuar na casa</button><button className="button danger-button" type="button" disabled={leavePending} onClick={() => void leaveHousehold()}>{leavePending ? "Saindo…" : "Sair da casa"}</button></div></section></div>}
   </main>;
 }

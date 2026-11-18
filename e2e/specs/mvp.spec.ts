@@ -132,7 +132,11 @@ test("conta, casa, tarefa compartilhada, convite, isolamento e resgate idempoten
     const sharedResponsibilities = ownerPage.getByRole("region", { name: "Vocês cuidam juntos" });
     await expect(sharedResponsibilities).toContainText(`E2E tarefa compartilhada ${runId}`);
     await expect(sharedResponsibilities).toContainText(`${sharedArea.name} · Diária`);
-    await expect(ownerPage.getByRole("region", { name: /Pessoa E2E cuida/ })).toBeVisible();
+    const currentResponsibilities = ownerPage.getByRole("region", { name: /Pessoa E2E cuida/ });
+    await expect(currentResponsibilities).toBeVisible();
+    const personalGroupWidth = await currentResponsibilities.evaluate((element) => element.getBoundingClientRect().width);
+    const responsibilityGridWidth = await ownerPage.locator(".nos-content").evaluate((element) => element.getBoundingClientRect().width);
+    expect(personalGroupWidth).toBeGreaterThan(responsibilityGridWidth * 0.9);
     await expect(ownerPage.getByRole("button", { name: /Editar|Adicionar tarefa|Remover/ })).toHaveCount(0);
     await ownerPage.getByRole("navigation", { name: "Navegação principal" }).getByRole("link", { name: "Configurações" }).click();
     await expect(ownerPage).toHaveURL(/\/casa$/);
@@ -271,6 +275,56 @@ test("pessoa pode sair da casa atual e aceitar convite de outra casa", async ({ 
   } finally {
     await prisma.$disconnect();
     await Promise.all([inviterContext, invitedContext].map((context) => context.close().catch(() => undefined)));
+  }
+});
+
+test("excluir área encerra a rotina e preserva o histórico de tarefas", async ({ browser }: { browser: Browser }) => {
+  const email = `${prefix}${runId}-delete-area@example.com`;
+  const owner = await browser.newContext();
+  const page = await owner.newPage();
+  const prisma = new PrismaClient();
+  let areaId: string | undefined;
+  let taskId: string | undefined;
+
+  try {
+    await signUp(page, email, "Pessoa excluir área E2E");
+    await createHouse(page, `E2E ${runId} Exclusão de área`);
+
+    const areaName = `Área E2E ${runId}`;
+    const areaResult = await api(page, "/api/areas", "POST", { name: areaName, icon: "🪴" });
+    expect(areaResult.status).toBe(201);
+    areaId = areaResult.body.area.id as string;
+
+    const taskResult = await api(page, "/api/tasks", "POST", {
+      name: `Tarefa E2E ${runId}`,
+      areaId,
+      responsibility: "Você",
+      recurrence: "Diária",
+      load: 3
+    });
+    expect(taskResult.status).toBe(201);
+    taskId = taskResult.body.task.id as string;
+    const completion = await api(page, "/api/tasks", "PATCH", { taskId, action: "complete" });
+    expect(completion.status).toBe(200);
+
+    await page.getByRole("link", { name: "Configurações" }).click();
+    await page.getByRole("button", { name: `Gerenciar ${areaName}` }).click();
+    await page.getByRole("button", { name: "Excluir área" }).click();
+    const confirmation = page.getByRole("alertdialog");
+    await expect(confirmation).toContainText("O histórico continua guardado.");
+    const deletionResponse = page.waitForResponse((response) => response.url().endsWith("/api/areas") && response.request().method() === "PATCH");
+    await confirmation.getByRole("button", { name: "Excluir área" }).click();
+    expect((await deletionResponse).ok()).toBeTruthy();
+    await expect(confirmation).toHaveCount(0);
+
+    await expect(page.getByText(areaName, { exact: true })).toHaveCount(0);
+    await expect(prisma.area.findUniqueOrThrow({ where: { id: areaId } })).resolves.toMatchObject({ status: "ARCHIVED" });
+    await expect(prisma.task.findUniqueOrThrow({ where: { id: taskId } })).resolves.toMatchObject({ status: "ARCHIVED" });
+    await expect(prisma.taskOccurrence.count({ where: { taskId } })).resolves.toBe(1);
+    await expect(prisma.occurrenceCompletion.count({ where: { occurrence: { taskId } } })).resolves.toBe(1);
+  } finally {
+    await prisma.$disconnect();
+    await owner.close().catch(() => undefined);
   }
 });
 

@@ -55,7 +55,7 @@ export function NosMock({ household }: { household: MockHousehold }) {
       <p className="eyebrow">Nós · {household.name}</p>
       <h1>Quem cuida do quê?</h1>
       <p className="lead">As tarefas ficam reunidas por responsabilidade, para ficar fácil ver o que está com cada pessoa.</p>
-      <div className={styles.responsibilityGrid}>
+      <div className={`${styles.responsibilityGrid} ${!showOtherPerson ? styles.singlePersonGrid : ""}`}>
         <ResponsibilityGroup id="you" title={`${currentPerson} cuida`} description={`Responsabilidade de ${currentPerson}`} tasks={personalTasks} household={household} />
         {showOtherPerson && <ResponsibilityGroup id="other" title={`${otherPerson} cuida`} description={`Responsabilidade de ${otherPerson}`} tasks={otherTasks} household={household} />}
         <ResponsibilityGroup id="shared" title="Vocês cuidam juntos" description="Responsabilidade compartilhada" tasks={sharedTasks} household={household} />

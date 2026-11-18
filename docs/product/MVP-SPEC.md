@@ -46,7 +46,7 @@ Convite: email/token, estados pendente/aceito/cancelado/expirado/inválido.
 
 Onboarding: entrada única, presets, primeira divisão, convite opcional.
 
-Áreas: presets + criar/editar/ordenar/arquivar.
+Áreas: presets + criar/editar/excluir.
 
 Tarefas: CRUD, área, responsável, frequência e instruções. A estimativa de esforço é configurada pelo produto para a rotina já começar pronta.
 
@@ -102,7 +102,9 @@ Convidado entra pelo convite e não refaz onboarding.
 
 Presets iniciais: Cozinha, Sala, Quartos, Banheiro, Escritório, Pets.
 
-Criar, editar, ordenar e arquivar.
+Criar, editar e excluir.
+
+Excluir uma área remove-a da organização ativa e encerra as tarefas ativas dela. Os registros permanecem guardados para preservar ocorrências e histórico.
 
 Arquivar não apaga tarefas/histórico.
 
@@ -206,7 +208,7 @@ Sem ranking, vencedor ou lista gigante.
 
 Pessoas e convites.
 
-Áreas: criar, editar, ordenar e arquivar.
+Áreas: criar, editar e excluir, preservando o histórico das tarefas relacionadas.
 
 Tarefas agrupadas dentro de cada área: criar, editar e remover da rotina. Não incluir uma lista global ou item de menu Tarefas. Casa não é catch-all.
 
@@ -416,7 +418,7 @@ E2E: convite → segunda pessoa.
 
 E2E: Nós → tarefas agrupadas pela pessoa responsável e pelas compartilhadas, sem ações de edição.
 
-E2E: Configurações → área → criar/editar/remover tarefa.
+E2E: Configurações → área → criar/editar/remover tarefa e excluir área com histórico preservado.
 
 E2E: shared claim → complete.
 
