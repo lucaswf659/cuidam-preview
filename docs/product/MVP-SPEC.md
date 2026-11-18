@@ -54,9 +54,9 @@ Ocorrências: geração por recorrência, conclusão e missed.
 
 Hoje: ocorrências da pessoa, progresso, concluir em 1 toque.
 
-Nós: balanceamento, áreas, atividade recente.
+Nós: visão das responsabilidades por área, sem pontuação ou feed de atividade.
 
-Configurações: Divisão, Pessoas e Áreas; sem menu Tarefas.
+Configurações: Pessoas e organização de áreas com suas tarefas; sem menu global de Tarefas.
 
 Recompensas: saldo compartilhado, CRUD e resgate.
 
@@ -66,13 +66,13 @@ Histórico: persistido no backend; UI completa fora do MVP.
 
 Hoje: o que eu preciso fazer?
 
-Nós: como a casa está funcionando?
+Nós: quem cuida do quê?
 
 Recompensas: saldo e recompensas.
 
 Configurações: como organizamos esta casa?
 
-Não existe Casa → Tarefas nem uma lista global obrigatória de todas as tarefas. Tarefas são descobertas em Nós → Área → Tarefa ou criadas por Hoje → +.
+Não existe uma lista global obrigatória de tarefas. Tarefas são consultadas em Nós → Área e gerenciadas em Configurações → Área → Tarefas; também podem ser criadas por Hoje → +.
 
 5. Modelo mental
 
@@ -188,43 +188,35 @@ Não manter permanentemente “Feitas hoje”, “Hoje na sua responsabilidade�
 
 ## 12. Nós
 
-Resumo do equilíbrio.
+Visão de leitura das responsabilidades da casa, organizada por área.
 
-Áreas como portas de entrada.
+Cada área abre somente as tarefas daquela área, mostrando frequência e responsabilidade.
 
-Cada área abre somente suas tarefas.
+Não exibir percentuais, notas ou julgamentos de equilíbrio. A carga é interna e não deve transformar a visão em uma medida de justiça.
 
-Dentro da área: ver, editar e adicionar.
+Não permitir criar, editar ou arquivar tarefas nesta tela. A gestão fica em Configurações → área → tarefas; Hoje mantém o atalho para criar uma tarefa.
 
-Atividade é secundária.
+Não exibir feed de conclusões ou atividade recente nesta tela; evitar aparência de acompanhamento ou fiscalização.
 
 Sem ranking, vencedor ou lista gigante.
 
 ## 13. Configurações da casa
 
-Divisão.
+Pessoas e convites.
 
-Pessoas.
+Áreas: criar, editar, ordenar e arquivar.
 
-Áreas.
+Tarefas agrupadas dentro de cada área: criar, editar e remover da rotina. Não incluir uma lista global ou item de menu Tarefas. Casa não é catch-all.
 
-Notificações.
+Notificações ficam fora do escopo web.
 
-Não incluir Tarefas como menu. Casa não é catch-all.
-
-## 14. Balanceamento — fechado
+## 14. Estimativa de esforço — fechado
 
 Carga: 1 muito leve, 2 leve, 3 moderada, 4 pesada, 5 muito pesada. É ordinal.
 
 Essa estimativa é uma referência interna para preparar a primeira divisão, não uma medida exata de justiça. A pessoa pode começar sem configurá-la e, se necessário, ajustá-la na edição da tarefa. Não mostrar o valor numérico nas telas de rotina, resumo ou onboarding.
 
-Algoritmo inicial: score por ocorrência = carga × fator de frequência decrescente. Para n ocorrências esperadas no período, usar fator 1 + 0,5×(n−1)/n. Responsabilidade individual recebe 100% do score. Shared permanece no household até execução.
-
-Percentual entre membros é derivado dos scores. Estado: Bem equilibrada se diferença relativa ≤10%; Um pouco desequilibrada se >10% e ≤25%; Mais concentrada se >25%. Limiares ficam parametrizados no serviço.
-
-A fórmula nunca aparece na UI e pode ser recalibrada após uso real.
-
-“Nós” deve apresentar o resultado como uma visão geral estimada, não como medida exata ou veredito de equilíbrio. Explicar brevemente que esforço e frequência ajudam a compor a referência e que ela serve para conversar.
+Sugestões já vêm com esforço definido; tarefa criada manualmente recebe o padrão 3. O valor não aparece nas telas de rotina, na visão Nós ou no onboarding. Pode ser ajustado opcionalmente ao editar uma tarefa em Configurações, com explicação simples. O esforço define as estrelas recebidas ao concluir uma ocorrência.
 
 ## 15. Recompensas — fechado
 
@@ -268,7 +260,7 @@ Loading: skeleton/placeholder curto.
 
 Empty Hoje: explicar e oferecer primeira tarefa.
 
-Empty Área: “Ainda não tem tarefas aqui” + adicionar.
+Empty Área em Nós: “Ainda não tem tarefas nesta área”. Para adicionar, acessar Configurações ou usar o atalho de criação em Hoje.
 
 Erro de rede: retry preservando intenção.
 
@@ -390,7 +382,9 @@ Convite → segunda pessoa entra sem refazer onboarding.
 
 Ao sair a última pessoa, a casa é desativada e uma antiga pessoa membro pode reabri-la sem perder o histórico.
 
-Nós → qualquer área abre a lista correta daquela área.
+Nós → qualquer área abre somente a lista de leitura das tarefas daquela área.
+
+Configurações → área permite criar, editar, remover tarefas da rotina e ajustar opcionalmente seu esforço.
 
 Adicionar por área pré-seleciona categoria.
 
@@ -404,7 +398,7 @@ Missed não gera dívida.
 
 Histórico preserva snapshots.
 
-Balance é determinístico e server-side.
+Estimativa de esforço não aparece nas telas de uso diário.
 
 Redeem não deixa saldo negativo.
 
@@ -418,7 +412,9 @@ E2E: cadastro → casa → tarefa → Hoje → concluir.
 
 E2E: convite → segunda pessoa.
 
-E2E: Nós → cada área → lista correta → editar/adicionar.
+E2E: Nós → cada área → lista correta, sem ações de edição.
+
+E2E: Configurações → área → criar/editar/remover tarefa.
 
 E2E: shared claim → complete.
 

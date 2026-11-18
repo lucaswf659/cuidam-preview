@@ -127,7 +127,21 @@ test("conta, casa, tarefa compartilhada, convite, isolamento e resgate idempoten
     await expect(ownerPage.locator(".task-card").filter({ hasText: earnedTaskName })).toHaveCount(0);
 
     const sharedTaskId = await addTask(ownerPage, `E2E tarefa compartilhada ${runId}`, "Nós");
-    await ownerPage.getByRole("link", { name: "Configurações" }).click();
+    const sharedArea = onboarding.body.household.areas[0];
+    await ownerPage.getByRole("link", { name: "Nós" }).click();
+    await ownerPage.getByRole("button", { name: `Ver tarefas da área ${sharedArea.name}` }).click();
+    const areaDialog = ownerPage.getByRole("dialog", { name: new RegExp(sharedArea.name) });
+    await expect(areaDialog).toContainText(`E2E tarefa compartilhada ${runId}`);
+    await expect(areaDialog.getByRole("button", { name: /Editar|Adicionar tarefa|Remover/ })).toHaveCount(0);
+    await ownerPage.getByRole("button", { name: "Fechar área" }).click();
+    await ownerPage.getByRole("navigation", { name: "Navegação principal" }).getByRole("link", { name: "Configurações" }).click();
+    await expect(ownerPage).toHaveURL(/\/casa$/);
+    await ownerPage.getByRole("button", { name: `Gerenciar ${sharedArea.name}` }).click();
+    const taskRow = ownerPage.getByRole("group", { name: `Tarefa E2E tarefa compartilhada ${runId}` });
+    await taskRow.getByRole("button", { name: "Editar" }).click();
+    await ownerPage.getByLabel("Nome da tarefa").fill(`E2E tarefa compartilhada editada ${runId}`);
+    await ownerPage.getByRole("button", { name: "Salvar" }).click();
+    await expect(ownerPage.getByRole("group", { name: `Tarefa E2E tarefa compartilhada editada ${runId}` })).toBeVisible();
     await ownerPage.getByLabel("E-mail", { exact: true }).fill(guestEmail);
     await ownerPage.getByRole("button", { name: "Gerar link do convite" }).click();
     await expect(ownerPage.getByRole("status")).toContainText("Link do convite pronto");

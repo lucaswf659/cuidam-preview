@@ -1,0 +1,28 @@
+.content {
+  width: min(100%, 1040px);
+}
+
+.content :global(.nos-area-list) {
+  height: auto;
+  max-height: none;
+  min-height: 0;
+  overflow: visible;
+}
+
+.content :global(.nos-areas-panel .section-heading) {
+  margin-top: 26px;
+}
+
+.content :global(.nos-area) {
+  min-height: 82px;
+}
+
+@media (max-width: 760px) {
+  .content {
+    padding-bottom: 24px;
+  }
+
+  .content :global(.nos-area-list) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

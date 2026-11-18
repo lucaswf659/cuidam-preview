@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { CasaMock } from "@/components/casa-mock";
 
 const household = {
@@ -87,6 +87,55 @@ describe("CasaMock invitation link", () => {
 
     expect(screen.getByRole("alertdialog")).toHaveTextContent("As tarefas ativas dessa área também saem da rotina.");
     expect(screen.getByRole("button", { name: "Voltar" })).toBeInTheDocument();
+  });
+
+  it("offers a visual icon picker for a custom area", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ area: { id: "balcony", name: "Varanda", icon: "🪴", sortOrder: 1 } }) });
+    vi.stubGlobal("fetch", fetchMock);
+    render(<CasaMock household={household} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Adicionar área" }));
+    expect(screen.getByRole("group", { name: "Ícone da área" })).toBeInTheDocument();
+    expect(screen.queryByLabelText("Ícone")).not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText("Nome da área"), { target: { value: "Varanda" } });
+    fireEvent.click(screen.getByRole("button", { name: "Plantas" }));
+    expect(screen.getByRole("button", { name: "Plantas" })).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(screen.getAllByRole("button", { name: "Adicionar área" }).at(-1)!);
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledWith("/api/mock/areas", expect.objectContaining({ body: JSON.stringify({ name: "Varanda", icon: "🪴" }) })));
+  });
+
+  it("manages tasks inside their area in configuration", async () => {
+    const task = { id: "task-1", name: "Limpar bancada", areaId: "kitchen", responsibility: "Você" as const, recurrence: "Diária", load: 3, completed: false };
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ task: { ...task, id: "task-new", name: "Lavar pia" } }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ task: { ...task, id: "task-new", name: "Lavar pia do dia" } }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ task: { ...task, id: "task-new", name: "Lavar pia do dia", archived: true } }) });
+    vi.stubGlobal("fetch", fetchMock);
+    render(<CasaMock household={{
+      ...household,
+      areas: [{ id: "kitchen", name: "Cozinha", icon: "🍳", sortOrder: 0 }],
+      tasks: [task]
+    }} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Gerenciar Cozinha" }));
+    expect(screen.getByText("Tarefas desta área")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Adicionar tarefa" }));
+    fireEvent.change(screen.getByLabelText("Nome da tarefa"), { target: { value: "Lavar pia" } });
+    fireEvent.click(screen.getAllByRole("button", { name: "Adicionar tarefa" }).at(-1)!);
+    await waitFor(() => expect(fetchMock).toHaveBeenNthCalledWith(1, "/api/mock/tasks", expect.objectContaining({ method: "POST" })));
+    expect(await screen.findByText("Lavar pia")).toBeInTheDocument();
+
+    fireEvent.click(within(screen.getByRole("group", { name: "Tarefa Lavar pia" })).getByRole("button", { name: "Editar" }));
+    expect(screen.getByText("Ajustar esforço da tarefa")).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText("Nome da tarefa"), { target: { value: "Lavar pia do dia" } });
+    fireEvent.click(screen.getByRole("button", { name: "Salvar" }));
+    await waitFor(() => expect(fetchMock).toHaveBeenNthCalledWith(2, "/api/mock/tasks", expect.objectContaining({ method: "PATCH", body: expect.stringContaining('"action":"edit"') })));
+    expect(await screen.findByText("Lavar pia do dia")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Remover Lavar pia do dia da rotina" }));
+    fireEvent.click(screen.getByRole("button", { name: "Remover tarefa" }));
+    await waitFor(() => expect(fetchMock).toHaveBeenNthCalledWith(3, "/api/mock/tasks", expect.objectContaining({ method: "PATCH", body: expect.stringContaining('"action":"archive"') })));
   });
 });
 
