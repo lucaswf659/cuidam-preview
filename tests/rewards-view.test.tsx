@@ -19,4 +19,18 @@ describe("RewardsView loading recovery", () => {
     expect(screen.queryByText("Carregando recompensas…")).not.toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
+
+  it("adds a starter reward with its suggested cost", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ balance: 0, rewards: [], members: [], history: [] }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ reward: { id: "reward-1" } }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ balance: 0, rewards: [{ id: "reward-1", name: "Escolher o filme da noite", cost: 30, recipientType: "HOUSEHOLD", recipientMemberId: null }], members: [], history: [] }) });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<RewardsView householdName="Nossa casa" />);
+    fireEvent.click(await screen.findByRole("button", { name: "Adicionar recompensa: Escolher o filme da noite" }));
+
+    await waitFor(() => expect(screen.getByRole("heading", { name: "Escolher o filme da noite" })).toBeInTheDocument());
+    expect(JSON.parse(fetchMock.mock.calls[1][1].body as string)).toEqual({ name: "Escolher o filme da noite", cost: 30, recipientType: "HOUSEHOLD" });
+  });
 });

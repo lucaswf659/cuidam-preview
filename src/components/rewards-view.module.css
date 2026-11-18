@@ -23,6 +23,78 @@
   min-height: 48px;
 }
 
+.starterInfo {
+  display: grid;
+  gap: 4px;
+  margin: 20px 0;
+  padding: 16px 18px;
+  border: 1px solid #dcefe0;
+  border-radius: 16px;
+  background: linear-gradient(110deg, #f2f8f1, #fffaf0);
+  color: #376b45;
+  font-size: 0.85rem;
+}
+
+.starterInfo p,
+.suggestionsHeading p {
+  margin: 0;
+  color: #777873;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.suggestions {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.suggestionsHeading h2 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+}
+
+.suggestionGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.suggestionCard {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid #e8e9e2;
+  border-radius: 16px;
+  background: #fff;
+}
+
+.suggestionCard > div {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.suggestionCard h3 {
+  margin: 0;
+  font-size: 0.83rem;
+  line-height: 1.4;
+}
+
+.suggestionCard strong {
+  flex: none;
+  color: #376b45;
+  font-size: 0.78rem;
+}
+
+.suggestionCard button {
+  min-height: 44px;
+}
+
 @media (max-width: 560px) {
   .form {
     grid-template-columns: minmax(0, 1fr);
@@ -41,5 +113,9 @@
 
   .actions button {
     width: 100%;
+  }
+
+  .suggestionGrid {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

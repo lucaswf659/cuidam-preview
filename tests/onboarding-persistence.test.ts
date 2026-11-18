@@ -31,6 +31,9 @@ describe("real onboarding persistence", () => {
       membership: {
         create: vi.fn().mockResolvedValue({ id: "membership-1" })
       },
+      reward: {
+        createMany: vi.fn().mockResolvedValue({ count: 3 })
+      },
       area: {
         createManyAndReturn: vi.fn(async ({ data }: { data: Array<{ sortOrder: number; name: string; icon: string | null }> }) =>
           data.map((area) => ({ ...area, id: `area-${area.sortOrder}` })).reverse()
@@ -70,6 +73,13 @@ describe("real onboarding persistence", () => {
     }));
 
     expect(response.status).toBe(201);
+    expect(tx.reward.createMany).toHaveBeenCalledWith({
+      data: [
+        { householdId: "household-1", name: "Escolher o filme da noite", cost: 30 },
+        { householdId: "household-1", name: "Jantar especial em casa", cost: 70 },
+        { householdId: "household-1", name: "Pizza para dividir", cost: 140 }
+      ]
+    });
     expect(tx.area.createManyAndReturn).toHaveBeenCalledOnce();
     expect(tx.area.createManyAndReturn.mock.calls[0][0].data).toHaveLength(4);
     expect(tx.task.createManyAndReturn).toHaveBeenCalledOnce();

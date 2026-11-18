@@ -152,9 +152,9 @@ describe("PATCH /api/tasks shared claim and completion", () => {
 
     expect(response.status).toBe(200);
     const update = mocks.tx.taskOccurrence.updateMany.mock.calls[0][0];
-    expect(update.data).toMatchObject({ status: "COMPLETED", completedCount: 3, claimedByUserId: null, claimedAt: null, starsGrantedSnapshot: 2 });
+    expect(update.data).toMatchObject({ status: "COMPLETED", completedCount: 3, claimedByUserId: null, claimedAt: null, starsGrantedSnapshot: 6 });
     expect(mocks.tx.occurrenceCompletion.create).toHaveBeenCalledWith({
-      data: { occurrenceId: "occurrence-1", completedById: "user-1", starsGranted: 2 }
+      data: { occurrenceId: "occurrence-1", completedById: "user-1", starsGranted: 6 }
     });
   });
 });

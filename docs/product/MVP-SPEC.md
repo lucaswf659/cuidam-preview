@@ -220,15 +220,19 @@ Carga: 1 muito leve, 2 leve, 3 moderada, 4 pesada, 5 muito pesada. É ordinal.
 
 Essa estimativa é uma referência interna para preparar a primeira divisão, não uma medida exata de justiça. A pessoa pode começar sem configurá-la e, se necessário, ajustá-la na edição da tarefa. Não mostrar o valor numérico nas telas de rotina, resumo ou onboarding.
 
-Sugestões já vêm com esforço definido; tarefa criada manualmente recebe o padrão 3. O valor não aparece nas telas de rotina, na visão Nós ou no onboarding. Pode ser ajustado opcionalmente ao editar uma tarefa em Configurações, com explicação simples. O esforço define as estrelas recebidas ao concluir uma ocorrência.
+Sugestões já vêm com esforço definido; tarefa criada manualmente recebe o padrão 3. O valor não aparece nas telas de rotina, na visão Nós ou no onboarding. Pode ser ajustado opcionalmente ao editar uma tarefa em Configurações, com explicação simples. O esforço define as estrelas base por conclusão; metas com várias conclusões na mesma ocorrência multiplicam essa base pela quantidade exigida, liberando o total apenas quando a meta é concluída.
 
 ## 15. Recompensas — fechado
 
 Saldo compartilhado. Estrelas celebram contribuição; não medem valor humano.
 
-Tabela inicial: carga 1→1, 2→2, 3→3, 4→4, 5→5; parametrizada.
+Cada casa nova começa com sugestões editáveis: escolher o filme da noite (30), jantar especial em casa (70) e pizza para dividir (140). Casas existentes sem recompensas veem as mesmas sugestões e podem adicioná-las. Qualquer casa pode criar, ajustar ou remover recompensas.
 
-Cada ocorrência concluída gera uma vez.
+A carga continua ordinal (1–5) e define as estrelas por conclusão. Uma ocorrência diária, semanal ou mensal completa rende sua carga. Para uma meta semanal de X conclusões, rende carga × X estrelas uma única vez, ao atingir a meta. Frequência maior gera mais estrelas ao longo do tempo porque há mais conclusões exigidas; ocorrência incompleta ou perdida não gera estrelas.
+
+Os valores sugeridos são referências de partida, não equivalem a dinheiro. No conjunto inicial completo, as tarefas selecionadas representam aproximadamente 57 estrelas por semana; isso deixa o cinema como uma recompensa pequena, o jantar como intermediária e a pizza como uma meta maior. Cada casa pode ajustar nomes e custos à própria rotina.
+
+Cada ocorrência concluída gera uma vez, no valor calculado pela carga e pela quantidade de conclusões exigidas naquela ocorrência.
 
 MISSED/CANCELLED não geram.
 
@@ -403,6 +407,8 @@ Missed não gera dívida.
 Histórico preserva snapshots.
 
 Estimativa de esforço não aparece nas telas de uso diário.
+
+Uma casa nova recebe recompensas de partida; uma casa existente sem recompensas pode adicionar as mesmas sugestões. Concluir uma tarefa mais vezes na meta da semana rende estrelas proporcionais ao número de conclusões exigidas.
 
 Redeem não deixa saldo negativo.
 

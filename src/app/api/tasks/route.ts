@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getRealContext, getRealHouseholdSnapshot, recurrenceFromLabel } from "@/lib/real/household";
 import { periodKeyForRecurrence } from "@/lib/real/recurrence";
 import type { MockResponsibility } from "@/lib/mock/store";
-import { DEFAULT_TASK_LOAD } from "@/lib/task-load";
+import { DEFAULT_TASK_LOAD, starsForCompletedOccurrence } from "@/lib/task-load";
 
 const validRecurrences = ["Diária", "Semanal", "3× por semana", "Mensal"];
 
@@ -178,7 +178,9 @@ export async function PATCH(request: Request) {
 
     const nextCount = Math.min(occurrence.completedCount + 1, occurrence.targetCompletions);
     const completesOccurrence = nextCount >= occurrence.targetCompletions;
-    const starsGranted = completesOccurrence ? occurrence.loadSnapshot : 0;
+    const starsGranted = completesOccurrence
+      ? starsForCompletedOccurrence(occurrence.loadSnapshot, occurrence.targetCompletions)
+      : 0;
     const updated = await tx.taskOccurrence.updateMany({
       where: {
         id: occurrence.id,

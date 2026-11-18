@@ -6,6 +6,7 @@ import { mockHouseholdForSession, saveMockHousehold } from "@/lib/mock/store";
 import { getReopenableHouseholds, recurrenceFromLabel } from "@/lib/real/household";
 import { periodKeyForRecurrence } from "@/lib/real/recurrence";
 import { onboardingPayloadSchema } from "@/lib/real/onboarding-schema";
+import { starterRewardSuggestions } from "@/lib/reward-suggestions";
 
 const mockMode = process.env.NEXT_PUBLIC_CUIDAM_MOCK !== "false";
 
@@ -79,6 +80,9 @@ export async function POST(request: Request) {
 
     const household = await tx.household.create({ data: { name: parsed.data.houseName, timezone: "America/Sao_Paulo" } });
     const membership = await tx.membership.create({ data: { householdId: household.id, userId: dbUser.id, role: "MEMBER", status: "ACTIVE" } });
+    await tx.reward.createMany({
+      data: starterRewardSuggestions.map((reward) => ({ householdId: household.id, ...reward }))
+    });
     const createdAreas = parsed.data.areas.length
       ? await tx.area.createManyAndReturn({
         data: parsed.data.areas.map((area, sortOrder) => ({
