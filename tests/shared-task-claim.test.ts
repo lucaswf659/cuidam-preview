@@ -19,6 +19,7 @@ const mocks = vi.hoisted(() => {
     getRealContext: vi.fn(),
     getRealHouseholdSnapshot: vi.fn(),
     recurrenceFromLabel: vi.fn(),
+    recurrenceLabel: vi.fn(),
     periodKeyForRecurrence: vi.fn()
   };
 });
@@ -27,7 +28,8 @@ vi.mock("@/lib/prisma", () => ({ prisma: mocks.prisma }));
 vi.mock("@/lib/real/household", () => ({
   getRealContext: mocks.getRealContext,
   getRealHouseholdSnapshot: mocks.getRealHouseholdSnapshot,
-  recurrenceFromLabel: mocks.recurrenceFromLabel
+  recurrenceFromLabel: mocks.recurrenceFromLabel,
+  recurrenceLabel: mocks.recurrenceLabel
 }));
 vi.mock("@/lib/real/recurrence", () => ({ periodKeyForRecurrence: mocks.periodKeyForRecurrence }));
 
@@ -56,6 +58,7 @@ describe("PATCH /api/tasks shared claim and completion", () => {
       membership: { id: "member-1" }
     });
     mocks.getRealHouseholdSnapshot.mockResolvedValue({ tasks: [{ id: "task-1", claimOwnedByCurrentUser: true }] });
+    mocks.recurrenceLabel.mockReturnValue("3× por semana");
     mocks.periodKeyForRecurrence.mockReturnValue("week:2026-11-09");
     mocks.prisma.task.findFirst.mockResolvedValue({
       id: "task-1",
@@ -66,7 +69,8 @@ describe("PATCH /api/tasks shared claim and completion", () => {
       recurrenceInterval: 1,
       weeklyTarget: 3,
       recurrenceAnchor: new Date("2026-11-09T12:00:00.000Z"),
-      load: 2
+      load: 2,
+      occurrences: [pendingOccurrence({ claimedBy: { id: "user-2", name: "Ana" } })]
     });
   });
 
@@ -90,8 +94,7 @@ describe("PATCH /api/tasks shared claim and completion", () => {
   });
 
   it("returns the latest task when another member wins the claim race", async () => {
-    mocks.tx.taskOccurrence.upsert.mockResolvedValueOnce(pendingOccurrence({ claimedByUserId: "user-2" }));
-    mocks.getRealHouseholdSnapshot.mockResolvedValue({ tasks: [{ id: "task-1", claimOwnerName: "Ana" }] });
+    mocks.tx.taskOccurrence.upsert.mockResolvedValueOnce(pendingOccurrence({ claimedByUserId: "user-2", claimedBy: { id: "user-2", name: "Ana" } }));
 
     const response = await PATCH(new Request("http://localhost/api/tasks", {
       method: "PATCH",

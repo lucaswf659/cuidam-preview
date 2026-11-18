@@ -199,6 +199,47 @@ test("cenário com muitas tarefas: navegação, estados e tempo de resposta", as
     for (const [route, values] of Object.entries(samples)) {
       console.info(`[E2E perf] ${route} | TTFB ${Math.round(median(values.map((item) => item.ttfb)))} ms | HTML ${Math.round(median(values.map((item) => item.html)))} ms | UI pronta ${Math.round(median(values.map((item) => item.ui)))} ms (mediana de 3)`);
     }
+
+    await page.goto("/today", { waitUntil: "domcontentloaded" });
+    const sharedTask = scenario.tasks.find((task) => task.name === "Recolher objetos");
+    if (!sharedTask) throw new Error("O fixture precisa ter uma tarefa compartilhada pendente para medir claim e conclusão.");
+    const taskCard = page.locator(".task-card").filter({ hasText: sharedTask.name });
+    await expect(taskCard).toBeVisible();
+
+    const markNextClick = (markName: string, buttonName: string) => page.evaluate(({ markName, buttonName, taskName }) => {
+      const card = [...document.querySelectorAll<HTMLElement>(".task-card")].find((element) => element.innerText.includes(taskName));
+      const button = [...(card?.querySelectorAll<HTMLButtonElement>("button") ?? [])].find((element) => element.innerText.includes(buttonName));
+      if (!button) throw new Error(`Não encontrei o botão ${buttonName} em ${taskName}`);
+      button.addEventListener("click", () => performance.mark(markName), { once: true });
+    }, { markName, buttonName, taskName: sharedTask.name });
+    const msSinceMark = (markName: string) => page.evaluate((name) => {
+      const mark = performance.getEntriesByName(name).at(-1);
+      if (!mark) throw new Error(`A marca ${name} não foi registrada.`);
+      return performance.now() - mark.startTime;
+    }, markName);
+
+    await markNextClick("cuidam-claim-click", "Vou cuidar");
+    const claimResponsePromise = page.waitForResponse((response) => response.url().endsWith("/api/tasks") && response.request().method() === "PATCH");
+    await taskCard.getByRole("button", { name: "Vou cuidar" }).click();
+    await expect(taskCard.getByRole("button", { name: /Concluir/ })).toBeVisible();
+    const claimUiMs = await msSinceMark("cuidam-claim-click");
+    const claimResponse = await claimResponsePromise;
+    expect(claimResponse.ok()).toBeTruthy();
+    await claimResponse.finished();
+    const claimTiming = claimResponse.request().timing();
+
+    await markNextClick("cuidam-complete-click", "Concluir");
+    const completeResponsePromise = page.waitForResponse((response) => response.url().endsWith("/api/tasks") && response.request().method() === "PATCH");
+    await taskCard.getByRole("button", { name: /Concluir/ }).click();
+    await expect(taskCard).toHaveCount(0);
+    const completeUiMs = await msSinceMark("cuidam-complete-click");
+    const completeResponse = await completeResponsePromise;
+    expect(completeResponse.ok()).toBeTruthy();
+    await completeResponse.finished();
+    const completeTiming = completeResponse.request().timing();
+
+    console.info(`[E2E ação] Vou cuidar | API ${Math.round(claimTiming.responseEnd - claimTiming.requestStart)} ms | botão Concluir atualizado ${Math.round(claimUiMs)} ms`);
+    console.info(`[E2E ação] Concluir | API ${Math.round(completeTiming.responseEnd - completeTiming.requestStart)} ms | tarefa removida de Hoje ${Math.round(completeUiMs)} ms`);
     console.info(`[E2E volume] ${scenario.areas.length} áreas | ${scenario.tasks.length} tarefas | ${scenario.tasks.filter((task) => task.completed).length} concluídas | ${scenario.tasks.filter((task) => task.partial).length} parciais | ${scenario.rewards.length} recompensas | 2 membros`);
   } finally {
     await prisma.$disconnect();

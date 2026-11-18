@@ -44,5 +44,19 @@ describe("TodayMock shared task claim", () => {
     expect(screen.queryByRole("button", { name: "Vou cuidar" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "✓ Concluir" })).not.toBeInTheDocument();
   });
+
+  it("updates the claim immediately and restores the task if the server rejects it", async () => {
+    let resolveFetch!: (response: { ok: boolean; json: () => Promise<{ error: string }> }) => void;
+    const fetchMock = vi.fn(() => new Promise<{ ok: boolean; json: () => Promise<{ error: string }> }>((resolve) => { resolveFetch = resolve; }));
+    vi.stubGlobal("fetch", fetchMock);
+    render(<TodayMock household={household} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Vou cuidar" }));
+    expect(screen.getByRole("button", { name: "✓ Concluir" })).toBeDisabled();
+
+    resolveFetch({ ok: false, json: async () => ({ error: "Outra pessoa acabou de assumir esta tarefa." }) });
+    expect(await screen.findByRole("button", { name: "Vou cuidar" })).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent("Outra pessoa acabou de assumir esta tarefa.");
+  });
 });
 

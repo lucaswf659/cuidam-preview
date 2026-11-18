@@ -82,7 +82,7 @@ describe("CasaMock invitation link", () => {
       areas: [{ id: "kitchen", name: "Cozinha", icon: "🍳", sortOrder: 0 }]
     }} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Gerenciar Cozinha" }));
+    fireEvent.click(screen.getByRole("button", { name: "Ver tarefas de Cozinha" }));
     fireEvent.click(screen.getByRole("button", { name: "Excluir área" }));
 
     expect(screen.getByRole("alertdialog")).toHaveTextContent("A área e as tarefas ativas dela saem da rotina.");
@@ -120,7 +120,7 @@ describe("CasaMock invitation link", () => {
       tasks: [task]
     }} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Gerenciar Cozinha" }));
+    fireEvent.click(screen.getByRole("button", { name: "Ver tarefas de Cozinha" }));
     expect(screen.getByText("Tarefas desta área")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Adicionar tarefa" }));
     fireEvent.change(screen.getByLabelText("Nome da tarefa"), { target: { value: "Lavar pia" } });

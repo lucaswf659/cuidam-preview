@@ -9,6 +9,7 @@ const mocks = vi.hoisted(() => ({
   getRealContext: vi.fn(),
   getRealHouseholdSnapshot: vi.fn(),
   recurrenceFromLabel: vi.fn(),
+  recurrenceLabel: vi.fn(),
   periodKeyForRecurrence: vi.fn()
 }));
 
@@ -16,7 +17,8 @@ vi.mock("@/lib/prisma", () => ({ prisma: mocks.prisma }));
 vi.mock("@/lib/real/household", () => ({
   getRealContext: mocks.getRealContext,
   getRealHouseholdSnapshot: mocks.getRealHouseholdSnapshot,
-  recurrenceFromLabel: mocks.recurrenceFromLabel
+  recurrenceFromLabel: mocks.recurrenceFromLabel,
+  recurrenceLabel: mocks.recurrenceLabel
 }));
 vi.mock("@/lib/real/recurrence", () => ({ periodKeyForRecurrence: mocks.periodKeyForRecurrence }));
 
@@ -35,6 +37,12 @@ describe("POST /api/tasks", () => {
     mocks.periodKeyForRecurrence.mockReturnValue("2026-09-28");
     mocks.prisma.area.findFirst.mockResolvedValue({ id: "area-1" });
     mocks.prisma.task.create.mockResolvedValue({ id: "task-1" });
+    mocks.prisma.task.findFirst.mockResolvedValue({
+      id: "task-1", name: "Limpar bancada", areaId: "area-1", status: "ACTIVE",
+      responsibilityType: "PERSON", responsibleMemberId: "member-1", recurrenceKind: "DAILY",
+      recurrenceInterval: 1, weeklyTarget: 1, load: 3, occurrences: []
+    });
+    mocks.recurrenceLabel.mockReturnValue("Diária");
   });
 
   it("cria a tarefa e a primeira ocorrência juntas numa gravação aninhada", async () => {
@@ -81,7 +89,11 @@ describe("PATCH /api/tasks", () => {
       household: { id: "house-1", timezone: "America/Sao_Paulo" },
       membership: { id: "member-1" }
     });
-    mocks.prisma.task.findFirst.mockResolvedValue({ id: "task-1", load: 4 });
+    mocks.prisma.task.findFirst.mockResolvedValue({
+      id: "task-1", name: "Tarefa atual", areaId: "area-1", status: "ACTIVE",
+      responsibilityType: "PERSON", responsibleMemberId: "member-1", recurrenceKind: "DAILY",
+      recurrenceInterval: 1, weeklyTarget: 1, load: 4, occurrences: []
+    });
     mocks.prisma.area.findFirst.mockResolvedValue({ id: "area-1" });
     mocks.prisma.membership.findFirst.mockResolvedValue(null);
     mocks.prisma.task.update.mockResolvedValue({ id: "task-1" });
