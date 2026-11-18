@@ -90,7 +90,7 @@ Casa: nome padrão editável.
 
 Convite opcional.
 
-Sugestões de áreas/tarefas pré-selecionadas e editáveis.
+Sugestões de áreas/tarefas pré-selecionadas e editáveis. Cada área oferece ao menos quatro sugestões de rotina. O conjunto inicial fica marcado para a casa começar pronta; alternativas adicionais ficam desmarcadas e podem ser escolhidas num painel com rolagem interna.
 
 Primeira divisão: aceitar sugestão ou ajustar.
 

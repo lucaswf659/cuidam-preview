@@ -111,6 +111,8 @@ describe("OnboardingFlow", () => {
     expect(screen.getByText(/Já deixamos uma primeira divisão pronta para você começar/)).toBeInTheDocument();
     expect(screen.getByText(/considera o esforço de cada tarefa por trás das cenas/)).toBeInTheDocument();
     expect(screen.queryByLabelText(/carga/i)).not.toBeInTheDocument();
+    expect(screen.getByRole("region", { name: /Lista de sugestões/ })).toBeInTheDocument();
+    expect(screen.getByLabelText("Incluir Limpar o fogão")).not.toBeChecked();
     fireEvent.change(screen.getByLabelText("Limpar bancada: nome"), { target: { value: "Cuidar da bancada" } });
     fireEvent.change(screen.getByLabelText("Cuidar da bancada: responsabilidade"), { target: { value: "Outra pessoa" } });
     fireEvent.click(screen.getByRole("button", { name: "Continuar" }));

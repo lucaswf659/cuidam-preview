@@ -5,7 +5,8 @@ import { createClient } from "@/lib/supabase/browser";
 import { useRouter } from "next/navigation";
 import { AreaIcon } from "@/components/area-icon";
 import { BrandMark } from "@/components/brand-mark";
-import { onboardingSuggestionsForAreas, type OnboardingSuggestion } from "@/lib/onboarding-suggestions";
+import { defaultOnboardingTaskKeys, onboardingSuggestionsForAreas, type OnboardingSuggestion } from "@/lib/onboarding-suggestions";
+import suggestionStyles from "@/components/onboarding-suggestions.module.css";
 
 type Step = "welcome" | "signup" | "house" | "presets" | "invite" | "done";
 type AuthMode = "signup" | "login";
@@ -48,7 +49,7 @@ export function OnboardingFlow({ initialStep = "welcome", initialMode = "signup"
     new Set(suggestedAreas.filter((area) => area.selected).map((area) => area.id))
   );
   const [suggestedTasks, setSuggestedTasks] = useState<OnboardingSuggestion[]>(() => onboardingSuggestionsForAreas(suggestedAreas.filter((area) => area.selected).map((area) => area.id)));
-  const [selectedTaskKeys, setSelectedTaskKeys] = useState(() => new Set(onboardingSuggestionsForAreas(suggestedAreas.filter((area) => area.selected).map((area) => area.id)).map((task) => task.id)));
+  const [selectedTaskKeys, setSelectedTaskKeys] = useState(() => defaultOnboardingTaskKeys(onboardingSuggestionsForAreas(suggestedAreas.filter((area) => area.selected).map((area) => area.id))));
   const router = useRouter();
   const inviteEndpoint = process.env.NEXT_PUBLIC_CUIDAM_MOCK === "false" ? "/api/invite" : "/api/mock/invite";
 
@@ -143,7 +144,7 @@ export function OnboardingFlow({ initialStep = "welcome", initialMode = "signup"
   const finishOnboarding = async () => {
     setError("");
     const onboardingName = name.trim() || email.trim().split("@")[0] || "Você";
-    const response = await fetch("/api/onboarding", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: onboardingName, houseName, areas: suggestedAreas.filter((area) => selectedAreas.has(area.id)), tasks: suggestedTasks.filter((task) => selectedAreas.has(task.areaId) && selectedTaskKeys.has(task.id)) }) });
+    const response = await fetch("/api/onboarding", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: onboardingName, houseName, areas: suggestedAreas.filter((area) => selectedAreas.has(area.id)), tasks: suggestedTasks.filter((task) => selectedAreas.has(task.areaId) && selectedTaskKeys.has(task.id)).map(({ selectedByDefault: _selectedByDefault, ...task }) => task) }) });
     if (!response.ok) { const body = await response.json().catch(() => null); setError(body?.error ?? "Não foi possível salvar sua casa."); return; }
     setStep("invite");
   };
@@ -173,7 +174,7 @@ export function OnboardingFlow({ initialStep = "welcome", initialMode = "signup"
     if (!selectedAreas.has(areaId)) {
       const defaults = onboardingSuggestionsForAreas([areaId]);
       setSuggestedTasks((current) => [...current, ...defaults.filter((task) => !current.some((item) => item.areaId === task.areaId && item.name === task.name))]);
-      setSelectedTaskKeys((current) => new Set([...current, ...defaults.map((task) => task.id)]));
+      setSelectedTaskKeys((current) => new Set([...current, ...defaultOnboardingTaskKeys(defaults)]));
     }
   };
 
@@ -181,7 +182,7 @@ export function OnboardingFlow({ initialStep = "welcome", initialMode = "signup"
 
   return (
     <main className="onboarding-shell">
-      <section className="onboarding-card" aria-live="polite">
+      <section className={`onboarding-card ${step === "presets" ? suggestionStyles.wideCard : ""}`} aria-live="polite">
         <div className="brand-lockup" aria-label="cuidam">
           <span className="brand-mark" aria-hidden="true"><BrandMark compact /></span>
           <span>cuidam</span>
@@ -264,7 +265,7 @@ export function OnboardingFlow({ initialStep = "welcome", initialMode = "signup"
         )}
 
         {step === "presets" && (
-          <section className="step-content">
+          <section className={`step-content ${suggestionStyles.suggestionStep}`}>
             <button className="back" type="button" onClick={() => setStep("house")}>← Voltar</button>
             <p className="eyebrow">Por onde começar</p>
             <h1>O que faz parte da casa?</h1>
@@ -277,15 +278,18 @@ export function OnboardingFlow({ initialStep = "welcome", initialMode = "signup"
                 </button>;
               })}
             </div>
-            {selectedAreas.size > 0 && <section className="onboarding-task-suggestions" aria-label="Sugestões de responsabilidades">
+            {selectedAreas.size > 0 && <section className={`onboarding-task-suggestions ${suggestionStyles.suggestions}`} aria-label="Sugestões de responsabilidades">
               <h2>Primeira divisão</h2>
               <p>Já deixamos uma primeira divisão pronta para você começar. Ajuste nomes, responsáveis e frequência se quiser; tudo pode ser revisto depois.</p>
               <p className="form-note">A divisão também considera o esforço de cada tarefa por trás das cenas. Se alguma estimativa não combinar com sua rotina, você pode ajustá-la depois.</p>
-              {suggestedTasks.filter((task) => selectedAreas.has(task.areaId)).map((task) => { const taskKey = task.id; const checked = selectedTaskKeys.has(taskKey); return <div className={`onboarding-suggestion-row ${checked ? "" : "suggestion-disabled"}`} key={taskKey}>
+              <div className={suggestionStyles.listHeading}><strong>Opções sugeridas</strong><span>As extras estão desmarcadas. Role para explorar e inclua só o que fizer parte da rotina.</span></div>
+              <div className={suggestionStyles.list} role="region" aria-label="Lista de sugestões. Role para ver mais opções" tabIndex={0}>
+              {suggestedTasks.filter((task) => selectedAreas.has(task.areaId)).map((task) => { const taskKey = task.id; const checked = selectedTaskKeys.has(taskKey); return <div className={`onboarding-suggestion-row ${suggestionStyles.row} ${checked ? "" : "suggestion-disabled"}`} key={taskKey}>
                 <div className="onboarding-suggestion-name"><input type="checkbox" aria-label={`Incluir ${task.name}`} checked={checked} onChange={() => setSelectedTaskKeys((current) => { const next = new Set(current); if (next.has(taskKey)) next.delete(taskKey); else next.add(taskKey); return next; })} /><span><small>{suggestedAreas.find((area) => area.id === task.areaId)?.name}</small><input aria-label={`${task.name}: nome`} disabled={!checked} value={task.name} onChange={(event) => setSuggestedTasks((current) => current.map((item) => item.id === task.id ? { ...item, name: event.target.value } : item))} /></span></div>
                 <label className="onboarding-suggestion-field"><span>Responsabilidade</span><select disabled={!checked} aria-label={`${task.name}: responsabilidade`} value={task.responsibility} onChange={(event) => setSuggestedTasks((current) => current.map((item) => item === task ? { ...item, responsibility: event.target.value as OnboardingSuggestion["responsibility"] } : item))}><option>Você</option><option>Outra pessoa</option><option>Nós</option></select></label>
                 <label className="onboarding-suggestion-field"><span>Frequência</span><select disabled={!checked} aria-label={`${task.name}: frequência`} value={task.recurrence} onChange={(event) => setSuggestedTasks((current) => current.map((item) => item === task ? { ...item, recurrence: event.target.value } : item))}><option>Diária</option><option>Semanal</option><option>3× por semana</option><option>Mensal</option></select></label>
               </div>; })}
+              </div>
               {!suggestedTasks.some((task) => selectedAreas.has(task.areaId) && selectedTaskKeys.has(task.id)) && <p className="form-note">Nenhuma sugestão selecionada. Vocês podem adicionar tarefas depois.</p>}
             </section>}
             <button className="button primary" onClick={finishOnboarding} disabled={selectedAreas.size === 0}>Continuar</button>

@@ -51,6 +51,13 @@ async function createHouse(page: Page, name: string) {
   await page.getByLabel("Nome da casa").fill(name);
   await page.getByRole("button", { name: "Continuar" }).click();
   await expect(page.getByRole("heading", { name: "O que faz parte da casa?" })).toBeVisible();
+  const suggestionList = page.getByRole("region", { name: /Lista de sugestões/ });
+  await expect(suggestionList).toBeVisible();
+  const suggestionScroll = await suggestionList.evaluate((element) => ({
+    overflowY: getComputedStyle(element).overflowY,
+    canScroll: element.scrollHeight > element.clientHeight
+  }));
+  expect(suggestionScroll).toEqual({ overflowY: "auto", canScroll: true });
   await page.getByRole("button", { name: "Continuar" }).click();
   await expect(page.getByRole("heading", { name: "Convide alguém, se fizer sentido." })).toBeVisible();
   await page.getByRole("button", { name: "Fazer depois" }).click();
