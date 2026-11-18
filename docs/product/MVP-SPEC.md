@@ -48,7 +48,7 @@ Onboarding: entrada única, presets, primeira divisão, convite opcional.
 
 Áreas: presets + criar/editar/ordenar/arquivar.
 
-Tarefas: CRUD, área, responsável, frequência, carga, instruções.
+Tarefas: CRUD, área, responsável, frequência e instruções. A estimativa de esforço é configurada pelo produto para a rotina já começar pronta.
 
 Ocorrências: geração por recorrência, conclusão e missed.
 
@@ -114,7 +114,9 @@ Não tornar cadastro de áreas uma etapa obrigatória do onboarding.
 
 8. Tarefas
 
-Obrigatórios: nome, área, responsabilidade, recorrência, carga. Opcionais: horário e instruções.
+Obrigatórios para a pessoa: nome, área, responsabilidade e recorrência. Opcionais: horário e instruções.
+
+A estimativa interna de esforço não é um passo de configuração. Sugestões já vêm com estimativa definida; tarefa criada manualmente recebe o padrão moderado (3 de 5). O valor não aparece nas telas do dia a dia. Pode ser ajustado opcionalmente em “Editar tarefa”, com explicação de que influencia a visão da divisão e as estrelas.
 
 Responsabilidade individual ou compartilhada (Nós).
 
@@ -214,11 +216,15 @@ Não incluir Tarefas como menu. Casa não é catch-all.
 
 Carga: 1 muito leve, 2 leve, 3 moderada, 4 pesada, 5 muito pesada. É ordinal.
 
+Essa estimativa é uma referência interna para preparar a primeira divisão, não uma medida exata de justiça. A pessoa pode começar sem configurá-la e, se necessário, ajustá-la na edição da tarefa. Não mostrar o valor numérico nas telas de rotina, resumo ou onboarding.
+
 Algoritmo inicial: score por ocorrência = carga × fator de frequência decrescente. Para n ocorrências esperadas no período, usar fator 1 + 0,5×(n−1)/n. Responsabilidade individual recebe 100% do score. Shared permanece no household até execução.
 
 Percentual entre membros é derivado dos scores. Estado: Bem equilibrada se diferença relativa ≤10%; Um pouco desequilibrada se >10% e ≤25%; Mais concentrada se >25%. Limiares ficam parametrizados no serviço.
 
 A fórmula nunca aparece na UI e pode ser recalibrada após uso real.
+
+“Nós” deve apresentar o resultado como uma visão geral estimada, não como medida exata ou veredito de equilíbrio. Explicar brevemente que esforço e frequência ajudam a compor a referência e que ela serve para conversar.
 
 ## 15. Recompensas — fechado
 
@@ -373,6 +379,10 @@ Analytics servem para aprendizado; não criar mecanismos de compulsão.
 ## 24. Critérios de aceite
 
 Cadastro → Hoje funciona sem assistência.
+
+Onboarding permite começar sem configurar estimativas de esforço; sugestões mantêm seus valores prontos e tarefas manuais usam o padrão 3.
+
+Estimativa não aparece nas listas comuns; edição permite ajuste opcional com explicação simples.
 
 Uma pessoa consegue criar e usar uma casa sem convidar outra.
 

@@ -1,6 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 import "./e2e/config";
 
+const e2ePort = process.env.CUIDAM_E2E_PORT ?? "3218";
+
 export default defineConfig({
   testDir: "./e2e/specs",
   fullyParallel: false,
@@ -13,14 +15,14 @@ export default defineConfig({
   globalTeardown: "./e2e/global-teardown.ts",
   use: {
     ...devices["Desktop Chrome"],
-    baseURL: "http://127.0.0.1:3217",
+    baseURL: `http://127.0.0.1:${e2ePort}`,
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
     video: "retain-on-failure"
   },
   webServer: {
     command: "node e2e/start-server.mjs",
-    url: "http://127.0.0.1:3217",
+    url: `http://127.0.0.1:${e2ePort}`,
     reuseExistingServer: false,
     timeout: 120_000
   }

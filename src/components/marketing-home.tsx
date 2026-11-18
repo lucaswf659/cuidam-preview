@@ -11,7 +11,7 @@ function LeafMark() {
 
 const steps = [
   { number: "01", title: "Escolham o que faz parte da casa", copy: "Comecem por áreas e sugestões de responsabilidades. Fica só o que fizer sentido para vocês.", tone: "sage" },
-  { number: "02", title: "Combinem quem cuida de cada parte", copy: "Definam responsabilidades, frequência e carga. A divisão pode ser ajustada quando a rotina mudar.", tone: "butter" },
+  { number: "02", title: "Comecem com uma divisão pronta", copy: "As sugestões já vêm organizadas para começar. Nomes, responsáveis e frequência podem ser ajustados quando a rotina mudar.", tone: "butter" },
   { number: "03", title: "Sigam um dia de cada vez", copy: "A tela Hoje mostra o que cabe no período, para a casa seguir funcionando sem alguém ter de lembrar por todos.", tone: "sky" },
 ];
 

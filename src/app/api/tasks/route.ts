@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getRealContext, getRealHouseholdSnapshot, recurrenceFromLabel } from "@/lib/real/household";
 import { periodKeyForRecurrence } from "@/lib/real/recurrence";
 import type { MockResponsibility } from "@/lib/mock/store";
+import { DEFAULT_TASK_LOAD } from "@/lib/task-load";
 
 const validRecurrences = ["Diária", "Semanal", "3× por semana", "Mensal"];
 
@@ -19,10 +20,10 @@ function parseTaskPayload(body: TaskPayload) {
     typeof body.name !== "string" || !body.name.trim() ||
     typeof body.areaId !== "string" ||
     typeof body.recurrence !== "string" || !validRecurrences.includes(body.recurrence) ||
-    typeof body.load !== "number" || body.load < 1 || body.load > 5
+    (body.load !== undefined && (typeof body.load !== "number" || body.load < 1 || body.load > 5))
   ) return null;
   const responsibility: MockResponsibility = body.responsibility === "Nós" || body.responsibility === "Outra pessoa" ? body.responsibility : "Você";
-  return { name: body.name.trim(), areaId: body.areaId, responsibility, recurrence: body.recurrence, load: body.load };
+  return { name: body.name.trim(), areaId: body.areaId, responsibility, recurrence: body.recurrence, load: body.load === undefined ? DEFAULT_TASK_LOAD : body.load as number };
 }
 
 async function resolveResponsibility(responsibility: MockResponsibility, householdId: string, membershipId: string) {
@@ -42,7 +43,7 @@ export async function POST(request: Request) {
   if (!context) return NextResponse.json({ error: "Sua sessão expirou. Entre novamente." }, { status: 401 });
   const body = await request.json().catch(() => null) as TaskPayload | null;
   const parsed = parseTaskPayload(body ?? {});
-  if (!parsed) return NextResponse.json({ error: "Preencha nome, área, frequência e carga." }, { status: 400 });
+  if (!parsed) return NextResponse.json({ error: "Preencha nome, área e frequência." }, { status: 400 });
 
   const area = await prisma.area.findFirst({ where: { id: parsed.areaId, householdId: context.household.id, status: "ACTIVE" } });
   if (!area) return NextResponse.json({ error: "A área informada não pertence a esta casa." }, { status: 400 });
@@ -107,7 +108,7 @@ export async function PATCH(request: Request) {
         responsibilityType: responsibility.responsibilityType,
         responsibleMemberId: responsibility.responsibleMemberId,
         ...recurrenceFromLabel(parsed.recurrence),
-        load: parsed.load
+        load: body.load === undefined ? existing.load : parsed.load
       }
     });
     return NextResponse.json({ task: await taskResponse(existing.id) });

@@ -58,16 +58,16 @@ async function createHouse(page: Page, name: string) {
   await expect(page).toHaveURL(/\/today$/);
 }
 
-async function addTask(page: Page, name: string, responsibility: "Você" | "Nós", load = 2) {
+async function addTask(page: Page, name: string, responsibility: "Você" | "Nós") {
   const responsePromise = page.waitForResponse((response) => response.url().endsWith("/api/tasks") && response.request().method() === "POST");
   await page.getByRole("button", { name: "Adicionar tarefa" }).click();
   await page.getByLabel("Nome da tarefa").fill(name);
   await page.getByLabel("Responsabilidade").selectOption(responsibility);
-  if (load !== 2) await page.getByRole("button", { name: `Carga ${load} de 5` }).click();
   await page.getByRole("button", { name: "Adicionar", exact: true }).click();
   const response = await responsePromise;
   expect(response.ok()).toBeTruthy();
   const body = await response.json();
+  expect(body.task.load).toBe(3);
   await expect(page.locator(".task-card").filter({ hasText: name })).toBeVisible();
   return body.task.id as string;
 }
@@ -104,9 +104,20 @@ test("conta, casa, tarefa compartilhada, convite, isolamento e resgate idempoten
     await expect(ownerPage).toHaveURL(/\/today$/);
     await expect(ownerPage.getByRole("heading", { name: /Pessoa ☀️/ })).toBeVisible();
 
-    const earnedTaskId = await addTask(ownerPage, `E2E tarefa estrelas ${runId}`, "Você", 5);
-    await ownerPage.locator(".task-card").filter({ hasText: `E2E tarefa estrelas ${runId}` }).getByRole("button", { name: /Concluir/ }).click();
-    await expect(ownerPage.locator(".task-card").filter({ hasText: `E2E tarefa estrelas ${runId}` })).toHaveCount(0);
+    const onboarding = await api(ownerPage, "/api/onboarding", "GET");
+    const earnedTaskName = `E2E tarefa estrelas ${runId}`;
+    const earnedTaskResponse = await api(ownerPage, "/api/tasks", "POST", {
+      name: earnedTaskName,
+      areaId: onboarding.body.household.areas[0].id,
+      responsibility: "Você",
+      recurrence: "Diária",
+      load: 5
+    });
+    expect(earnedTaskResponse.status).toBe(201);
+    const earnedTaskId = earnedTaskResponse.body.task.id as string;
+    await ownerPage.reload();
+    await ownerPage.locator(".task-card").filter({ hasText: earnedTaskName }).getByRole("button", { name: /Concluir/ }).click();
+    await expect(ownerPage.locator(".task-card").filter({ hasText: earnedTaskName })).toHaveCount(0);
 
     const sharedTaskId = await addTask(ownerPage, `E2E tarefa compartilhada ${runId}`, "Nós");
     await ownerPage.getByRole("link", { name: "Configurações" }).click();

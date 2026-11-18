@@ -108,12 +108,16 @@ describe("OnboardingFlow", () => {
     await waitFor(() => expect(screen.getByLabelText("Nome da casa")).toBeInTheDocument());
     fireEvent.click(screen.getByRole("button", { name: "Continuar" }));
     expect(screen.getByRole("heading", { name: "Primeira divisão" })).toBeInTheDocument();
+    expect(screen.getByText(/Já deixamos uma primeira divisão pronta para você começar/)).toBeInTheDocument();
+    expect(screen.getByText(/considera o esforço de cada tarefa por trás das cenas/)).toBeInTheDocument();
+    expect(screen.queryByLabelText(/carga/i)).not.toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("Limpar bancada: nome"), { target: { value: "Cuidar da bancada" } });
     fireEvent.change(screen.getByLabelText("Cuidar da bancada: responsabilidade"), { target: { value: "Outra pessoa" } });
     fireEvent.click(screen.getByRole("button", { name: "Continuar" }));
     await waitFor(() => expect(screen.getByLabelText("E-mail de quem mora com você")).toBeInTheDocument());
     const onboardingPayload = JSON.parse(fetchMock.mock.calls[1][1].body as string);
     expect(onboardingPayload.tasks).toContainEqual(expect.objectContaining({ name: "Cuidar da bancada", responsibility: "Outra pessoa" }));
+    expect(onboardingPayload.tasks.find((task: { name: string }) => task.name === "Cuidar da bancada").load).toBe(2);
     fireEvent.change(screen.getByLabelText("E-mail de quem mora com você"), { target: { value: "maria@example.com" } });
     fireEvent.click(screen.getByRole("button", { name: "Gerar link do convite" }));
     await waitFor(() => expect(screen.getByLabelText("Link do convite")).toHaveValue("http://localhost:3000/convite/teste"));
