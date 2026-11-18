@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => {
   const tx = {
+    $queryRaw: vi.fn(),
+    household: { findUnique: vi.fn() },
     user: {
       upsert: vi.fn(),
       update: vi.fn()
@@ -41,7 +43,7 @@ describe("POST /api/invite/[token]", () => {
       email: "convidado@example.com",
       status: "PENDING",
       expiresAt: new Date(Date.now() + 60_000),
-      household: { id: "house-1", name: "Casa de teste" }
+      household: { id: "house-1", name: "Casa de teste", status: "ACTIVE" }
     });
     mocks.createClient.mockResolvedValue({
       auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: "auth-2", email: "convidado@example.com", user_metadata: { display_name: "Convidado WF", name: "convidado" } } } }) }
@@ -49,6 +51,7 @@ describe("POST /api/invite/[token]", () => {
     mocks.tx.user.upsert.mockResolvedValue({ id: "user-2", activeHouseholdId: null });
     mocks.tx.membership.findUnique.mockResolvedValue(null);
     mocks.tx.membership.count.mockResolvedValue(1);
+    mocks.tx.household.findUnique.mockResolvedValue({ status: "ACTIVE" });
   });
 
   it("vincula a segunda conta à casa convidada e aceita o convite", async () => {
@@ -80,6 +83,22 @@ describe("POST /api/invite/[token]", () => {
       data: { status: "ACTIVE", leftAt: null }
     });
     expect(mocks.tx.membership.create).not.toHaveBeenCalled();
+  });
+
+  it("does not accept a pending invite for a deactivated household", async () => {
+    mocks.prisma.invitation.findUnique.mockResolvedValue({
+      id: "invite-1",
+      householdId: "house-1",
+      email: "convidado@example.com",
+      status: "PENDING",
+      expiresAt: new Date(Date.now() + 60_000),
+      household: { id: "house-1", name: "Casa de teste", status: "INACTIVE" }
+    });
+
+    const response = await POST(new Request("http://localhost/api/invite/token"), { params: Promise.resolve({ token: "token" }) });
+
+    expect(response.status).toBe(404);
+    expect(mocks.prisma.$transaction).not.toHaveBeenCalled();
   });
 });
 

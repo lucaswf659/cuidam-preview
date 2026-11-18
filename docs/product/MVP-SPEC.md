@@ -40,7 +40,7 @@ Não otimizar por DAU/streak; otimizar por redução de esforço.
 
 Conta: cadastro, login, recuperação.
 
-Casa: 1 casa ativa por conta; máximo 2 membros no MVP. Uma pessoa pode sair da casa para aceitar convite de outra; sair encerra seu acesso, preserva a casa e seu histórico, e libera a conta para outro vínculo.
+Casa: 1 casa ativa por conta; máximo 2 membros no MVP. Pode ser usada por uma pessoa só; convidar alguém é opcional. Uma pessoa pode sair da casa para aceitar convite de outra. Se a última pessoa sair, a casa é desativada, sem apagar dados ou histórico. Uma pessoa que já fez parte dela pode reativá-la quando estiver sem casa ativa. Múltiplas casas ativas por conta ficam fora do MVP.
 
 Convite: email/token, estados pendente/aceito/cancelado/expirado/inválido.
 
@@ -84,7 +84,7 @@ A interface não deve exigir que a pessoa aprenda esses conceitos antes de agir.
 
 Uma tela de entrada: proposta + Criar conta + Já tenho conta.
 
-Cadastro: nome, email, senha.
+Cadastro: nome, email, senha. A casa pode ser organizada por uma pessoa só; convidar alguém é opcional.
 
 Casa: nome padrão editável.
 
@@ -374,7 +374,11 @@ Analytics servem para aprendizado; não criar mecanismos de compulsão.
 
 Cadastro → Hoje funciona sem assistência.
 
+Uma pessoa consegue criar e usar uma casa sem convidar outra.
+
 Convite → segunda pessoa entra sem refazer onboarding.
+
+Ao sair a última pessoa, a casa é desativada e uma antiga pessoa membro pode reabri-la sem perder o histórico.
 
 Nós → qualquer área abre a lista correta daquela área.
 

@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { mockHouseholdForSession, saveMockHousehold } from "@/lib/mock/store";
-import { recurrenceFromLabel } from "@/lib/real/household";
+import { getReopenableHouseholds, recurrenceFromLabel } from "@/lib/real/household";
 import { periodKeyForRecurrence } from "@/lib/real/recurrence";
 import { onboardingPayloadSchema } from "@/lib/real/onboarding-schema";
 
@@ -27,7 +27,9 @@ export async function GET() {
     where: { authProviderId: user.id },
     include: { activeHousehold: { include: { areas: { where: { status: "ACTIVE" }, orderBy: { sortOrder: "asc" } } } } }
   });
-  if (!dbUser?.activeHousehold) return NextResponse.json({ household: null });
+  if (!dbUser?.activeHousehold || dbUser.activeHousehold.status !== "ACTIVE") {
+    return NextResponse.json({ household: null, reopenableHouseholds: await getReopenableHouseholds(user.id) });
+  }
   return NextResponse.json({ household: { id: dbUser.activeHousehold.id, name: dbUser.activeHousehold.name, areas: dbUser.activeHousehold.areas } });
 }
 
@@ -69,9 +71,10 @@ export async function POST(request: Request) {
     });
     await tx.$queryRaw`SELECT "id" FROM "User" WHERE "id" = ${dbUser.id} FOR UPDATE`;
     const lockedUser = await tx.user.findUnique({ where: { id: dbUser.id } });
-    const existing = lockedUser?.activeHouseholdId
+    const existingHousehold = lockedUser?.activeHouseholdId
       ? await tx.household.findUnique({ where: { id: lockedUser.activeHouseholdId } })
       : null;
+    const existing = existingHousehold?.status === "ACTIVE" ? existingHousehold : null;
     if (existing) return { household: existing, created: false };
 
     const household = await tx.household.create({ data: { name: parsed.data.houseName, timezone: "America/Sao_Paulo" } });

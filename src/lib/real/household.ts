@@ -31,7 +31,7 @@ export async function getRealContext() {
       activeHousehold: true
     }
   });
-  if (!dbUser?.activeHousehold) return null;
+  if (!dbUser?.activeHousehold || dbUser.activeHousehold.status !== "ACTIVE") return null;
 
   const displayName = authDisplayName(user);
   if (displayName && displayName !== dbUser.name) {
@@ -42,6 +42,23 @@ export async function getRealContext() {
   const membership = dbUser.memberships.find((item) => item.householdId === dbUser.activeHouseholdId);
   if (!membership) return null;
   return { user, dbUser, household: dbUser.activeHousehold, membership };
+}
+
+export async function getReopenableHouseholds(authProviderId: string) {
+  const memberships = await prisma.membership.findMany({
+    where: {
+      user: { authProviderId },
+      status: "LEFT",
+      household: {
+        status: "INACTIVE",
+        memberships: { none: { status: "ACTIVE" } }
+      }
+    },
+    select: { household: { select: { id: true, name: true } } },
+    distinct: ["householdId"],
+    orderBy: { leftAt: "desc" }
+  });
+  return memberships.map(({ household }) => household);
 }
 
 export async function getRealHouseholdSnapshot(): Promise<MockHousehold | null> {

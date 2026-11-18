@@ -22,7 +22,7 @@ describe("getRealContext display name sync", () => {
       id: "user-1",
       name: "lucaswf659",
       activeHouseholdId: "house-1",
-      activeHousehold: { id: "house-1" },
+      activeHousehold: { id: "house-1", status: "ACTIVE" },
       memberships: [{ householdId: "house-1", id: "membership-1" }]
     });
     mocks.updateUser.mockResolvedValue({});

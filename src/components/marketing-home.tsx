@@ -16,7 +16,7 @@ const steps = [
 ];
 
 const faqs = [
-  { q: "Preciso convidar alguém para começar?", a: "Não. Você pode organizar sua parte primeiro e convidar outra pessoa quando fizer sentido." },
+  { q: "Posso usar o Cuidam morando sozinho?", a: "Sim. Organize sua rotina por conta própria. Convidar alguém é opcional e você pode fazer isso depois, se fizer sentido." },
   { q: "O Cuidam serve só para tarefas diárias?", a: "Não. A rotina pode incluir responsabilidades diárias, semanais e mensais, em diferentes áreas da casa." },
   { q: "O app mostra quem faz mais?", a: "O Cuidam ajuda a enxergar como as responsabilidades estão distribuídas. Não há ranking nem competição." },
   { q: "O convite é enviado por e-mail?", a: "O Cuidam gera um link para você compartilhar por onde preferir. Nenhum e-mail é enviado automaticamente." },
@@ -45,7 +45,7 @@ export function MarketingHome() {
       <div className="marketing-hero-copy">
         <p className="marketing-eyebrow"><span aria-hidden="true">✳</span> Menos cobrança. Mais parceria.</p>
         <h1 id="marketing-title">A casa não precisa morar na cabeça de uma pessoa só.</h1>
-        <p className="marketing-intro">O Cuidam ajuda vocês a dividir responsabilidades com clareza — para cada um saber o que é seu e a rotina ficar mais leve para todo mundo.</p>
+        <p className="marketing-intro">Organize a rotina da casa, sozinho ou com quem divide esse cuidado com você. O Cuidam ajuda a deixar claro o que precisa acontecer, sem precisar lembrar ou cobrar.</p>
         <div className="marketing-hero-actions">
           <Link className="marketing-button" href="/entrar?mode=signup">Organizar nossa casa <span aria-hidden="true">↗</span></Link>
           <Link className="marketing-secondary-link" href="/entrar?mode=login">Já tenho uma conta</Link>
@@ -59,7 +59,7 @@ export function MarketingHome() {
         <div className="marketing-demo-card">
           <div className="marketing-demo-topline"><span>EXEMPLO DE UMA ROTINA</span><span className="marketing-demo-spark" aria-hidden="true">✳</span></div>
           <h2>Hoje, sem complicar.</h2>
-          <p className="marketing-demo-caption">Uma casa · responsabilidades claras</p>
+          <p className="marketing-demo-caption">Uma casa · rotina em dia</p>
           <div className="marketing-demo-task">
             <span className="marketing-demo-icon demo-icon-kitchen" aria-hidden="true">⌂</span>
             <span className="marketing-demo-task-copy"><strong>Deixar a bancada livre</strong><small>Cozinha · sua responsabilidade</small></span>

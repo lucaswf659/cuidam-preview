@@ -8,6 +8,8 @@ export async function POST() {
 
   const leftAt = new Date();
   const left = await prisma.$transaction(async (tx) => {
+    await tx.$queryRaw`SELECT "id" FROM "User" WHERE "id" = ${context.dbUser.id} FOR UPDATE`;
+    await tx.$queryRaw`SELECT "id" FROM "Household" WHERE "id" = ${context.household.id} FOR UPDATE`;
     const membership = await tx.membership.updateMany({
       where: { id: context.membership.id, householdId: context.household.id, userId: context.dbUser.id, status: "ACTIVE" },
       data: { status: "LEFT", leftAt }
@@ -19,9 +21,15 @@ export async function POST() {
       data: { activeHouseholdId: null }
     });
     if (user.count !== 1) throw new Error("O vínculo ativo da casa mudou. Tente novamente.");
-    return true;
+
+    const activeMemberCount = await tx.membership.count({ where: { householdId: context.household.id, status: "ACTIVE" } });
+    if (activeMemberCount > 0) return { deactivated: false };
+
+    await tx.household.updateMany({ where: { id: context.household.id, status: "ACTIVE" }, data: { status: "INACTIVE" } });
+    await tx.invitation.updateMany({ where: { householdId: context.household.id, status: "PENDING" }, data: { status: "CANCELLED" } });
+    return { deactivated: true };
   });
 
   if (!left) return NextResponse.json({ error: "Sua conta já não está vinculada a esta casa." }, { status: 409 });
-  return NextResponse.json({ left: true });
+  return NextResponse.json({ left: true, deactivated: left.deactivated });
 }

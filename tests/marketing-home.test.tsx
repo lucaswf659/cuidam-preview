@@ -7,6 +7,8 @@ describe("MarketingHome", () => {
     render(<MarketingHome />);
 
     expect(screen.getByRole("heading", { name: "A casa não precisa morar na cabeça de uma pessoa só." })).toBeInTheDocument();
+    expect(screen.getByText("Posso usar o Cuidam morando sozinho?")).toBeInTheDocument();
+    expect(screen.getByText(/Organize a rotina da casa, sozinho ou com quem divide esse cuidado/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Entrar" })).toHaveAttribute("href", "/entrar?mode=login");
     expect(screen.getByRole("link", { name: /^Começar$/ })).toHaveAttribute("href", "/entrar?mode=signup");
     expect(screen.getByRole("link", { name: "Organizar nossa casa" })).toHaveAttribute("href", "/entrar?mode=signup");

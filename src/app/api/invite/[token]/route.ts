@@ -17,6 +17,7 @@ async function findValidInvitation(token: string) {
   });
   if (!invitation) return { invitation: null, error: "Convite não encontrado." };
   if (invitation.status !== "PENDING") return { invitation: null, error: "Este convite não está mais disponível." };
+  if (invitation.household.status !== "ACTIVE") return { invitation: null, error: "Esta casa está desativada. Peça a uma pessoa que já fez parte dela para reabri-la e enviar um novo convite." };
   if (invitation.expiresAt <= new Date()) {
     await prisma.invitation.update({ where: { id: invitation.id }, data: { status: "EXPIRED" } });
     return { invitation: null, error: "Este convite expirou." };
@@ -49,6 +50,9 @@ export async function POST(_request: Request, context: RouteContext) {
       update: { email: user.email!, name: displayName },
       create: { authProviderId: user.id, email: user.email!, name: displayName }
     });
+    await tx.$queryRaw`SELECT "id" FROM "Household" WHERE "id" = ${invitation.householdId} FOR UPDATE`;
+    const household = await tx.household.findUnique({ where: { id: invitation.householdId }, select: { status: true } });
+    if (!household || household.status !== "ACTIVE") return { error: "Esta casa está desativada. Peça a uma pessoa que já fez parte dela para reabri-la e enviar um novo convite." };
     if (dbUser.activeHouseholdId && dbUser.activeHouseholdId !== invitation.householdId) return { error: "Sua conta já está vinculada a outra casa. Para aceitar este convite, saia da casa atual em Configurações e abra o link novamente." };
     const existingMembership = await tx.membership.findUnique({ where: { householdId_userId: { householdId: invitation.householdId, userId: dbUser.id } } });
     if (!existingMembership) {

@@ -2,8 +2,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => {
   const tx = {
-    membership: { updateMany: vi.fn() },
-    user: { updateMany: vi.fn() }
+    $queryRaw: vi.fn(),
+    membership: { updateMany: vi.fn(), count: vi.fn() },
+    user: { updateMany: vi.fn() },
+    household: { updateMany: vi.fn() },
+    invitation: { updateMany: vi.fn() }
   };
   return {
     tx,
@@ -26,7 +29,10 @@ describe("POST /api/household/leave", () => {
       membership: { id: "membership-1" }
     });
     mocks.tx.membership.updateMany.mockResolvedValue({ count: 1 });
+    mocks.tx.membership.count.mockResolvedValue(0);
     mocks.tx.user.updateMany.mockResolvedValue({ count: 1 });
+    mocks.tx.household.updateMany.mockResolvedValue({ count: 1 });
+    mocks.tx.invitation.updateMany.mockResolvedValue({ count: 0 });
   });
 
   it("marks the current membership as left and clears the active household", async () => {
@@ -34,7 +40,7 @@ describe("POST /api/household/leave", () => {
     const body = await response.json();
 
     expect(response.status).toBe(200);
-    expect(body).toEqual({ left: true });
+    expect(body).toEqual({ left: true, deactivated: true });
     expect(mocks.tx.membership.updateMany).toHaveBeenCalledWith({
       where: { id: "membership-1", householdId: "house-1", userId: "user-1", status: "ACTIVE" },
       data: { status: "LEFT", leftAt: expect.any(Date) }
@@ -43,6 +49,26 @@ describe("POST /api/household/leave", () => {
       where: { id: "user-1", activeHouseholdId: "house-1" },
       data: { activeHouseholdId: null }
     });
+    expect(mocks.tx.household.updateMany).toHaveBeenCalledWith({
+      where: { id: "house-1", status: "ACTIVE" },
+      data: { status: "INACTIVE" }
+    });
+    expect(mocks.tx.invitation.updateMany).toHaveBeenCalledWith({
+      where: { householdId: "house-1", status: "PENDING" },
+      data: { status: "CANCELLED" }
+    });
+  });
+
+  it("keeps the house active while another member remains", async () => {
+    mocks.tx.membership.count.mockResolvedValue(1);
+
+    const response = await POST();
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body).toEqual({ left: true, deactivated: false });
+    expect(mocks.tx.household.updateMany).not.toHaveBeenCalled();
+    expect(mocks.tx.invitation.updateMany).not.toHaveBeenCalled();
   });
 
   it("rejects requests without an active household", async () => {

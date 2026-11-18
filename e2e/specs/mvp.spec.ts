@@ -47,12 +47,12 @@ async function openLoginForm(page: Page) {
 }
 
 async function createHouse(page: Page, name: string) {
-  await expect(page.getByRole("heading", { name: "Como vocês chamam a casa?" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Que nome vamos dar à sua casa?" })).toBeVisible();
   await page.getByLabel("Nome da casa").fill(name);
   await page.getByRole("button", { name: "Continuar" }).click();
   await expect(page.getByRole("heading", { name: "O que faz parte da casa?" })).toBeVisible();
   await page.getByRole("button", { name: "Continuar" }).click();
-  await expect(page.getByRole("heading", { name: /Convide alguém da casa/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Convide alguém, se fizer sentido." })).toBeVisible();
   await page.getByRole("button", { name: "Fazer depois" }).click();
   await page.getByRole("button", { name: "Ir para Hoje" }).click();
   await expect(page).toHaveURL(/\/today$/);
@@ -166,12 +166,15 @@ test("conta, casa, tarefa compartilhada, convite, isolamento e resgate idempoten
 });
 
 test("pessoa pode sair da casa atual e aceitar convite de outra casa", async ({ browser }: { browser: Browser }) => {
+  test.setTimeout(150_000);
   const inviterEmail = `${prefix}${runId}-switch-inviter@example.com`;
   const invitedEmail = `${prefix}${runId}-switch-invited@example.com`;
   const inviterContext = await browser.newContext();
   const invitedContext = await browser.newContext();
   const inviterPage = await inviterContext.newPage();
   const invitedPage = await invitedContext.newPage();
+  const prisma = new PrismaClient();
+  let sharedHouseId: string | undefined;
 
   try {
     await signUp(inviterPage, inviterEmail, "Pessoa que convida E2E");
@@ -191,13 +194,39 @@ test("pessoa pode sair da casa atual e aceitar convite de outra casa", async ({ 
     await invitedPage.getByRole("button", { name: "Sair da casa" }).click();
     await expect(invitedPage.getByRole("alertdialog").getByRole("heading", { name: "Sair de E2E" })).toBeVisible();
     await invitedPage.getByRole("alertdialog").getByRole("button", { name: "Sair da casa" }).click();
-    await expect(invitedPage).toHaveURL(/\/$/);
+    await expect(invitedPage).toHaveURL(/\/entrar\?mode=login$/);
+    await expect(invitedPage.getByRole("form", { name: "Ou volte para uma casa anterior" }).getByRole("combobox")).not.toHaveValue("");
 
     await invitedPage.goto(inviteUrl);
     await expect(invitedPage.getByRole("heading", { name: "Agora vocês cuidam juntos." })).toBeVisible();
     await invitedPage.getByRole("button", { name: "Ir para Hoje" }).click();
     await expect(invitedPage).toHaveURL(/\/today$/);
+
+    const sharedHouse = await api(invitedPage, "/api/onboarding", "GET");
+    sharedHouseId = sharedHouse.body.household.id as string;
+    await inviterPage.goto("/casa");
+    await inviterPage.getByRole("button", { name: "Sair da casa" }).click();
+    await inviterPage.getByRole("alertdialog").getByRole("button", { name: "Sair da casa" }).click();
+    await expect(inviterPage).toHaveURL(/\/entrar\?mode=login$/);
+    await expect(prisma.household.findUniqueOrThrow({ where: { id: sharedHouseId } })).resolves.toMatchObject({ status: "ACTIVE" });
+
+    await invitedPage.goto("/casa");
+    await invitedPage.getByRole("button", { name: "Sair da casa" }).click();
+    await invitedPage.getByRole("alertdialog").getByRole("button", { name: "Sair da casa" }).click();
+    await expect(invitedPage).toHaveURL(/\/entrar\?mode=login$/);
+    await expect(prisma.household.findUniqueOrThrow({ where: { id: sharedHouseId } })).resolves.toMatchObject({ status: "INACTIVE" });
+    await invitedPage.getByRole("form", { name: "Ou volte para uma casa anterior" }).getByRole("combobox").selectOption({ label: `E2E ${runId} Casa para convite` });
+    const reopenButton = invitedPage.getByRole("button", { name: "Reabrir casa" });
+    await expect(reopenButton).toBeEnabled();
+    const [reactivationResult] = await Promise.all([
+      invitedPage.waitForResponse((response) => response.url().includes("/api/household/reactivate") && response.request().method() === "POST", { timeout: 10_000 }),
+      reopenButton.click()
+    ]);
+    expect(reactivationResult.status()).toBe(303);
+    await expect(invitedPage).toHaveURL(/\/today$/);
+    await expect(prisma.household.findUniqueOrThrow({ where: { id: sharedHouseId } })).resolves.toMatchObject({ status: "ACTIVE" });
   } finally {
+    await prisma.$disconnect();
     await Promise.all([inviterContext, invitedContext].map((context) => context.close().catch(() => undefined)));
   }
 });

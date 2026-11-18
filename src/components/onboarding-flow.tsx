@@ -10,7 +10,7 @@ import { onboardingSuggestionsForAreas, type OnboardingSuggestion } from "@/lib/
 type Step = "welcome" | "signup" | "house" | "presets" | "invite" | "done";
 type AuthMode = "signup" | "login";
 
-type OnboardingFlowProps = { initialStep?: Step; initialMode?: AuthMode; initialName?: string; initialEmail?: string; confirmationCompleted?: boolean; };
+type OnboardingFlowProps = { initialStep?: Step; initialMode?: AuthMode; initialName?: string; initialEmail?: string; confirmationCompleted?: boolean; reopenableHouseholds?: Array<{ id: string; name: string }>; reopenError?: string; };
 
 const suggestedAreas = [
   { id: "kitchen", icon: "🍳", name: "Cozinha", selected: true },
@@ -21,7 +21,7 @@ const suggestedAreas = [
   { id: "pets", icon: "🐾", name: "Pets", selected: false }
 ];
 
-export function OnboardingFlow({ initialStep = "welcome", initialMode = "signup", initialName = "", initialEmail = "", confirmationCompleted = false }: OnboardingFlowProps) {
+export function OnboardingFlow({ initialStep = "welcome", initialMode = "signup", initialName = "", initialEmail = "", confirmationCompleted = false, reopenableHouseholds = [], reopenError = "" }: OnboardingFlowProps) {
   const [step, setStep] = useState<Step>(initialStep);
   const [authMode, setAuthMode] = useState<AuthMode>(initialMode);
   const [name, setName] = useState(initialName);
@@ -33,7 +33,14 @@ export function OnboardingFlow({ initialStep = "welcome", initialMode = "signup"
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteUrl, setInviteUrl] = useState("");
   const [houseName, setHouseName] = useState("Nossa casa");
-  const [error, setError] = useState("");
+  const [availablePreviousHouses, setAvailablePreviousHouses] = useState(reopenableHouseholds);
+  const [previousHouseId, setPreviousHouseId] = useState(reopenableHouseholds[0]?.id ?? "");
+  const [error, setError] = useState(() => ({
+    session: "Sua sessão expirou. Entre novamente para reabrir a casa.",
+    choose: "Escolha uma casa para reabrir.",
+    unavailable: "Esta casa não está disponível para reabertura nesta conta.",
+    occupied: "Alguém ainda está nesta casa. Peça um novo convite para voltar."
+  }[reopenError] ?? ""));
   const [signupConfirmationSent, setSignupConfirmationSent] = useState(false);
   const [confirmationResent, setConfirmationResent] = useState(false);
   const [resendingConfirmation, setResendingConfirmation] = useState(false);
@@ -55,6 +62,9 @@ export function OnboardingFlow({ initialStep = "welcome", initialMode = "signup"
         const householdResponse = await fetch("/api/onboarding");
         const householdData = await householdResponse.json();
         if (householdData.household) { router.replace("/today"); return; }
+        const previousHouses = Array.isArray(householdData.reopenableHouseholds) ? householdData.reopenableHouseholds as Array<{ id: string; name: string }> : [];
+        setAvailablePreviousHouses(previousHouses);
+        setPreviousHouseId(previousHouses[0]?.id ?? "");
       }
       setStep("house");
       return;
@@ -84,6 +94,9 @@ export function OnboardingFlow({ initialStep = "welcome", initialMode = "signup"
         router.replace("/today");
         return;
       }
+      const previousHouses = Array.isArray(householdData.reopenableHouseholds) ? householdData.reopenableHouseholds as Array<{ id: string; name: string }> : [];
+      setAvailablePreviousHouses(previousHouses);
+      setPreviousHouseId(previousHouses[0]?.id ?? "");
     }
     setStep("house");
   };
@@ -179,7 +192,7 @@ export function OnboardingFlow({ initialStep = "welcome", initialMode = "signup"
             <div className="organic-shape" aria-hidden="true"><BrandMark /></div>
             <p className="eyebrow">Uma casa mais leve</p>
             <h1>Cada um cuida do que é seu.</h1>
-            <p className="lead">Organizem as responsabilidades da casa sem precisar lembrar ou cobrar um ao outro.</p>
+            <p className="lead">Organize a rotina da casa, sozinho ou com quem divide esse cuidado com você.</p>
             <div className="actions stacked-actions">
               <button className="button primary" onClick={() => { setAuthMode("signup"); setStep("signup"); }}>Criar conta</button>
               <button className="button secondary" onClick={() => { setAuthMode("login"); setStep("signup"); }}>Já tenho uma conta</button>
@@ -228,15 +241,26 @@ export function OnboardingFlow({ initialStep = "welcome", initialMode = "signup"
         )}
 
         {step === "house" && (
-          <form className="step-content form-step" onSubmit={(event) => { event.preventDefault(); setStep("presets"); }}>
+          <section className="step-content form-step">
             {confirmationCompleted && <p className="form-success" role="status">E-mail confirmado. Agora vamos configurar sua casa.</p>}
             <button className="back" type="button" onClick={() => setStep("signup")}>← Voltar</button>
             <p className="eyebrow">Sua casa</p>
-            <h1>Como vocês chamam a casa?</h1>
-            <p className="lead">Pode deixar “Nossa casa”. Dá para mudar depois.</p>
-            <label>Nome da casa<input value={houseName} onChange={(event) => setHouseName(event.target.value)} required /></label>
-            <button className="button primary" type="submit">Continuar</button>
-          </form>
+            <h1>Que nome vamos dar à sua casa?</h1>
+            <p className="lead">Pode deixar “Nossa casa”. Você pode organizar sua rotina sozinho e convidar alguém depois.</p>
+            {error && availablePreviousHouses.length === 0 && <p className="form-error" role="alert">{error}</p>}
+            {availablePreviousHouses.length > 0 && <form className="reopen-house-panel" action="/api/household/reactivate" method="post" aria-labelledby="reopen-house-title">
+              <h2 id="reopen-house-title">Ou volte para uma casa anterior</h2>
+              <p>As casas desativadas ficam guardadas com todo o histórico. Você pode reabri-las quando quiser.</p>
+              <label>Casa anterior<select name="householdId" value={previousHouseId} onChange={(event) => setPreviousHouseId(event.target.value)}><option value="">Escolha uma casa</option>{availablePreviousHouses.map((house) => <option key={house.id} value={house.id}>{house.name}</option>)}</select></label>
+              <button className="button secondary" type="submit" disabled={!previousHouseId}>Reabrir casa</button>
+              {error && <p className="form-error" role="alert">{error}</p>}
+            </form>}
+            {availablePreviousHouses.length > 0 && <p className="form-note reopen-house-or">Ou crie uma nova casa</p>}
+            <form className="form-step" onSubmit={(event) => { event.preventDefault(); setStep("presets"); }}>
+              <label>Nome da casa<input value={houseName} onChange={(event) => setHouseName(event.target.value)} required /></label>
+              <button className="button primary" type="submit">Continuar</button>
+            </form>
+          </section>
         )}
 
         {step === "presets" && (
@@ -273,8 +297,8 @@ export function OnboardingFlow({ initialStep = "welcome", initialMode = "signup"
           <section className="step-content form-step">
             <button className="back" type="button" onClick={() => setStep("presets")}>← Voltar</button>
             <p className="eyebrow">Pessoas</p>
-            <h1>Convide alguém da casa.</h1>
-            <p className="lead">Gere um link e compartilhe por onde quiser. Nenhum e-mail será enviado; você pode fazer isso depois.</p>
+            <h1>Convide alguém, se fizer sentido.</h1>
+            <p className="lead">Você pode usar o Cuidam sozinho. Se quiser dividir o cuidado com outra pessoa, gere um link e compartilhe por onde preferir.</p>
             <label>E-mail de quem mora com você<input type="email" value={inviteEmail} onChange={(event) => setInviteEmail(event.target.value)} placeholder="alguem@email.com" autoComplete="email" /></label>
             <button className="button primary" onClick={sendInvite}>Gerar link do convite</button>
             <button className="button text-button" onClick={() => setStep("done")}>Fazer depois</button>

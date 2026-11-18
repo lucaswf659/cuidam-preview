@@ -27,6 +27,7 @@ describe("OnboardingFlow", () => {
   it("exibe a entrada principal e permite iniciar cadastro", () => {
     render(<OnboardingFlow />);
     expect(screen.getByRole("heading", { name: "Cada um cuida do que é seu." })).toBeInTheDocument();
+    expect(screen.getByText(/sozinho ou com quem divide esse cuidado com você/i)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Criar conta" }));
     expect(screen.getByRole("heading", { name: "Vamos deixar isso fácil." })).toBeInTheDocument();
     expect(screen.getByLabelText("Seu nome")).toBeInTheDocument();

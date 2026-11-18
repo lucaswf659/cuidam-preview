@@ -17,6 +17,11 @@ enum MembershipStatus {
   LEFT
 }
 
+enum HouseholdStatus {
+  ACTIVE
+  INACTIVE
+}
+
 enum InvitationStatus {
   PENDING
   ACCEPTED
@@ -82,6 +87,7 @@ model Household {
   id          String       @id @default(cuid())
   name        String
   timezone    String
+  status      HouseholdStatus @default(ACTIVE)
   createdAt   DateTime     @default(now())
   activeAccounts User[]     @relation("ActiveHousehold")
   memberships Membership[]
