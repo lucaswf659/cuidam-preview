@@ -119,8 +119,109 @@
   border-top: 1px solid #efeee9;
 }
 
-.content :global(.casa-leave-panel) {
-  margin: 0;
+.manageAreaButton {
+  width: auto;
+  min-width: 112px;
+  min-height: 44px;
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 11px;
+  color: #376b45;
+  background: #eef6ef;
+  font-size: .72rem;
+  font-weight: 650;
+}
+
+.manageAreaButton:hover {
+  background: #e5f1e6;
+}
+
+.manageAreaButton:focus-visible,
+.leaveHouseButton:focus-visible,
+.houseActions summary:focus-visible {
+  outline: 3px solid rgba(55, 107, 69, .24);
+  outline-offset: 2px;
+}
+
+.houseActions {
+  margin-top: 2px;
+  padding-top: 8px;
+  border-top: 1px solid #e8e9e2;
+}
+
+.houseActions summary {
+  width: fit-content;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #777873;
+  font-size: .75rem;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+
+.houseActions summary::-webkit-details-marker {
+  display: none;
+}
+
+.houseActions summary::after {
+  content: "⌄";
+  color: #777873;
+  font-size: 1rem;
+  transition: transform .18s ease;
+}
+
+.houseActions[open] summary::after {
+  transform: rotate(180deg);
+}
+
+.leaveHouseAction {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px 20px;
+  margin-top: 6px;
+  padding: 16px 18px;
+  border: 1px solid #f0e2de;
+  border-radius: 16px;
+  background: #fffaf9;
+}
+
+.leaveHouseAction strong {
+  color: #35322f;
+  font-size: .82rem;
+}
+
+.leaveHouseAction p {
+  max-width: 70ch;
+  margin: 5px 0 0;
+  color: #777873;
+  font-size: .72rem;
+  line-height: 1.5;
+}
+
+.leaveHouseAction .leaveHouseButton {
+  min-width: 124px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid #edcbc5;
+  border-radius: 11px;
+  color: #9b3d35;
+  background: #fff;
+  font-size: .74rem;
+  font-weight: 650;
+}
+
+.leaveHouseAction .leaveHouseButton:hover {
+  border-color: #dfaaa1;
+  background: #fff3f0;
 }
 
 .areaActions {
@@ -158,9 +259,15 @@
   gap: 12px;
 }
 
-.taskHeading > div {
+.taskHeading > div:first-child {
   flex-direction: column;
   gap: 3px;
+}
+
+.areaManagementActions {
+  display: flex;
+  flex: none;
+  gap: 8px;
 }
 
 .taskHeading strong {
@@ -355,12 +462,16 @@
   }
 
   .areaManagement { padding-right: 12px; padding-left: 12px; }
-  .taskHeading { align-items: flex-start; }
-  .taskHeading > div { padding-top: 5px; }
+  .taskHeading { align-items: flex-start; flex-wrap: wrap; }
+  .taskHeading > div:first-child { padding-top: 5px; }
+  .areaManagementActions { width: 100%; }
+  .areaManagementActions :global(.button) { flex: 1; }
   .taskHeading small { max-width: 24ch; }
   .areaTaskRow { align-items: flex-start; }
   .areaTaskRow > div { flex-direction: column; }
   .deleteAreaButton { width: 100%; }
+  .leaveHouseAction { grid-template-columns: minmax(0, 1fr); }
+  .leaveHouseAction .leaveHouseButton { width: 100%; }
 }
 
 @media (max-width: 760px) {
