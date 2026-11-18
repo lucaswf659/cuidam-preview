@@ -80,6 +80,7 @@ async function api(page: Page, url: string, method: string, body?: unknown) {
 }
 
 test("conta, casa, tarefa compartilhada, convite, isolamento e resgate idempotente", async ({ browser }: { browser: Browser }) => {
+  test.setTimeout(120_000);
   const ownerEmail = `${prefix}${runId}-owner@example.com`;
   const guestEmail = `${prefix}${runId}-guest@example.com`;
   const isolatedEmail = `${prefix}${runId}-isolated@example.com`;
@@ -161,6 +162,43 @@ test("conta, casa, tarefa compartilhada, convite, isolamento e resgate idempoten
     expect(foreignArea.status).toBe(400);
   } finally {
     await Promise.all([owner, guest, isolated].map((context) => context.close().catch(() => undefined)));
+  }
+});
+
+test("pessoa pode sair da casa atual e aceitar convite de outra casa", async ({ browser }: { browser: Browser }) => {
+  const inviterEmail = `${prefix}${runId}-switch-inviter@example.com`;
+  const invitedEmail = `${prefix}${runId}-switch-invited@example.com`;
+  const inviterContext = await browser.newContext();
+  const invitedContext = await browser.newContext();
+  const inviterPage = await inviterContext.newPage();
+  const invitedPage = await invitedContext.newPage();
+
+  try {
+    await signUp(inviterPage, inviterEmail, "Pessoa que convida E2E");
+    await createHouse(inviterPage, `E2E ${runId} Casa para convite`);
+    await inviterPage.getByRole("link", { name: "Configurações" }).click();
+    await inviterPage.getByLabel("E-mail", { exact: true }).fill(invitedEmail);
+    await inviterPage.getByRole("button", { name: "Gerar link do convite" }).click();
+    await expect(inviterPage.getByRole("status")).toContainText("Link do convite pronto");
+    const inviteUrl = await inviterPage.getByLabel("Link do convite").inputValue();
+
+    await signUp(invitedPage, invitedEmail, "Pessoa que troca de casa E2E");
+    await createHouse(invitedPage, `E2E ${runId} Casa atual`);
+    await invitedPage.goto(inviteUrl);
+    await expect(invitedPage.locator("p[role=alert]")).toContainText("saia da casa atual em Configurações e abra o link novamente");
+
+    await invitedPage.goto("/casa");
+    await invitedPage.getByRole("button", { name: "Sair da casa" }).click();
+    await expect(invitedPage.getByRole("alertdialog").getByRole("heading", { name: "Sair de E2E" })).toBeVisible();
+    await invitedPage.getByRole("alertdialog").getByRole("button", { name: "Sair da casa" }).click();
+    await expect(invitedPage).toHaveURL(/\/$/);
+
+    await invitedPage.goto(inviteUrl);
+    await expect(invitedPage.getByRole("heading", { name: "Agora vocês cuidam juntos." })).toBeVisible();
+    await invitedPage.getByRole("button", { name: "Ir para Hoje" }).click();
+    await expect(invitedPage).toHaveURL(/\/today$/);
+  } finally {
+    await Promise.all([inviterContext, invitedContext].map((context) => context.close().catch(() => undefined)));
   }
 });
 

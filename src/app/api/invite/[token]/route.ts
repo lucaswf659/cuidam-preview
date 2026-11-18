@@ -49,12 +49,16 @@ export async function POST(_request: Request, context: RouteContext) {
       update: { email: user.email!, name: displayName },
       create: { authProviderId: user.id, email: user.email!, name: displayName }
     });
-    if (dbUser.activeHouseholdId && dbUser.activeHouseholdId !== invitation.householdId) return { error: "Sua conta já está vinculada a outra casa." };
+    if (dbUser.activeHouseholdId && dbUser.activeHouseholdId !== invitation.householdId) return { error: "Sua conta já está vinculada a outra casa. Para aceitar este convite, saia da casa atual em Configurações e abra o link novamente." };
     const existingMembership = await tx.membership.findUnique({ where: { householdId_userId: { householdId: invitation.householdId, userId: dbUser.id } } });
     if (!existingMembership) {
       const memberCount = await tx.membership.count({ where: { householdId: invitation.householdId, status: "ACTIVE" } });
       if (memberCount >= 2) return { error: "Esta casa já atingiu o limite de pessoas do MVP." };
       await tx.membership.create({ data: { householdId: invitation.householdId, userId: dbUser.id, role: "MEMBER", status: "ACTIVE" } });
+    } else if (existingMembership.status === "LEFT") {
+      const memberCount = await tx.membership.count({ where: { householdId: invitation.householdId, status: "ACTIVE" } });
+      if (memberCount >= 2) return { error: "Esta casa já atingiu o limite de pessoas do MVP." };
+      await tx.membership.update({ where: { id: existingMembership.id }, data: { status: "ACTIVE", leftAt: null } });
     }
     await tx.user.update({ where: { id: dbUser.id }, data: { activeHouseholdId: invitation.householdId } });
     await tx.invitation.update({ where: { id: invitation.id }, data: { status: "ACCEPTED", acceptedAt: new Date() } });

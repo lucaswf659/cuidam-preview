@@ -9,7 +9,8 @@ const mocks = vi.hoisted(() => {
     membership: {
       findUnique: vi.fn(),
       count: vi.fn(),
-      create: vi.fn()
+      create: vi.fn(),
+      update: vi.fn()
     },
     invitation: {
       update: vi.fn()
@@ -64,6 +65,21 @@ describe("POST /api/invite/[token]", () => {
     expect(mocks.tx.membership.create).toHaveBeenCalledWith({ data: { householdId: "house-1", userId: "user-2", role: "MEMBER", status: "ACTIVE" } });
     expect(mocks.tx.user.update).toHaveBeenCalledWith({ where: { id: "user-2" }, data: { activeHouseholdId: "house-1" } });
     expect(mocks.tx.invitation.update).toHaveBeenCalledWith({ where: { id: "invite-1" }, data: { status: "ACCEPTED", acceptedAt: expect.any(Date) } });
+  });
+
+  it("reativa o vínculo se a pessoa retornar à mesma casa", async () => {
+    mocks.tx.user.upsert.mockResolvedValue({ id: "user-2", activeHouseholdId: "house-1" });
+    mocks.tx.membership.findUnique.mockResolvedValue({ id: "membership-2", status: "LEFT" });
+    mocks.tx.membership.count.mockResolvedValue(1);
+
+    const response = await POST(new Request("http://localhost/api/invite/token"), { params: Promise.resolve({ token: "token" }) });
+
+    expect(response.status).toBe(200);
+    expect(mocks.tx.membership.update).toHaveBeenCalledWith({
+      where: { id: "membership-2" },
+      data: { status: "ACTIVE", leftAt: null }
+    });
+    expect(mocks.tx.membership.create).not.toHaveBeenCalled();
   });
 });
 

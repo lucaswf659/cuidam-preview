@@ -40,7 +40,7 @@ Não otimizar por DAU/streak; otimizar por redução de esforço.
 
 Conta: cadastro, login, recuperação.
 
-Casa: 1 casa ativa por conta; máximo 2 membros no MVP.
+Casa: 1 casa ativa por conta; máximo 2 membros no MVP. Uma pessoa pode sair da casa para aceitar convite de outra; sair encerra seu acesso, preserva a casa e seu histórico, e libera a conta para outro vínculo.
 
 Convite: email/token, estados pendente/aceito/cancelado/expirado/inválido.
 

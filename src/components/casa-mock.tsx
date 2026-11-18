@@ -22,6 +22,9 @@ export function CasaMock({ household }: { household: MockHousehold }) {
   const [openArea, setOpenArea] = useState<string | null>(null);
   const [areaForm, setAreaForm] = useState<AreaForm | null>(null);
   const [confirmArea, setConfirmArea] = useState<MockArea | null>(null);
+  const [confirmLeave, setConfirmLeave] = useState(false);
+  const [leavePending, setLeavePending] = useState(false);
+  const [leaveError, setLeaveError] = useState("");
   const [areaError, setAreaError] = useState("");
   const [areaManagerError, setAreaManagerError] = useState("");
   const members: HouseholdPerson[] = household.members ?? [{ id: "current-member", name: household.ownerName, email: household.ownerEmail, current: true }];
@@ -126,6 +129,20 @@ export function CasaMock({ household }: { household: MockHousehold }) {
     }
   };
 
+  const leaveHousehold = async () => {
+    setLeaveError("");
+    setLeavePending(true);
+    try {
+      const response = await fetch("/api/household/leave", { method: "POST" });
+      const data = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(data?.error ?? "Não foi possível sair desta casa.");
+      window.location.assign("/");
+    } catch (cause) {
+      setLeaveError(cause instanceof Error ? cause.message : "Não foi possível sair desta casa.");
+      setLeavePending(false);
+    }
+  };
+
   return <main className="casa-shell">
     <AppChrome current="casa" />
     <section className="casa-content">
@@ -141,6 +158,11 @@ export function CasaMock({ household }: { household: MockHousehold }) {
         </div>
         <div className="casa-share-panel"><div className="section-heading casa-invite-heading"><h3>Compartilhar a casa</h3></div><form className="casa-card casa-invite-card" onSubmit={sendInvite}><p>Gere um link para a outra pessoa entrar direto nesta casa. Nenhum e-mail será enviado.</p><label>E-mail<input type="email" value={inviteEmail} onChange={(event) => { setInviteEmail(event.target.value); setInviteUrl(""); setMessage(""); setInviteError(""); }} placeholder="alguem@email.com" required disabled={memberCount >= 2} /></label>{inviteError && <small className="form-error" role="alert">{inviteError}</small>}{message && <small className="form-success" role="status">{message}</small>}{inviteUrl && <><label>Link do convite<input aria-label="Link do convite" type="text" className="invite-link-input" value={inviteUrl} readOnly onFocus={(event) => event.currentTarget.select()} /></label><button className="button secondary" type="button" onClick={copyInviteLink}>Copiar link</button></>}{memberCount < 2 && <button className="button primary" type="submit" disabled={invitePending}>{invitePending ? "Gerando link…" : inviteUrl ? "Gerar outro link" : mockMode ? "Gerar link de teste" : "Gerar link do convite"}</button>}</form></div>
       </section>
+      {!mockMode && <section className="casa-leave-panel" aria-labelledby="leave-house-title">
+        <div><h2 id="leave-house-title">Sair desta casa</h2><p>Você pode sair para aceitar um convite de outra casa. A casa e o histórico continuam guardados.</p></div>
+        {leaveError && <p className="form-error" role="alert">{leaveError}</p>}
+        <button className="button secondary casa-leave-button" type="button" onClick={() => { setLeaveError(""); setConfirmLeave(true); }}>Sair da casa</button>
+      </section>}
       <div className="casa-areas-panel">
         <div className="section-heading casa-section-heading"><div><h2>Áreas da casa</h2><span>{areas.length} áreas</span></div><button className="button secondary compact-button" onClick={openCreateArea}>Adicionar área</button></div>
         {areaManagerError && <p className="form-error" role="alert">{areaManagerError}</p>}
@@ -150,6 +172,7 @@ export function CasaMock({ household }: { household: MockHousehold }) {
 
     {areaForm && <div className="modal-backdrop"><section className="task-form-modal area-form-modal" role="dialog" aria-modal="true" aria-labelledby="area-form-title"><div className="task-form-heading"><div><span className="drawer-kicker">{areaForm.mode === "add" ? "Nova área" : "Editar área"}</span><h2 id="area-form-title">Como chamar esse espaço?</h2></div><button className="drawer-close" type="button" onClick={() => setAreaForm(null)} aria-label="Fechar formulário">×</button></div><form onSubmit={saveArea}><label>Nome da área<input value={areaForm.name} onChange={(event) => updateAreaForm({ name: event.target.value })} placeholder="Ex.: Varanda" required /></label><label>Ícone<input value={areaForm.icon} maxLength={4} onChange={(event) => updateAreaForm({ icon: event.target.value })} placeholder="🏡" /></label>{areaError && <p className="form-error">{areaError}</p>}<div className="form-actions"><button className="button secondary" type="button" onClick={() => setAreaForm(null)}>Cancelar</button><button className="button primary" type="submit">{areaForm.mode === "add" ? "Adicionar área" : "Salvar"}</button></div></form></section></div>}
     {confirmArea && <div className="modal-backdrop" role="presentation"><section className="confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="archive-area-title"><span className="confirm-icon">−</span><h2 id="archive-area-title">Arquivar {confirmArea.name}?</h2><p>As tarefas ativas dessa área também saem da rotina. O histórico delas continua guardado.</p><div><button className="button secondary" onClick={() => setConfirmArea(null)}>Voltar</button><button className="button danger-button" onClick={() => void archiveArea()}>Arquivar área</button></div></section></div>}
+    {confirmLeave && <div className="modal-backdrop" role="presentation"><section className="confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="leave-house-confirm-title"><span className="confirm-icon">↗</span><h2 id="leave-house-confirm-title">Sair de {household.name}?</h2><p>Você perderá acesso a esta casa. Os dados e o histórico ficam guardados. Para entrar em outra, abra novamente o link de convite que recebeu.</p><div><button className="button secondary" type="button" disabled={leavePending} onClick={() => setConfirmLeave(false)}>Continuar na casa</button><button className="button danger-button" type="button" disabled={leavePending} onClick={() => void leaveHousehold()}>{leavePending ? "Saindo…" : "Sair da casa"}</button></div></section></div>}
   </main>;
 }
 
