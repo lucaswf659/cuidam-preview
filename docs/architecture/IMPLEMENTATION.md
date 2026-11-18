@@ -49,7 +49,9 @@ npm run build      # build de produção
 
 ## Próximas etapas
 
-- retomar notificações ao iniciar a versão mobile; até lá, `/casa/notificacoes` redireciona para `/casa` e os dados existentes ficam preservados para uso futuro.
+- Refinar e validar o MVP web com o grupo de testes antes de começar o app móvel.
+- Acompanhar o roadmap priorizado em [`docs/product/ROADMAP.md`](../product/ROADMAP.md), incluindo Google OAuth, templates de e-mail, contato corporativo e auditoria de infraestrutura/segurança.
+- Retomar notificações ao iniciar a versão mobile; até lá, `/casa/notificacoes` redireciona para `/casa` e os dados existentes ficam preservados para uso futuro.
 
 ### Auditoria de aceite — 2026-11-16
 
