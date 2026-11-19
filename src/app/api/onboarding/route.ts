@@ -148,7 +148,8 @@ export async function POST(request: Request) {
     if (occurrenceData.length) await tx.taskOccurrence.createMany({ data: occurrenceData });
     await tx.user.update({ where: { id: dbUser.id }, data: { activeHouseholdId: household.id } });
     return { household, created: true };
-  });
+  }, { maxWait: 10_000, timeout: 15_000 });
 
   return NextResponse.json({ householdId: result.household.id, created: result.created }, { status: result.created ? 201 : 200 });
 }
+

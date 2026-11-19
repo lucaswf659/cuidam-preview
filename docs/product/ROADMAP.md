@@ -28,12 +28,9 @@ Este documento mantém o plano de evolução do produto. A especificação de es
 
 ## Prioridade 1 — preparar o piloto e a operação
 
-### 3. Entrar com Google — a fazer
+### 3. Entrar com Google — adiado
 
-- Configurar o cliente OAuth no Google Cloud e o provedor Google no Supabase.
-- Cadastrar os redirects de desenvolvimento, preview e produção.
-- Adicionar o fluxo de login Google na web, mantendo e-mail e senha como alternativa.
-- Testar cadastro, login de uma conta existente, callback em outro dispositivo e comportamento para e-mail já cadastrado antes de liberar para todos.
+- Retomar depois. Quando priorizado, configurar o cliente OAuth no Google Cloud e o provedor no Supabase, registrar redirects de desenvolvimento/preview/produção, implementar o fluxo web e testar contas novas/existentes, callback em outro dispositivo e e-mail já cadastrado.
 
 ### 4. Personalizar e revisar os e-mails — a fazer
 
@@ -111,3 +108,4 @@ Itens que o usuário já levantou, mantidos para avaliação futura:
 - Quais benefícios justificariam pagamento e quais precisam continuar gratuitos.
 - Qual provedor de e-mail hospedará o endereço corporativo.
 - Quais capacidades móveis entram na primeira versão, além do que já existe na web.
+

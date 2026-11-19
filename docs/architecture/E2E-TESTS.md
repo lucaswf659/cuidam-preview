@@ -20,7 +20,7 @@ Os testes E2E usam Playwright, Supabase Auth e PostgreSQL reais. Eles criam casa
 5. Confira que `CUIDAM_E2E_SUPABASE_PROJECT_REF` identifica esse mesmo projeto e mantenha `CUIDAM_E2E_CONFIRM_ISOLATED_PROJECT=YES_CUIDAM_E2E_ONLY`.
 6. Instale o navegador uma vez com `npx playwright install chromium`.
 
-A Secret key é usada somente pelo teardown para apagar as contas com o prefixo `CUIDAM_E2E_EMAIL_PREFIX` e as casas `E2E ...` criadas por elas. Ela não é passada ao servidor Next nem ao navegador. O prefixo deve ser exclusivo deste projeto descartável.
+A Secret key é usada somente pelo teardown para apagar as contas com o prefixo `CUIDAM_E2E_EMAIL_PREFIX` e as casas `E2E ...` criadas por elas. Ela não é passada ao servidor Next nem ao navegador. O teardown usa `DIRECT_URL` para essa limpeza em lote; o app continua usando `DATABASE_URL`. O prefixo deve ser exclusivo deste projeto descartável.
 
 ## Executar
 
@@ -33,4 +33,5 @@ npm run test:e2e:report
 A suíte percorre cadastro/login e retomada da casa, criação/conclusão de tarefas, convite e entrada da segunda conta, disputa concorrente pela reserva, isolamento entre duas casas, resgate idempotente, virada de recorrência e bloqueio de leitura para o papel PostgreSQL `anon` mesmo com privilégio temporário de `SELECT`. Trace, vídeo e captura de tela são guardados em `test-results/` em caso de falha; o relatório HTML fica em `playwright-report/`.
 
 Não execute os E2E contra o banco de preview ou produção. O runner mantém a execução bloqueada até encontrar `.env.e2e` válida e diferente da configuração normal.
+
 

@@ -4,6 +4,9 @@ import "./config";
 
 export default async function globalTeardown() {
   const prefix = process.env.CUIDAM_E2E_EMAIL_PREFIX ?? "cuidam-e2e+";
+  // Cleanup is a one-off batch operation; use the validated direct/session URL
+  // rather than the transaction pooler used by the app runtime.
+  if (process.env.DIRECT_URL) process.env.DATABASE_URL = process.env.DIRECT_URL;
   const prisma = new PrismaClient();
   const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SECRET_KEY!, { auth: { autoRefreshToken: false, persistSession: false } });
   try {
@@ -51,4 +54,5 @@ export default async function globalTeardown() {
     await prisma.$disconnect();
   }
 }
+
 

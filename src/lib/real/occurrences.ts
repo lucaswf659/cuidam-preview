@@ -36,7 +36,7 @@ export async function ensureCurrentOccurrences(householdId: string, date = new D
       })),
       skipDuplicates: true
     });
-  });
+  }, { maxWait: 10_000, timeout: 15_000 });
 }
 
 export async function ensureAllCurrentOccurrences(date = new Date()) {
@@ -46,3 +46,4 @@ export async function ensureAllCurrentOccurrences(date = new Date()) {
   }
   return households.length;
 }
+
