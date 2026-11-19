@@ -155,10 +155,11 @@
 }
 
 .houseActions summary {
-  width: fit-content;
+  width: 100%;
   min-height: 44px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
   color: #777873;
   font-size: .75rem;
@@ -172,14 +173,21 @@
 }
 
 .houseActions summary::after {
-  content: "⌄";
+  width: 8px;
+  height: 8px;
+  flex: none;
+  margin: -4px 4px 0 12px;
+  border-right: 1.8px solid currentColor;
+  border-bottom: 1.8px solid currentColor;
+  content: "";
   color: #777873;
-  font-size: 1rem;
+  transform: rotate(45deg);
   transition: transform .18s ease;
 }
 
 .houseActions[open] summary::after {
-  transform: rotate(180deg);
+  margin-top: 4px;
+  transform: rotate(225deg);
 }
 
 .leaveHouseAction {
