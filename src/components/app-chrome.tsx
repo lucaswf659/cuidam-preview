@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ViewTransition } from "react";
 import { LogoutButton } from "@/components/logout-button";
 import { BrandMark } from "@/components/brand-mark";
+import styles from "@/components/app-chrome.module.css";
 
 export type AppSection = "today" | "nos" | "rewards" | "casa";
 
