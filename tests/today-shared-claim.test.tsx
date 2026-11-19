@@ -33,8 +33,12 @@ describe("TodayMock shared task claim", () => {
     expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ taskId: "task-1", action: "claim" });
 
     fireEvent.click(screen.getByRole("button", { name: "✓ Concluir" }));
-    await waitFor(() => expect(screen.getByRole("heading", { name: "Tudo certo por hoje." })).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole("button", { name: "Feito!" })).toBeInTheDocument());
     expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toEqual({ taskId: "task-1" });
+    const taskCard = document.querySelector(".task-card");
+    expect(taskCard).not.toBeNull();
+    fireEvent.animationEnd(taskCard!);
+    expect(screen.getByRole("heading", { name: "Tudo certo por hoje." })).toBeInTheDocument();
   });
 
   it("does not offer completion when another person has claimed the task", () => {
