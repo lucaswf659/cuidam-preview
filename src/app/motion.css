@@ -17,6 +17,13 @@ button:not(:disabled):hover {
   filter: brightness(1.035);
 }
 
+button:has(.inline-spinner) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .45em;
+}
+
 input,
 select,
 textarea {
