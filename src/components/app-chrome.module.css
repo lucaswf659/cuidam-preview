@@ -1,0 +1,42 @@
+.navNote {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-right: 0;
+  margin-left: 0;
+  padding: 12px 11px;
+  border: 1px solid rgba(104, 187, 127, .16);
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(237, 247, 238, .92), rgba(255, 247, 226, .78));
+  color: #6f766c;
+}
+
+.sprout {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  overflow: visible;
+}
+
+.sproutLeaf,
+.sproutLeafAlt {
+  transform-box: fill-box;
+  transform-origin: bottom center;
+  animation: leaf-sway 4.8s ease-in-out infinite;
+}
+
+.sproutLeafAlt { animation-delay: -.9s; }
+
+@keyframes leaf-sway {
+  0%, 100% { transform: rotate(0); }
+  50% { transform: rotate(-5deg); }
+}
+
+@media (max-width: 819px) {
+  .navNote { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sproutLeaf,
+  .sproutLeafAlt { animation: none; }
+}

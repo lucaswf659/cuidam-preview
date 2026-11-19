@@ -52,7 +52,16 @@ export function AppChrome({ current }: { current: AppSection }) {
           <span>{destination.label}</span>
         </Link>)}
       </div>
-      <p className="primary-nav__note">Uma casa mais leve começa com uma divisão clara.</p>
+      <p className={`primary-nav__note ${styles.navNote}`}>
+        <svg className={styles.sprout} viewBox="0 0 32 32" aria-hidden="true">
+          <path d="M16 26V13" fill="none" stroke="#376b45" strokeWidth="1.8" strokeLinecap="round" />
+          <path className={styles.sproutLeaf} d="M15.8 17.5C8.6 17.8 6.2 14 7 9.5c5.8.1 9.7 2.6 8.8 8Z" fill="#68bb7f" />
+          <path className={styles.sproutLeafAlt} d="M16.4 13.8C17.2 7.7 21.5 5.6 26 7c-.2 5.3-3.3 8.8-9.6 8.1Z" fill="#f4c95d" />
+          <path d="M10 26h13l-1.5 4h-10Z" fill="#f58e8e" />
+          <path d="M9 26h15" stroke="#934e4b" strokeWidth="1.4" strokeLinecap="round" />
+        </svg>
+        <span>Uma casa mais leve começa com uma divisão clara.</span>
+      </p>
     </nav>
   </ViewTransition>;
 }

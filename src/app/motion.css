@@ -51,6 +51,29 @@ textarea {
   background-color: #f1f8f2;
 }
 
+.area-symbol {
+  transition: transform 180ms cubic-bezier(.2, .75, .25, 1), filter 180ms ease;
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .task-card:hover .area-symbol,
+  .nos-area-button:hover .area-symbol,
+  .settings-row:hover .area-symbol,
+  .area-choice:hover > .area-symbol {
+    transform: translateY(-2px) rotate(-4deg) scale(1.06);
+    filter: saturate(1.08);
+  }
+}
+
+.today-shell,
+.nos-shell,
+.casa-shell,
+.rewards-shell {
+  background-image:
+    radial-gradient(ellipse at 100% 0%, rgba(244, 201, 93, .09), transparent 34rem),
+    radial-gradient(ellipse at 0% 100%, rgba(104, 187, 127, .075), transparent 32rem);
+}
+
 .app-brand-lockup:hover .app-brand-mark {
   transform: rotate(-4deg) scale(1.06);
 }
