@@ -8,7 +8,7 @@
 }
 
 .leaving {
-  animation: completion-leave 560ms cubic-bezier(.2, .8, .2, 1) both !important;
+  animation: completion-leave 900ms cubic-bezier(.2, .8, .2, 1) both !important;
 }
 
 .sparkles {
@@ -42,8 +42,8 @@
 
 @keyframes completion-leave {
   0% { transform: scale(1); opacity: 1; background-color: #fff; }
-  24% { transform: scale(1.018); opacity: 1; background-color: #edf7ef; box-shadow: 0 8px 22px rgba(55, 107, 69, .14); }
-  60% { transform: scale(.99); opacity: 1; background-color: #edf7ef; }
+  20% { transform: scale(1.018); opacity: 1; background-color: #edf7ef; box-shadow: 0 8px 22px rgba(55, 107, 69, .14); }
+  76% { transform: scale(1); opacity: 1; background-color: #edf7ef; box-shadow: 0 8px 22px rgba(55, 107, 69, .1); }
   100% { transform: translateY(-9px) scale(.97); opacity: 0; background-color: #edf7ef; }
 }
 
