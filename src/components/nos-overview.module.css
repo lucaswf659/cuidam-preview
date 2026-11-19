@@ -104,6 +104,10 @@
   width: 40px;
   height: 40px;
   flex: none;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 13px;
 }
 
 .taskCopy {
