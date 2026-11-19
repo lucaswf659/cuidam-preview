@@ -7,18 +7,24 @@
   transition: width 480ms cubic-bezier(.2, .8, .2, 1);
 }
 
+.completionButton {
+  position: relative;
+}
+
 .leaving {
   animation: completion-leave 900ms cubic-bezier(.2, .8, .2, 1) both !important;
 }
 
 .sparkles {
   position: absolute;
-  top: 8px;
-  right: 76px;
+  top: -13px;
+  left: 50%;
   width: 46px;
   height: 38px;
+  transform: translateX(-50%);
   color: #d39c28;
   pointer-events: none;
+  z-index: 2;
 }
 
 .sparkles i {
