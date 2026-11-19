@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import { InlineSpinner } from "@/components/inline-spinner";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/browser";
 
@@ -63,7 +64,7 @@ export function ResetPasswordForm() {
             <label>Nova senha<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="new-password" minLength={8} required /></label>
             <label>Confirme a nova senha<input type="password" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} autoComplete="new-password" minLength={8} required /></label>
             {error && <p className="form-error" role="alert">{error}</p>}
-            <button className="button primary" type="submit" disabled={saving}>{saving ? "Salvando…" : "Salvar nova senha"}</button>
+            <button className="button primary" type="submit" disabled={saving}>{saving && <InlineSpinner />}{saving ? "Salvando…" : "Salvar nova senha"}</button>
           </form>
         )}
       </section>

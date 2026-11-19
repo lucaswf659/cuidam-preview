@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ViewTransition } from "react";
 import { LogoutButton } from "@/components/logout-button";
 import { BrandMark } from "@/components/brand-mark";
 
@@ -33,7 +34,7 @@ function BrandLink() {
 }
 
 export function AppChrome({ current }: { current: AppSection }) {
-  return <>
+  return <ViewTransition name="app-chrome" default="none">
     <header className="app-topbar">
       <BrandLink />
       <LogoutButton />
@@ -53,6 +54,6 @@ export function AppChrome({ current }: { current: AppSection }) {
       </div>
       <p className="primary-nav__note">Uma casa mais leve começa com uma divisão clara.</p>
     </nav>
-  </>;
+  </ViewTransition>;
 }
 

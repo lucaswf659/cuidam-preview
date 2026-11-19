@@ -1,0 +1,92 @@
+/* Motion gives every interaction a quiet response; it never delays an action. */
+button:not(:disabled),
+[role="button"],
+a[href] {
+  transition-property: transform, scale, translate, filter, color, background-color, border-color, box-shadow, opacity;
+  transition-duration: 160ms;
+  transition-timing-function: cubic-bezier(.2, .75, .25, 1);
+}
+
+button:not(:disabled):active,
+[role="button"]:active,
+a[href]:active {
+  scale: .975;
+}
+
+input,
+select,
+textarea {
+  transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+
+.primary-nav__link,
+.bottom-nav a,
+.area-choice,
+.nos-area-button,
+.settings-row-button,
+.task-edit,
+.task-remove,
+.reward-card-secondary button {
+  transition: transform 180ms cubic-bezier(.2, .75, .25, 1), color 180ms ease,
+    background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.modal-backdrop {
+  animation: overlay-in 180ms ease-out both;
+}
+
+.confirm-modal,
+.task-form-modal {
+  animation: modal-in 240ms cubic-bezier(.2, .8, .25, 1) both;
+}
+
+.form-error,
+.form-success,
+[role="alert"] {
+  animation: feedback-in 180ms ease-out both;
+}
+
+::view-transition-old(.app-route) {
+  animation: page-out 130ms ease-in both;
+}
+
+::view-transition-new(.app-route) {
+  animation: page-in 210ms cubic-bezier(.2, .8, .25, 1) both;
+}
+
+::view-transition-group(app-chrome) {
+  animation: none;
+  z-index: 2;
+}
+
+@keyframes overlay-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modal-in {
+  from { opacity: 0; transform: translateY(8px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes feedback-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes page-out {
+  from { opacity: 1; }
+  to { opacity: .88; }
+}
+
+@keyframes page-in {
+  from { opacity: .88; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(.app-route),
+  ::view-transition-new(.app-route) {
+    animation-duration: .01ms !important;
+  }
+}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { InlineSpinner } from "@/components/inline-spinner";
 
 export function LogoutButton() {
   const [error, setError] = useState("");
@@ -21,7 +22,7 @@ export function LogoutButton() {
 
   return <div className="logout-control">
     <button className="logout-button" type="button" onClick={logout} disabled={pending}>
-      {pending ? "Saindo…" : "Sair"}
+      {pending && <InlineSpinner />}{pending ? "Saindo…" : "Sair"}
     </button>
     {error && <span className="logout-error" role="status">{error}</span>}
   </div>;

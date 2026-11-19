@@ -95,6 +95,51 @@
   min-height: 44px;
 }
 
+.loadingGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.loadingLabel {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #376b45;
+  font-size: .82rem;
+  font-weight: 600;
+}
+
+.loadingCard {
+  display: grid;
+  align-content: space-between;
+  gap: 18px;
+  min-height: 176px;
+  padding: 22px;
+  border: 1px solid #e8e9e2;
+  border-radius: 20px;
+  background: #fff;
+}
+
+.loadingCard span {
+  display: block;
+  width: 52%;
+  height: 14px;
+  border-radius: 99px;
+  background: linear-gradient(100deg, #eee9e1 20%, #f7f4ee 42%, #eee9e1 64%);
+  background-size: 220% 100%;
+  animation: reward-shimmer 1.6s ease-in-out infinite;
+}
+
+.loadingCard span:first-child { width: 42px; height: 42px; border-radius: 14px; }
+.loadingCard span:last-child { width: 100px; height: 42px; }
+
+@keyframes reward-shimmer {
+  from { background-position: 100% 0; }
+  to { background-position: -120% 0; }
+}
+
 @media (max-width: 560px) {
   .form {
     grid-template-columns: minmax(0, 1fr);
@@ -118,4 +163,8 @@
   .suggestionGrid {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loadingCard span { animation: none; }
 }

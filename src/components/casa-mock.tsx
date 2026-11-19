@@ -4,6 +4,8 @@ import { FormEvent, useState } from "react";
 import type { HouseholdInvitation, HouseholdPerson, MockArea, MockHousehold, MockResponsibility, MockTask } from "@/lib/mock/store";
 import { AppChrome } from "@/components/app-chrome";
 import { AreaIcon } from "@/components/area-icon";
+import { InlineSpinner } from "@/components/inline-spinner";
+import feedbackStyles from "@/components/inline-spinner.module.css";
 import styles from "@/components/casa-settings.module.css";
 import effortStyles from "@/components/task-effort.module.css";
 import { DEFAULT_TASK_LOAD } from "@/lib/task-load";
@@ -39,6 +41,11 @@ export function CasaMock({ household }: { household: MockHousehold }) {
   const [inviteError, setInviteError] = useState("");
   const [inviteUrl, setInviteUrl] = useState("");
   const [invitePending, setInvitePending] = useState(false);
+  const [savingTask, setSavingTask] = useState(false);
+  const [taskActionPending, setTaskActionPending] = useState(false);
+  const [savingArea, setSavingArea] = useState(false);
+  const [areaManagerPending, setAreaManagerPending] = useState(false);
+  const [cancelingInvitationId, setCancelingInvitationId] = useState<string | null>(null);
   const [openArea, setOpenArea] = useState<string | null>(null);
   const [areaForm, setAreaForm] = useState<AreaForm | null>(null);
   const [confirmArea, setConfirmArea] = useState<MockArea | null>(null);
@@ -65,40 +72,63 @@ export function CasaMock({ household }: { household: MockHousehold }) {
     if (!taskForm) return;
     setTaskError("");
     const payload = { name: taskForm.name, areaId: taskForm.areaId, responsibility: taskForm.responsibility, recurrence: taskForm.recurrence, ...(taskForm.mode === "edit" ? { load: taskForm.load } : {}) };
-    const response = await fetch(apiTasks, { method: taskForm.mode === "add" ? "POST" : "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify(taskForm.mode === "add" ? payload : { ...payload, taskId: taskForm.taskId, action: "edit" }) });
-    const data = await response.json().catch(() => null);
-    if (!response.ok || !data?.task) { setTaskError(data?.error ?? "Não foi possível salvar a tarefa."); return; }
-    if (taskForm.mode === "add") setTasks((current) => [...current, data.task as MockTask]);
-    else setTasks((current) => current.map((task) => task.id === taskForm.taskId ? data.task as MockTask : task));
-    setOpenArea(taskForm.areaId);
-    setTaskForm(null);
+    setSavingTask(true);
+    try {
+      const response = await fetch(apiTasks, { method: taskForm.mode === "add" ? "POST" : "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify(taskForm.mode === "add" ? payload : { ...payload, taskId: taskForm.taskId, action: "edit" }) });
+      const data = await response.json().catch(() => null);
+      if (!response.ok || !data?.task) { setTaskError(data?.error ?? "Não foi possível salvar a tarefa."); return; }
+      if (taskForm.mode === "add") setTasks((current) => [...current, data.task as MockTask]);
+      else setTasks((current) => current.map((task) => task.id === taskForm.taskId ? data.task as MockTask : task));
+      setOpenArea(taskForm.areaId);
+      setTaskForm(null);
+    } catch {
+      setTaskError("Não foi possível salvar a tarefa. Tente novamente.");
+    } finally {
+      setSavingTask(false);
+    }
   };
 
   const archiveTask = async () => {
     if (!confirmTask) return;
     setTaskError("");
-    const response = await fetch(apiTasks, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ taskId: confirmTask.id, action: "archive" }) });
-    const data = await response.json().catch(() => null);
-    if (!response.ok) { setTaskError(data?.error ?? "Não foi possível remover a tarefa da rotina."); setConfirmTask(null); return; }
-    setTasks((current) => current.map((task) => task.id === confirmTask.id ? { ...task, archived: true } : task));
-    setConfirmTask(null);
+    setTaskActionPending(true);
+    try {
+      const response = await fetch(apiTasks, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ taskId: confirmTask.id, action: "archive" }) });
+      const data = await response.json().catch(() => null);
+      if (!response.ok) { setTaskError(data?.error ?? "Não foi possível remover a tarefa da rotina."); setConfirmTask(null); return; }
+      setTasks((current) => current.map((task) => task.id === confirmTask.id ? { ...task, archived: true } : task));
+      setConfirmTask(null);
+    } catch {
+      setTaskError("Não foi possível remover a tarefa da rotina. Tente novamente.");
+      setConfirmTask(null);
+    } finally {
+      setTaskActionPending(false);
+    }
   };
 
   const saveArea = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!areaForm) return;
     setAreaError("");
-    const response = await fetch(apiAreas, { method: areaForm.mode === "add" ? "POST" : "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify(areaForm.mode === "add" ? { name: areaForm.name, icon: areaForm.icon } : { areaId: areaForm.areaId, name: areaForm.name, icon: areaForm.icon }) });
-    const data = await response.json();
-    if (!response.ok) { setAreaError(data.error ?? "Não foi possível salvar a área."); return; }
-    if (areaForm.mode === "add") setAreas((current) => [...current, data.area]);
-    else setAreas((current) => current.map((area) => area.id === areaForm.areaId ? data.area : area));
-    setAreaForm(null);
+    setSavingArea(true);
+    try {
+      const response = await fetch(apiAreas, { method: areaForm.mode === "add" ? "POST" : "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify(areaForm.mode === "add" ? { name: areaForm.name, icon: areaForm.icon } : { areaId: areaForm.areaId, name: areaForm.name, icon: areaForm.icon }) });
+      const data = await response.json();
+      if (!response.ok) { setAreaError(data.error ?? "Não foi possível salvar a área."); return; }
+      if (areaForm.mode === "add") setAreas((current) => [...current, data.area]);
+      else setAreas((current) => current.map((area) => area.id === areaForm.areaId ? data.area : area));
+      setAreaForm(null);
+    } catch {
+      setAreaError("Não foi possível salvar a área. Tente novamente.");
+    } finally {
+      setSavingArea(false);
+    }
   };
 
   const deleteArea = async () => {
     if (!confirmArea) return;
     setAreaManagerError("");
+    setAreaManagerPending(true);
     try {
       const response = await fetch(apiAreas, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "delete", areaId: confirmArea.id }) });
       const data = await response.json();
@@ -109,6 +139,8 @@ export function CasaMock({ household }: { household: MockHousehold }) {
     } catch (cause) {
       setAreaManagerError(cause instanceof Error ? cause.message : "Não foi possível excluir a área.");
       setConfirmArea(null);
+    } finally {
+      setAreaManagerPending(false);
     }
   };
 
@@ -140,6 +172,7 @@ export function CasaMock({ household }: { household: MockHousehold }) {
 
   const cancelInvitation = async (invitationId: string) => {
     setInviteError(""); setMessage("");
+    setCancelingInvitationId(invitationId);
     try {
       const response = await fetch(apiInvite, { method: "DELETE", headers: { "content-type": "application/json" }, body: JSON.stringify({ invitationId }) });
       const data = await response.json().catch(() => null);
@@ -148,6 +181,8 @@ export function CasaMock({ household }: { household: MockHousehold }) {
       setInviteUrl(""); setMessage("Convite cancelado.");
     } catch (cause) {
       setInviteError(cause instanceof Error ? cause.message : "Não foi possível cancelar o convite.");
+    } finally {
+      setCancelingInvitationId(null);
     }
   };
 
@@ -176,19 +211,20 @@ export function CasaMock({ household }: { household: MockHousehold }) {
     }
   };
 
-  return <main className="casa-shell">
+  return <main className="casa-shell" aria-busy={Boolean(invitePending || savingTask || taskActionPending || savingArea || areaManagerPending || leavePending || cancelingInvitationId)}>
     <AppChrome current="casa" />
     <section className={`casa-content ${styles.content}`}>
       <div className="casa-heading"><p className="eyebrow">Casa</p><h1>{household.name}</h1><p className="lead">Um lugar simples para ajustar como vocês cuidam da casa.</p></div>
+      {(savingTask || taskActionPending || savingArea || areaManagerPending || leavePending || cancelingInvitationId) && <p className={feedbackStyles.actionStatus} role="status"><InlineSpinner />{savingTask ? "Salvando tarefa…" : taskActionPending ? "Atualizando rotina…" : savingArea ? "Salvando área…" : areaManagerPending ? "Excluindo área…" : leavePending ? "Saindo da casa…" : "Cancelando convite…"}</p>}
       <section className="casa-people-panel" aria-labelledby="people-title">
         <div className="section-heading casa-section-heading"><div><h2 id="people-title">Pessoas</h2><span>{memberCount} de 2 pessoas na casa</span></div></div>
         <div className="casa-card casa-people-card">
           <div className="casa-people-list">{members.map((person) => <div className="casa-person-row" key={person.id}><span className="casa-person-avatar" aria-hidden="true">{person.name.trim().charAt(0).toLocaleUpperCase("pt-BR") || "•"}</span><span><b>{person.name}</b><small>{person.current ? "Você" : "Membro da casa"}{person.email ? ` · ${person.email}` : ""}</small></span><span className="casa-person-status">Na casa</span></div>)}</div>
-          {invitations.map((invitation) => <div className="casa-invitation-row" key={invitation.id}><span className="casa-invitation-icon" aria-hidden="true">✉</span><span><b>{invitation.email}</b><small>Convite aguardando resposta</small></span><button className="casa-invitation-cancel" type="button" onClick={() => void cancelInvitation(invitation.id)}>Cancelar</button></div>)}
+          {invitations.map((invitation) => <div className="casa-invitation-row" key={invitation.id}><span className="casa-invitation-icon" aria-hidden="true">✉</span><span><b>{invitation.email}</b><small>Convite aguardando resposta</small></span><button className="casa-invitation-cancel" type="button" disabled={cancelingInvitationId === invitation.id} onClick={() => void cancelInvitation(invitation.id)}>{cancelingInvitationId === invitation.id && <InlineSpinner />}{cancelingInvitationId === invitation.id ? "Cancelando…" : "Cancelar"}</button></div>)}
           {!invitations.length && memberCount < 2 && <p className="casa-people-hint">Convide alguém quando quiser dividir a casa.</p>}
           {memberCount >= 2 && <p className="casa-people-hint">Esta casa já tem as duas pessoas previstas no MVP.</p>}
         </div>
-        <div className="casa-share-panel"><div className="section-heading casa-invite-heading"><h3>Compartilhar a casa</h3></div><form className="casa-card casa-invite-card" onSubmit={sendInvite}><p>Gere um link para a outra pessoa entrar direto nesta casa. Nenhum e-mail será enviado.</p><label>E-mail<input type="email" value={inviteEmail} onChange={(event) => { setInviteEmail(event.target.value); setInviteUrl(""); setMessage(""); setInviteError(""); }} placeholder="alguem@email.com" required disabled={memberCount >= 2} /></label>{inviteError && <small className="form-error" role="alert">{inviteError}</small>}{message && <small className="form-success" role="status">{message}</small>}{inviteUrl && <><label>Link do convite<input aria-label="Link do convite" type="text" className="invite-link-input" value={inviteUrl} readOnly onFocus={(event) => event.currentTarget.select()} /></label><button className="button secondary" type="button" onClick={copyInviteLink}>Copiar link</button></>}{memberCount < 2 && <button className="button primary" type="submit" disabled={invitePending}>{invitePending ? "Gerando link…" : inviteUrl ? "Gerar outro link" : mockMode ? "Gerar link de teste" : "Gerar link do convite"}</button>}</form></div>
+        <div className="casa-share-panel"><div className="section-heading casa-invite-heading"><h3>Compartilhar a casa</h3></div><form className="casa-card casa-invite-card" onSubmit={sendInvite} aria-busy={invitePending}><p>Gere um link para a outra pessoa entrar direto nesta casa. Nenhum e-mail será enviado.</p><label>E-mail<input type="email" value={inviteEmail} onChange={(event) => { setInviteEmail(event.target.value); setInviteUrl(""); setMessage(""); setInviteError(""); }} placeholder="alguem@email.com" required disabled={memberCount >= 2 || invitePending} /></label>{inviteError && <small className="form-error" role="alert">{inviteError}</small>}{message && <small className="form-success" role="status">{message}</small>}{inviteUrl && <><label>Link do convite<input aria-label="Link do convite" type="text" className="invite-link-input" value={inviteUrl} readOnly onFocus={(event) => event.currentTarget.select()} /></label><button className="button secondary" type="button" disabled={invitePending} onClick={copyInviteLink}>Copiar link</button></>}{memberCount < 2 && <button className="button primary" type="submit" disabled={invitePending}>{invitePending && <InlineSpinner />}{invitePending ? "Gerando link…" : inviteUrl ? "Gerar outro link" : mockMode ? "Gerar link de teste" : "Gerar link do convite"}</button>}</form></div>
       </section>
       <div className="casa-areas-panel">
         <div className="section-heading casa-section-heading"><div><h2>Áreas da casa</h2><span>{areas.length} áreas</span></div><button className="button secondary compact-button" onClick={openCreateArea}>Adicionar área</button></div>

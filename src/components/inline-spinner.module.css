@@ -1,0 +1,30 @@
+.spinner {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  flex: 0 0 auto;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  vertical-align: -0.13em;
+  margin-right: .35em;
+  animation: spin .7s linear infinite;
+}
+
+.actionStatus {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  color: #376b45;
+  font-size: .8rem;
+  font-weight: 600;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation-duration: 1.6s; }
+}

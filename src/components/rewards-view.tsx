@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AppChrome } from "@/components/app-chrome";
+import { InlineSpinner } from "@/components/inline-spinner";
 import styles from "./rewards-view.module.css";
 import { starterRewardSuggestions } from "@/lib/reward-suggestions";
 
@@ -14,6 +15,9 @@ export function RewardsView({ householdName }: { householdName: string }) {
   const [snapshot, setSnapshot] = useState<Snapshot>(empty);
   const [loading, setLoading] = useState(true);
   const [working, setWorking] = useState(false);
+  const [workingRewardId, setWorkingRewardId] = useState<string | null>(null);
+  const [workingRewardAction, setWorkingRewardAction] = useState<"redeem" | "archive" | null>(null);
+  const [workingSuggestion, setWorkingSuggestion] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loadError, setLoadError] = useState(false);
@@ -57,17 +61,17 @@ export function RewardsView({ householdName }: { householdName: string }) {
     finally { setWorking(false); }
   };
   const addSuggestedReward = async (suggestion: (typeof starterRewardSuggestions)[number]) => {
-    setWorking(true); setError(""); setMessage("");
+    setWorking(true); setWorkingSuggestion(suggestion.name); setError(""); setMessage("");
     try {
       const response = await fetch("/api/rewards", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...suggestion, recipientType: "HOUSEHOLD" }) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error ?? "Não foi possível adicionar a sugestão.");
       await refresh(); setMessage(`“${suggestion.name}” foi adicionada. Você pode ajustar o valor depois.`);
     } catch (reason) { setError(reason instanceof Error ? reason.message : "Não foi possível adicionar a sugestão."); }
-    finally { setWorking(false); }
+    finally { setWorking(false); setWorkingSuggestion(null); }
   };
   const action = async (reward: Reward, verb: "redeem" | "archive") => {
-    setWorking(true); setError(""); setMessage("");
+    setWorking(true); setWorkingRewardId(reward.id); setWorkingRewardAction(verb); setError(""); setMessage("");
     try {
       const idempotencyKey = verb === "redeem" ? redemptionKeys.current.get(reward.id) ?? crypto.randomUUID() : undefined;
       if (idempotencyKey) redemptionKeys.current.set(reward.id, idempotencyKey);
@@ -77,7 +81,7 @@ export function RewardsView({ householdName }: { householdName: string }) {
       if (verb === "redeem") redemptionKeys.current.delete(reward.id);
       await refresh(); setMessage(verb === "redeem" ? `Resgate de “${reward.name}” registrado.` : "Recompensa removida da lista.");
     } catch (reason) { setError(reason instanceof Error ? reason.message : "Não foi possível concluir a ação."); }
-    finally { setWorking(false); }
+    finally { setWorking(false); setWorkingRewardId(null); setWorkingRewardAction(null); }
   };
   const edit = (reward: Reward) => { setEditing(reward.id); setName(reward.name); setCost(reward.cost); setRecipientType(reward.recipientType); setRecipientMemberId(snapshot.members.find((member) => member.id === reward.recipientMemberId)?.id ?? ""); };
 
@@ -88,10 +92,10 @@ export function RewardsView({ householdName }: { householdName: string }) {
       <aside className={styles.starterInfo}><strong>Como funcionam as estrelas</strong><p>Tarefas rendem estrelas conforme o esforço e a frequência. A casa começa com recompensas sugeridas; vocês podem mudar os valores ou criar outras depois.</p></aside>
       <article className="rewards-balance"><span>Saldo compartilhado</span><strong aria-live="polite">{loading ? "…" : snapshot.balance} <small>★</small></strong></article>
       <div className="rewards-section-heading"><h2>Para resgatar</h2><span>{snapshot.rewards.length} {snapshot.rewards.length === 1 ? "recompensa" : "recompensas"}</span></div>
-      {loading ? <p className="rewards-empty" role="status">Carregando recompensas…</p> : error && snapshot.rewards.length === 0 ? <div className="rewards-empty" role="status"><p>{error}</p><button className="button secondary" onClick={loadRewards}>Tentar novamente</button></div> : snapshot.rewards.length ? <div className="rewards-grid">{snapshot.rewards.map((reward) => <article className="reward-card" key={reward.id}><div className="reward-card-icon" aria-hidden="true">✦</div><div className="reward-card-info"><h3>{reward.name}</h3><p>{reward.recipientType === "HOUSEHOLD" ? "Para a casa" : `Para ${snapshot.members.find((member) => member.id === reward.recipientMemberId)?.name ?? "uma pessoa"}`}</p></div><strong className="reward-cost">{reward.cost} ★</strong><button className="button primary" disabled={working || snapshot.balance < reward.cost} onClick={() => action(reward, "redeem")}>Resgatar</button><div className="reward-card-secondary"><button onClick={() => edit(reward)}>Editar</button><button onClick={() => action(reward, "archive")}>Remover</button></div></article>)}</div> : <p className="rewards-empty">Ainda não há recompensas. Vocês podem combinar uma recompensa simples para começar.</p>}
-      {!loading && !loadError && snapshot.rewards.length === 0 && <section className={styles.suggestions} aria-labelledby="reward-suggestions-title"><div className={styles.suggestionsHeading}><div><h2 id="reward-suggestions-title">Sugestões para começar</h2><p>Use os valores como referência e ajuste quando fizer sentido.</p></div></div><div className={styles.suggestionGrid}>{starterRewardSuggestions.map((suggestion) => <article className={styles.suggestionCard} key={suggestion.name}><div><h3>{suggestion.name}</h3><strong>{suggestion.cost} ★</strong></div><button className="button secondary" aria-label={`Adicionar recompensa: ${suggestion.name}`} disabled={working} onClick={() => void addSuggestedReward(suggestion)}>Adicionar</button></article>)}</div></section>}
+      {loading ? <div className={styles.loadingGrid} aria-busy="true"><span className={styles.loadingLabel} role="status"><InlineSpinner /> Carregando recompensas…</span>{[0, 1, 2].map((item) => <div className={styles.loadingCard} aria-hidden="true" key={item}><span /><span /><span /></div>)}</div> : error && snapshot.rewards.length === 0 ? <div className="rewards-empty" role="status"><p>{error}</p><button className="button secondary" onClick={loadRewards}>Tentar novamente</button></div> : snapshot.rewards.length ? <div className="rewards-grid">{snapshot.rewards.map((reward) => <article className="reward-card" key={reward.id}><div className="reward-card-icon" aria-hidden="true">✦</div><div className="reward-card-info"><h3>{reward.name}</h3><p>{reward.recipientType === "HOUSEHOLD" ? "Para a casa" : `Para ${snapshot.members.find((member) => member.id === reward.recipientMemberId)?.name ?? "uma pessoa"}`}</p></div><strong className="reward-cost">{reward.cost} ★</strong><button className="button primary" disabled={working || snapshot.balance < reward.cost} onClick={() => action(reward, "redeem")}>{workingRewardId === reward.id && workingRewardAction === "redeem" && <InlineSpinner />}{workingRewardId === reward.id && workingRewardAction === "redeem" ? "Resgatando…" : "Resgatar"}</button><div className="reward-card-secondary"><button disabled={working} onClick={() => edit(reward)}>Editar</button><button disabled={working} onClick={() => action(reward, "archive")}>{workingRewardId === reward.id && workingRewardAction === "archive" ? <><InlineSpinner /> Removendo…</> : "Remover"}</button></div></article>)}</div> : <p className="rewards-empty">Ainda não há recompensas. Vocês podem combinar uma recompensa simples para começar.</p>}
+      {!loading && !loadError && snapshot.rewards.length === 0 && <section className={styles.suggestions} aria-labelledby="reward-suggestions-title"><div className={styles.suggestionsHeading}><div><h2 id="reward-suggestions-title">Sugestões para começar</h2><p>Use os valores como referência e ajuste quando fizer sentido.</p></div></div><div className={styles.suggestionGrid}>{starterRewardSuggestions.map((suggestion) => <article className={styles.suggestionCard} key={suggestion.name}><div><h3>{suggestion.name}</h3><strong>{suggestion.cost} ★</strong></div><button className="button secondary" aria-label={`Adicionar recompensa: ${suggestion.name}`} disabled={working} onClick={() => void addSuggestedReward(suggestion)}>{workingSuggestion === suggestion.name && <InlineSpinner />}{workingSuggestion === suggestion.name ? "Adicionando…" : "Adicionar"}</button></article>)}</div></section>}
       {message && <p className="form-success" role="status">{message}</p>}{error && !loading && (!loadError || snapshot.rewards.length > 0) && <p className="form-error" role="alert">{error}</p>}
-      <section className="reward-form-card"><h2>{editing ? "Ajustar recompensa" : "Criar recompensa"}</h2><form className={styles.form} onSubmit={save}><label className={styles.wideField}>O que vocês gostariam de resgatar?<input value={name} maxLength={80} onChange={(event) => setName(event.target.value)} placeholder="Ex.: Escolher o jantar de sexta" required /></label><label>Custo em estrelas<input type="number" min={1} max={999} value={cost} onChange={(event) => setCost(Number(event.target.value))} required /></label><label>Para<select value={recipientType} onChange={(event) => setRecipientType(event.target.value as "HOUSEHOLD" | "MEMBER")}><option value="HOUSEHOLD">A casa</option><option value="MEMBER">Uma pessoa</option></select></label>{recipientType === "MEMBER" && <label>Quem recebe?<select value={recipientMemberId} onChange={(event) => setRecipientMemberId(event.target.value)} required><option value="">Escolha uma pessoa</option>{snapshot.members.map((member) => <option key={member.id} value={member.id}>{member.name}</option>)}</select></label>}<div className={styles.actions}>{editing && <button className="button secondary" type="button" onClick={resetForm}>Cancelar edição</button>}<button className="button primary" disabled={working}>{working ? "Salvando…" : editing ? "Salvar alterações" : "Adicionar recompensa"}</button></div></form></section>
+      <section className="reward-form-card"><h2>{editing ? "Ajustar recompensa" : "Criar recompensa"}</h2><form className={styles.form} onSubmit={save} aria-busy={working}><label className={styles.wideField}>O que vocês gostariam de resgatar?<input value={name} maxLength={80} onChange={(event) => setName(event.target.value)} placeholder="Ex.: Escolher o jantar de sexta" required /></label><label>Custo em estrelas<input type="number" min={1} max={999} value={cost} onChange={(event) => setCost(Number(event.target.value))} required /></label><label>Para<select value={recipientType} onChange={(event) => setRecipientType(event.target.value as "HOUSEHOLD" | "MEMBER")}><option value="HOUSEHOLD">A casa</option><option value="MEMBER">Uma pessoa</option></select></label>{recipientType === "MEMBER" && <label>Quem recebe?<select value={recipientMemberId} onChange={(event) => setRecipientMemberId(event.target.value)} required><option value="">Escolha uma pessoa</option>{snapshot.members.map((member) => <option key={member.id} value={member.id}>{member.name}</option>)}</select></label>}<div className={styles.actions}>{editing && <button className="button secondary" type="button" disabled={working} onClick={resetForm}>Cancelar edição</button>}<button className="button primary" disabled={working}>{working && <InlineSpinner />}{working ? "Salvando…" : editing ? "Salvar alterações" : "Adicionar recompensa"}</button></div></form></section>
       {snapshot.history.length > 0 && <section className="reward-history"><h2>Resgates recentes</h2>{snapshot.history.map((item) => <div key={item.id}><span>{item.rewardName}<small> · {item.redeemedBy}</small></span><strong>−{item.cost} ★</strong></div>)}</section>}
     </section>
   </main>;

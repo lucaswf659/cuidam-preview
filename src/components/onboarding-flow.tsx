@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/browser";
 import { useRouter } from "next/navigation";
 import { AreaIcon } from "@/components/area-icon";
 import { BrandMark } from "@/components/brand-mark";
+import { InlineSpinner } from "@/components/inline-spinner";
 import { defaultOnboardingTaskKeys, onboardingSuggestionsForAreas, type OnboardingSuggestion } from "@/lib/onboarding-suggestions";
 import suggestionStyles from "@/components/onboarding-suggestions.module.css";
 
@@ -28,6 +29,9 @@ export function OnboardingFlow({ initialStep = "welcome", initialMode = "signup"
   const [name, setName] = useState(initialName);
   const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState("");
+  const [authPending, setAuthPending] = useState(false);
+  const [onboardingPending, setOnboardingPending] = useState(false);
+  const [invitePending, setInvitePending] = useState(false);
   const [recoveringPassword, setRecoveringPassword] = useState(false);
   const [recoverySent, setRecoverySent] = useState(false);
   const [requestingRecovery, setRequestingRecovery] = useState(false);
@@ -56,6 +60,9 @@ export function OnboardingFlow({ initialStep = "welcome", initialMode = "signup"
   const continueSignup = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError("");
+    if (authPending) return;
+    setAuthPending(true);
+    try {
     if (process.env.NEXT_PUBLIC_CUIDAM_MOCK !== "false") {
       const response = await fetch("/api/mock-auth", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email }) });
       if (!response.ok) { setError("Informe um e-mail válido."); return; }
@@ -100,6 +107,11 @@ export function OnboardingFlow({ initialStep = "welcome", initialMode = "signup"
       setPreviousHouseId(previousHouses[0]?.id ?? "");
     }
     setStep("house");
+    } catch {
+      setError(authMode === "login" ? "Não foi possível entrar agora. Tente novamente." : "Não foi possível criar sua conta agora. Tente novamente.");
+    } finally {
+      setAuthPending(false);
+    }
   };
 
   const requestPasswordRecovery = async (event: FormEvent<HTMLFormElement>) => {
@@ -142,20 +154,36 @@ export function OnboardingFlow({ initialStep = "welcome", initialMode = "signup"
   };
 
   const finishOnboarding = async () => {
+    if (onboardingPending) return;
+    setOnboardingPending(true);
     setError("");
-    const onboardingName = name.trim() || email.trim().split("@")[0] || "Você";
-    const response = await fetch("/api/onboarding", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: onboardingName, houseName, areas: suggestedAreas.filter((area) => selectedAreas.has(area.id)), tasks: suggestedTasks.filter((task) => selectedAreas.has(task.areaId) && selectedTaskKeys.has(task.id)).map(({ selectedByDefault: _selectedByDefault, ...task }) => task) }) });
-    if (!response.ok) { const body = await response.json().catch(() => null); setError(body?.error ?? "Não foi possível salvar sua casa."); return; }
-    setStep("invite");
+    try {
+      const onboardingName = name.trim() || email.trim().split("@")[0] || "Você";
+      const response = await fetch("/api/onboarding", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: onboardingName, houseName, areas: suggestedAreas.filter((area) => selectedAreas.has(area.id)), tasks: suggestedTasks.filter((task) => selectedAreas.has(task.areaId) && selectedTaskKeys.has(task.id)).map(({ selectedByDefault: _selectedByDefault, ...task }) => task) }) });
+      if (!response.ok) { const body = await response.json().catch(() => null); setError(body?.error ?? "Não foi possível salvar sua casa."); return; }
+      setStep("invite");
+    } catch {
+      setError("Não foi possível salvar sua casa. Tente novamente.");
+    } finally {
+      setOnboardingPending(false);
+    }
   };
 
   const sendInvite = async () => {
     if (!inviteEmail.trim()) { setStep("done"); return; }
-    const response = await fetch(inviteEndpoint, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email: inviteEmail }) });
-    if (!response.ok) { setError("Não foi possível gerar o convite. Confira o e-mail e tente novamente."); return; }
-    const data = await response.json().catch(() => null);
-    setInviteUrl(data?.inviteUrl ? new URL(data.inviteUrl, window.location.origin).toString() : "");
-    setStep("done");
+    if (invitePending) return;
+    setInvitePending(true);
+    try {
+      const response = await fetch(inviteEndpoint, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email: inviteEmail }) });
+      if (!response.ok) { setError("Não foi possível gerar o convite. Confira o e-mail e tente novamente."); return; }
+      const data = await response.json().catch(() => null);
+      setInviteUrl(data?.inviteUrl ? new URL(data.inviteUrl, window.location.origin).toString() : "");
+      setStep("done");
+    } catch {
+      setError("Não foi possível gerar o convite. Confira sua conexão e tente novamente.");
+    } finally {
+      setInvitePending(false);
+    }
   };
 
   const copyInvite = async () => {
@@ -210,7 +238,7 @@ export function OnboardingFlow({ initialStep = "welcome", initialMode = "signup"
               <h1>Vamos recuperar seu acesso.</h1>
               <p className="lead">Informe o e-mail da sua conta. Se houver uma conta associada, enviaremos as instruções para redefinir a senha.</p>
               <label>E-mail<input type="email" value={email} onChange={(event) => { setEmail(event.target.value); setRecoverySent(false); }} placeholder="voce@email.com" autoComplete="email" required /></label>
-              {recoverySent ? <p className="form-success" role="status">Se houver uma conta associada a esse e-mail, as instruções chegarão em instantes.</p> : <button className="button primary" type="submit" disabled={requestingRecovery}>{requestingRecovery ? "Enviando…" : "Enviar instruções"}</button>}
+              {recoverySent ? <p className="form-success" role="status">Se houver uma conta associada a esse e-mail, as instruções chegarão em instantes.</p> : <button className="button primary" type="submit" disabled={requestingRecovery}>{requestingRecovery && <InlineSpinner />}{requestingRecovery ? "Enviando…" : "Enviar instruções"}</button>}
               {error && <p className="form-error" role="alert">{error}</p>}
             </form>
           ) :
@@ -222,7 +250,7 @@ export function OnboardingFlow({ initialStep = "welcome", initialMode = "signup"
             <p className="lead">Enviamos um link de confirmação para <strong>{email}</strong>.</p>
             <p className="form-note">Abra a mensagem para confirmar sua conta. Se não encontrar, confira a pasta de spam. O link abre o Cuidam e continua a configuração da casa.</p>
             {confirmationResent && <p className="form-success" role="status">Enviamos outra mensagem de confirmação.</p>}
-            <button className="button primary" type="button" onClick={resendSignupConfirmation} disabled={resendingConfirmation}>{resendingConfirmation ? "Reenviando…" : "Reenviar confirmação"}</button>
+            <button className="button primary" type="button" onClick={resendSignupConfirmation} disabled={resendingConfirmation}>{resendingConfirmation && <InlineSpinner />}{resendingConfirmation ? "Reenviando…" : "Reenviar confirmação"}</button>
             <button className="button text-button" type="button" onClick={() => { setSignupConfirmationSent(false); setConfirmationResent(false); setAuthMode("login"); setPassword(""); setError(""); }}>Já confirmei meu e-mail</button>
             {error && <p className="form-error" role="alert">{error}</p>}
           </section>
@@ -234,7 +262,7 @@ export function OnboardingFlow({ initialStep = "welcome", initialMode = "signup"
             {authMode === "signup" && <label>Seu nome<input value={name} onChange={(event) => setName(event.target.value)} placeholder="Como podemos te chamar?" autoComplete="name" required /></label>}
             <label>E-mail<input type="email" value={email} onChange={(event) => { setEmail(event.target.value); setSignupConfirmationSent(false); }} placeholder="voce@email.com" autoComplete="email" required /></label>
             <label>Senha<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Pelo menos 8 caracteres" autoComplete={authMode === "login" ? "current-password" : "new-password"} minLength={8} required /></label>
-            <button className="button primary" type="submit">{authMode === "signup" ? "Continuar" : "Entrar"}</button>
+            <button className="button primary" type="submit" disabled={authPending}>{authPending && <InlineSpinner />}{authPending ? authMode === "signup" ? "Criando conta…" : "Entrando…" : authMode === "signup" ? "Continuar" : "Entrar"}</button>
             {error && <p className="form-error" role="alert">{error}</p>}
             {authMode === "login" && process.env.NEXT_PUBLIC_CUIDAM_MOCK === "false" && <button className="button text-button" type="button" onClick={() => { setRecoveringPassword(true); setError(""); }}>Esqueci minha senha</button>}
             {authMode === "signup" && process.env.NEXT_PUBLIC_CUIDAM_MOCK === "false" && <p className="form-note">Você poderá recuperar a senha pelo e-mail.</p>}
@@ -292,7 +320,7 @@ export function OnboardingFlow({ initialStep = "welcome", initialMode = "signup"
               </div>
               {!suggestedTasks.some((task) => selectedAreas.has(task.areaId) && selectedTaskKeys.has(task.id)) && <p className="form-note">Nenhuma sugestão selecionada. Vocês podem adicionar tarefas depois.</p>}
             </section>}
-            <button className="button primary" onClick={finishOnboarding} disabled={selectedAreas.size === 0}>Continuar</button>
+            <button className="button primary" onClick={finishOnboarding} disabled={selectedAreas.size === 0 || onboardingPending}>{onboardingPending && <InlineSpinner />}{onboardingPending ? "Preparando sua casa…" : "Continuar"}</button>
             {error && <p className="form-error" role="alert">{error}</p>}
           </section>
         )}
@@ -304,8 +332,8 @@ export function OnboardingFlow({ initialStep = "welcome", initialMode = "signup"
             <h1>Convide alguém, se fizer sentido.</h1>
             <p className="lead">Você pode usar o Cuidam sozinho. Se quiser dividir o cuidado com outra pessoa, gere um link e compartilhe por onde preferir.</p>
             <label>E-mail de quem mora com você<input type="email" value={inviteEmail} onChange={(event) => setInviteEmail(event.target.value)} placeholder="alguem@email.com" autoComplete="email" /></label>
-            <button className="button primary" onClick={sendInvite}>Gerar link do convite</button>
-            <button className="button text-button" onClick={() => setStep("done")}>Fazer depois</button>
+            <button className="button primary" onClick={sendInvite} disabled={invitePending}>{invitePending && <InlineSpinner />}{invitePending ? "Gerando link…" : "Gerar link do convite"}</button>
+            <button className="button text-button" onClick={() => setStep("done")} disabled={invitePending}>Fazer depois</button>
             {error && <p className="form-error" role="alert">{error}</p>}
           </section>
         )}

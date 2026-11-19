@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { InlineSpinner } from "@/components/inline-spinner";
 
 export function ConfirmRecoveryLink({ tokenHash, type, next }: { tokenHash: string; type: "recovery" | "email" | ""; next: string }) {
   const [error, setError] = useState("");
@@ -40,7 +41,7 @@ export function ConfirmRecoveryLink({ tokenHash, type, next }: { tokenHash: stri
           <p className="lead">{type === "email" ? "Confirme para voltar ao Cuidam e continuar." : "Confirme para abrir a troca de senha. Esse passo impede que pré-visualizações automáticas do e-mail consumam o link."}</p>
           {error && <p className="form-error" role="alert">{error}</p>}
           <button className="button primary" type="button" onClick={confirm} disabled={!tokenHash || confirming}>
-            {confirming ? "Confirmando…" : type === "email" ? "Confirmar e continuar" : "Continuar para trocar a senha"}
+            {confirming && <InlineSpinner />}{confirming ? "Confirmando…" : type === "email" ? "Confirmar e continuar" : "Continuar para trocar a senha"}
           </button>
           {!tokenHash && <p className="form-error" role="alert">{type === "email" ? "Este link está incompleto. Peça uma nova confirmação." : "Este link está incompleto. Peça uma nova mensagem de recuperação."}</p>}
         </div>

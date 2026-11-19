@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { ViewTransition } from "react";
 import "./globals.css";
+import "./motion.css";
 
 export const metadata: Metadata = {
   title: "cuidam",
@@ -9,7 +11,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="pt-BR">
-      <body>{children}</body>
+      <body><ViewTransition default="app-route">{children}</ViewTransition></body>
     </html>
   );
 }
