@@ -928,6 +928,38 @@ html, body { height: auto; min-height: 100%; overflow-x: hidden; overflow-y: aut
 /* Navigation stays in brand green; accents belong to the content itself. */
 .primary-nav__link.is-active { color: var(--green-dark); background: var(--green-soft); }
 
+@media (min-width: 900px) {
+  .primary-nav {
+    background: linear-gradient(180deg, #fff 0%, #f5faf5 48%, #fff8ed 100%);
+  }
+
+  .primary-nav__icon-shell--sun,
+  .primary-nav__icon-shell--star { background: #fff0c2; }
+  .primary-nav__icon-shell--people { background: #ffe5df; }
+  .primary-nav__icon-shell--home { background: #dcefe0; }
+}
+
+.area-select-control {
+  position: relative;
+  display: block;
+}
+
+.area-select-control > .area-symbol {
+  position: absolute;
+  z-index: 1;
+  top: 6px;
+  left: 8px;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  pointer-events: none;
+}
+
+.area-select-control > .area-symbol svg { width: 26px; height: 26px; }
+.task-form-modal .area-select-control select { padding-left: 54px; }
+
 /* Period labels help Today scan at a glance without adding urgency. */
 
 

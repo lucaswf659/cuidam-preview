@@ -8,10 +8,10 @@ type AreaIconProps = {
 
 const icons: Record<string, ReactNode> = {
   cozinha: <>
-    <path className="area-icon-soft" d="M7 15.5h18l-1.8 10H8.8l-1.8-10Z" />
-    <path d="M6.5 15.5h19m-19 3H4m23 0h-1.5M11 11c0-1.7 1.7-2.2 1.7-4.4M17 11c0-1.7 1.7-2.2 1.7-4.4" />
-    <path className="area-icon-accent" d="M14.2 18.8c1.5-2.6 4.7-3.1 7-1.7-.8 3.1-3.8 4.4-7 3.6-.5-.1-.6-1.1 0-1.9Z" />
-    <path className="area-icon-detail" d="M15 20.2c1.4-.8 2.8-1.6 4-2.4" />
+    <path className="area-icon-soft" d="M6 15h18l-1.8 9H8L6 15Z" />
+    <path d="M5 15h20m-20 3H3m24 0h-2m-14-7c0-1.5 1.5-2 1.5-4m5.5 4c0-1.5 1.5-2 1.5-4" />
+    <circle className="area-icon-accent" cx="14" cy="18.8" r="2.4" />
+    <path className="area-icon-detail" d="M14 18.8c.7-.6 1.1-1.3 1.3-2.1" />
   </>,
   sala: <>
     <path className="area-icon-soft" d="M6 14h20v9H6z" />
