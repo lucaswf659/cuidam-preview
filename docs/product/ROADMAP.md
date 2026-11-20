@@ -4,9 +4,9 @@ Este documento mantém o plano de evolução do produto. A especificação de es
 
 ## Direção acordada
 
-1. Refinar e validar a versão web com as pessoas que já estão testando.
-2. Preparar autenticação, e-mails e infraestrutura para um piloto mais amplo.
-3. Depois da validação web, planejar o app móvel em React Native/Expo, compartilhando o backend e o Supabase.
+1. Manter a versão web funcionando enquanto o cliente móvel é desenvolvido.
+2. Preparar o app Android-first em React Native/Expo, compartilhando o backend e o Supabase.
+3. Validar os fluxos móveis antes de abrir um beta maior ou iniciar a publicação.
 4. Definir um modelo de negócio sustentável sem prejudicar a experiência acolhedora do Cuidam.
 5. Publicar primeiro no Google Play; avaliar publicação iOS na etapa móvel, sem iniciar agora o trabalho específico da App Store.
 
@@ -72,12 +72,14 @@ Este documento mantém o plano de evolução do produto. A especificação de es
 
 ## Prioridade 3 — app móvel e publicação
 
-### 9. Planejar o app React Native/Expo — depois da validação web
+### 9. Criar o app Android-first em React Native/Expo — iniciado
 
-- Reaproveitar Supabase, regras de negócio e APIs sempre que adequado; redesenhar os fluxos e componentes para uso nativo em iOS e Android.
-- Definir navegação, sessão segura, links profundos para convites e recuperação, estados offline/rede e processo de atualização.
-- Retomar notificações push nesta etapa, conforme o MVP; elas permanecem fora do produto web.
-- Implementar autenticação Google nativa com retorno por deep link.
+- Plano técnico registrado em [`ANDROID-APP-PLAN.md`](../architecture/ANDROID-APP-PLAN.md).
+- Usar Expo/React Native e Expo Router; construir e validar primeiro no Android. A arquitetura poderá atender iOS mais tarde, sem iniciar agora o trabalho de App Store.
+- Reutilizar Supabase Auth, o mesmo PostgreSQL e as regras de negócio. O backend atual é cookie-first e as tabelas não permitem acesso direto via Data API; adicionar autenticação Bearer ao backend antes de conectar as telas móveis.
+- Começar por sessão segura, cadastro/login/recuperação, deep links com fallback web e Hoje; depois Nós, recompensas e configurações.
+- Os jobs de recorrência continuam no servidor. Retomar push após os fluxos móveis essenciais.
+- Login Google continua adiado; OAuth móvel será uma etapa posterior.
 
 ### 10. Publicar no Google Play — depois do beta móvel
 
@@ -95,6 +97,16 @@ Este documento mantém o plano de evolução do produto. A especificação de es
 ## Ideias para depois — sem compromisso de MVP
 
 Itens que o usuário já levantou, mantidos para avaliação futura:
+
+### Feedback recente de teste — 20/11/2026
+
+Uma usuária elogiou a interface e as cores e sugeriu melhorias para encaixar o Cuidam na rotina real. As quatro mudanças abaixo foram incorporadas à versão web; cenários com crianças seguem em validação de produto:
+
+1. **Adicionar tarefa rapidamente — implementado.** O atalho fica no cabeçalho em qualquer tela autenticada e abre o formulário de Hoje.
+2. **Encontrar tarefas por cômodo — implementado.** A navegação “Por cômodo” permite consultar tarefas ativas agrupadas por área, sem criar uma lista global extensa.
+3. **Tarefas pontuais com prazo — implementado.** Exigem uma data, aparecem em Hoje quando chega o prazo e permanecem vencidas até concluir ou arquivar. Não têm horário nem geram repetição.
+4. **Passar responsabilidade — implementado na web.** A tarefa pessoal passa imediatamente para a outra pessoa; tarefas pendentes passam a refletir a nova responsabilidade. A atualização é vista ao abrir ou atualizar o Cuidam. Push fica para o app mobile; e-mail e SMS não são enviados.
+5. **Rotina com filhos pequenos — validar com famílias.** Usar o exemplo de levar criança à creche em conversas de pesquisa; não criar modo infantil, perfis ou permissões adicionais ainda.
 
 - Tema escuro.
 - Casa visual/3D para decorar com itens ligados a recompensas resgatadas.

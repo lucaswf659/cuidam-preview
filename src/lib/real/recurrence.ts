@@ -32,8 +32,40 @@ export function currentPeriodKey(date = new Date(), timeZone = "America/Sao_Paul
   return dateKey(localDate(date, timeZone));
 }
 
+export function dateAtNoonInTimeZone(value: string, timeZone: string) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return null;
+  const [, yearText, monthText, dayText] = match;
+  const year = Number(yearText);
+  const month = Number(monthText);
+  const day = Number(dayText);
+  const target = Date.UTC(year, month - 1, day, 12);
+  if (new Date(target).toISOString().slice(0, 10) !== value) return null;
+  let candidate = target;
+  const format = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23"
+  });
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const parts = Object.fromEntries(format.formatToParts(new Date(candidate)).filter((part) => part.type !== "literal").map((part) => [part.type, Number(part.value)]));
+    const actual = Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute, parts.second);
+    candidate += target - actual;
+  }
+  return new Date(candidate);
+}
+
 export function periodKeyForRecurrence(input: RecurrenceInput, date = new Date(), timeZone = "America/Sao_Paulo") {
   const current = localDate(date, timeZone);
+  if (input.recurrenceKind === "ONCE") {
+    const due = localDate(input.recurrenceAnchor, timeZone);
+    return dateNumber(current) >= dateNumber(due) ? `once:${dateKey(due)}` : null;
+  }
   if (input.recurrenceKind === "DAILY") return dateKey(current);
   if (input.recurrenceKind === "MONTHLY") return `month:${current.year}-${String(current.month).padStart(2, "0")}`;
   if (input.recurrenceKind === "EVERY_N_WEEKS") {

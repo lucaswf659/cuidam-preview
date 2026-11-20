@@ -12,30 +12,21 @@ Em **Authentication → URL Configuration**:
 
 Em **Authentication → SMTP Settings**, use as credenciais SMTP do Resend no projeto Supabase que serve o deployment. O projeto E2E deve manter credenciais próprias de teste.
 
-Em **Authentication → Email Templates**, personalize estes dois templates:
+Em **Authentication → Email Templates**, configure estes dois templates. Os arquivos HTML completos ficam em `docs/architecture/` para copiar e colar no campo **Body → Source**:
 
 ### Confirm signup
 
 **Subject:** `Confirme seu e-mail para entrar no Cuidam`
 
-```html
-<h2>Confirme seu e-mail</h2>
-<p>Recebemos seu pedido para criar uma conta no Cuidam.</p>
-<p><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email&next={{ .RedirectTo }}">Confirmar e continuar</a></p>
-<p>Depois da confirmação, você volta ao Cuidam para configurar sua casa ou continuar pelo convite recebido.</p>
-<p>Se você não pediu esta conta, pode ignorar esta mensagem.</p>
-```
+Corpo: `email-confirm-signup.html`
 
 ### Reset Password
 
 **Subject:** `Vamos recuperar seu acesso ao Cuidam`
 
-```html
-<h2>Vamos recuperar seu acesso</h2>
-<p>Recebemos um pedido para trocar a senha da sua conta no Cuidam.</p>
-<p><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery">Escolher nova senha</a></p>
-<p>Se você não pediu essa troca, ignore esta mensagem; sua senha continua a mesma.</p>
-```
+Corpo: `email-reset-password.html`
+
+Os links usam `{{ .TokenHash }}` e abrem a tela de confirmação do Cuidam. A pessoa precisa tocar no botão dentro do app para validar o token; isso evita que leitores automáticos de e-mail consumam o link antes dela.
 
 Os templates padrão podem incluir o link do Supabase e textos em inglês. Salve as alterações no projeto Supabase de preview/produção que realmente envia os e-mails. Links já enviados antes de salvar continuarão com o template antigo.
 

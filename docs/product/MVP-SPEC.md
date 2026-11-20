@@ -52,7 +52,7 @@ Tarefas: CRUD, área, responsável, frequência e instruções. A estimativa de 
 
 Ocorrências: geração por recorrência, conclusão e missed.
 
-Hoje: ocorrências da pessoa, progresso, concluir em 1 toque.
+Hoje: ocorrências da pessoa, progresso, concluir em 1 toque. O botão de adicionar tarefa fica acessível no cabeçalho sem rolar a página.
 
 Nós: visão direta de quem cuida de cada tarefa, agrupada por pessoa e responsabilidades compartilhadas, sem pontuação ou feed de atividade.
 
@@ -65,6 +65,8 @@ Histórico: persistido no backend; UI completa fora do MVP.
 4. Navegação
 
 Hoje: o que eu preciso fazer?
+
+Por cômodo: o que pode ser feito em cada espaço? Esta consulta reúne as tarefas ativas por área e permite passar imediatamente uma responsabilidade pessoal para a outra pessoa da casa.
 
 Nós: quem cuida do quê?
 
@@ -124,11 +126,15 @@ Responsabilidade individual ou compartilhada (Nós).
 
 Responsável garante que aconteça; executor pode ser diferente.
 
-Transferência de responsabilidade fica fora do MVP.
+Uma tarefa pessoal pode ser passada à outra pessoa da casa. A mudança é imediata e altera a responsabilidade atual e a ocorrência pendente. O registro histórico anterior é preservado. Notificação push fica para o app mobile; no web, a outra pessoa vê a mudança ao abrir ou atualizar a casa.
 
 Editar muda o futuro; ocorrências passadas mantêm snapshots.
 
 Remover = arquivar, preservando histórico.
+
+### 8.1 Tarefas pontuais
+
+Uma tarefa pontual usa a recorrência `Uma vez` e exige uma data de prazo, sem horário. Ela aparece em Hoje a partir do prazo e permanece pendente, inclusive depois de vencida, até ser concluída ou arquivada em Configurações. Sua ocorrência mantém a mesma chave e snapshots até a conclusão/arquivamento; não volta a gerar outra ocorrência e não é marcada como perdida automaticamente.
 
 9. Tarefas compartilhadas
 
@@ -162,7 +168,7 @@ Timezone da casa é referência.
 
 Geração idempotente: nunca duplicar ocorrência.
 
-Não concluída até o fim do período → MISSED; nunca vira dívida no período seguinte.
+Recorrências repetidas não concluídas até o fim do período → MISSED; nunca viram dívida no período seguinte. A exceção é a tarefa pontual, que segue a regra da seção 8.1.
 
 ### 10.1 Decisões de calendário aprovadas
 

@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getRealContext } from "@/lib/real/household";
 
-export async function POST() {
-  const context = await getRealContext();
+export async function POST(request: Request): Promise<NextResponse>;
+export async function POST(): Promise<NextResponse>;
+export async function POST(request?: Request) {
+  const context = await getRealContext(request);
   if (!context) return NextResponse.json({ error: "Sua sessão expirou. Entre novamente." }, { status: 401 });
 
   const leftAt = new Date();

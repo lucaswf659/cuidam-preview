@@ -3,9 +3,10 @@ import { prisma } from "@/lib/prisma";
 import { authDisplayName } from "@/lib/real/auth-display-name";
 import type { MockArea, MockHousehold, MockResponsibility, MockTask } from "@/lib/mock/store";
 import { ensureCurrentOccurrences } from "@/lib/real/occurrences";
-import { periodKeyForRecurrence } from "@/lib/real/recurrence";
+import { currentPeriodKey, periodKeyForRecurrence } from "@/lib/real/recurrence";
 
 export function recurrenceFromLabel(label: string) {
+  if (label === "Uma vez") return { recurrenceKind: "ONCE" as const, recurrenceInterval: 1, weeklyTarget: 1 };
   if (label === "Diária") return { recurrenceKind: "DAILY" as const, recurrenceInterval: 1, weeklyTarget: 1 };
   if (label === "3× por semana") return { recurrenceKind: "WEEKLY" as const, recurrenceInterval: 1, weeklyTarget: 3 };
   if (label === "Mensal") return { recurrenceKind: "MONTHLY" as const, recurrenceInterval: 1, weeklyTarget: 1 };
@@ -13,15 +14,28 @@ export function recurrenceFromLabel(label: string) {
 }
 
 export function recurrenceLabel(kind: string, interval: number, weeklyTarget: number) {
+  if (kind === "ONCE") return "Uma vez";
   if (kind === "DAILY") return "Diária";
   if (kind === "MONTHLY") return "Mensal";
   if (kind === "EVERY_N_WEEKS") return `A cada ${interval} semanas`;
   return weeklyTarget > 1 ? `${weeklyTarget}× por semana` : "Semanal";
 }
 
-export async function getRealContext() {
+export async function getAuthenticatedUser(request?: Request) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const authorization = request?.headers.get("authorization");
+  if (authorization !== null && authorization !== undefined) {
+    const bearer = /^Bearer\s+(\S+)$/i.exec(authorization.trim());
+    if (!bearer) return null;
+    const { data: { user }, error } = await supabase.auth.getUser(bearer[1]);
+    return error ? null : user;
+  }
+  const { data: { user }, error } = await supabase.auth.getUser();
+  return error ? null : user;
+}
+
+export async function getRealContext(request?: Request) {
+  const user = await getAuthenticatedUser(request);
   if (!user?.email) return null;
 
   const dbUser = await prisma.user.findUnique({
@@ -61,8 +75,8 @@ export async function getReopenableHouseholds(authProviderId: string) {
   return memberships.map(({ household }) => household);
 }
 
-export async function getRealHouseholdSnapshot(): Promise<MockHousehold | null> {
-  const context = await getRealContext();
+export async function getRealHouseholdSnapshot(request?: Request): Promise<MockHousehold | null> {
+  const context = await getRealContext(request);
   if (!context) return null;
 
   const now = new Date();
@@ -92,8 +106,9 @@ export async function getRealHouseholdSnapshot(): Promise<MockHousehold | null> 
   const tasks: MockTask[] = household.tasks.map((task) => {
     const occurrence = task.occurrences[0];
     let responsibility: MockResponsibility = "Outra pessoa";
-    const responsibilityType = occurrence ? occurrence.responsibilityTypeSnapshot : task.responsibilityType;
-    const responsibleMemberId = occurrence ? occurrence.responsibleMemberIdSnapshot : task.responsibleMemberId;
+    const usePendingSnapshot = occurrence?.status === "PENDING";
+    const responsibilityType = usePendingSnapshot ? occurrence.responsibilityTypeSnapshot : task.responsibilityType;
+    const responsibleMemberId = usePendingSnapshot ? occurrence.responsibleMemberIdSnapshot : task.responsibleMemberId;
     if (responsibilityType === "SHARED") responsibility = "Nós";
     else if (responsibleMemberId === context.membership.id) responsibility = "Você";
     return {
@@ -102,6 +117,10 @@ export async function getRealHouseholdSnapshot(): Promise<MockHousehold | null> 
       areaId: task.areaId,
       responsibility,
       recurrence: recurrenceLabel(task.recurrenceKind, task.recurrenceInterval, task.weeklyTarget),
+      ...(task.recurrenceKind === "ONCE" ? {
+        dueDate: currentPeriodKey(task.recurrenceAnchor, household.timezone),
+        isOverdue: currentPeriodKey(task.recurrenceAnchor, household.timezone) < currentPeriodKey(now, household.timezone)
+      } : {}),
       load: occurrence?.loadSnapshot ?? task.load,
       completed: occurrence?.status === "COMPLETED" || Boolean(occurrence && occurrence.completedCount >= occurrence.targetCompletions),
       completedCount: occurrence?.completedCount ?? 0,

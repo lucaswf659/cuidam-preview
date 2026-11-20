@@ -2,17 +2,18 @@ import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getRealContext, getRealHouseholdSnapshot, recurrenceFromLabel, recurrenceLabel } from "@/lib/real/household";
-import { periodKeyForRecurrence } from "@/lib/real/recurrence";
+import { currentPeriodKey, dateAtNoonInTimeZone, periodKeyForRecurrence } from "@/lib/real/recurrence";
 import type { MockResponsibility } from "@/lib/mock/store";
 import { DEFAULT_TASK_LOAD, starsForCompletedOccurrence } from "@/lib/task-load";
 
-const validRecurrences = ["Diária", "Semanal", "3× por semana", "Mensal"];
+const validRecurrences = ["Diária", "Semanal", "3× por semana", "Mensal", "Uma vez"];
 
 type TaskPayload = {
   name?: unknown;
   areaId?: unknown;
   responsibility?: unknown;
   recurrence?: unknown;
+  dueDate?: unknown;
   load?: unknown;
 };
 
@@ -21,10 +22,11 @@ function parseTaskPayload(body: TaskPayload) {
     typeof body.name !== "string" || !body.name.trim() ||
     typeof body.areaId !== "string" ||
     typeof body.recurrence !== "string" || !validRecurrences.includes(body.recurrence) ||
+    (body.recurrence === "Uma vez" && (typeof body.dueDate !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(body.dueDate))) ||
     (body.load !== undefined && (typeof body.load !== "number" || body.load < 1 || body.load > 5))
   ) return null;
   const responsibility: MockResponsibility = body.responsibility === "Nós" || body.responsibility === "Outra pessoa" ? body.responsibility : "Você";
-  return { name: body.name.trim(), areaId: body.areaId, responsibility, recurrence: body.recurrence, load: body.load === undefined ? DEFAULT_TASK_LOAD : body.load as number };
+  return { name: body.name.trim(), areaId: body.areaId, responsibility, recurrence: body.recurrence, dueDate: typeof body.dueDate === "string" ? body.dueDate : undefined, load: body.load === undefined ? DEFAULT_TASK_LOAD : body.load as number };
 }
 
 async function resolveResponsibility(responsibility: MockResponsibility, householdId: string, membershipId: string) {
@@ -40,8 +42,10 @@ type OccurrenceRecord = Prisma.TaskOccurrenceGetPayload<{ include: { claimedBy: 
 
 function taskResponse(task: TaskRecord, occurrence: OccurrenceRecord | null | undefined, context: TaskResponseContext) {
   const now = new Date();
-  const responsibilityType = occurrence?.responsibilityTypeSnapshot ?? task.responsibilityType;
-  const responsibleMemberId = occurrence?.responsibleMemberIdSnapshot ?? task.responsibleMemberId;
+  const dueDate = task.recurrenceKind === "ONCE" ? currentPeriodKey(task.recurrenceAnchor, context.household.timezone) : undefined;
+  const usePendingSnapshot = occurrence?.status === "PENDING";
+  const responsibilityType = usePendingSnapshot ? occurrence.responsibilityTypeSnapshot : task.responsibilityType;
+  const responsibleMemberId = usePendingSnapshot ? occurrence.responsibleMemberIdSnapshot : task.responsibleMemberId;
   const responsibility: MockResponsibility = responsibilityType === "SHARED"
     ? "Nós"
     : responsibleMemberId === context.membership.id
@@ -54,6 +58,7 @@ function taskResponse(task: TaskRecord, occurrence: OccurrenceRecord | null | un
     areaId: task.areaId,
     responsibility,
     recurrence: recurrenceLabel(task.recurrenceKind, task.recurrenceInterval, task.weeklyTarget),
+    ...(dueDate ? { dueDate, isOverdue: dueDate < currentPeriodKey(now, context.household.timezone) } : {}),
     load: occurrence?.loadSnapshot ?? task.load,
     completed: occurrence?.status === "COMPLETED" || Boolean(occurrence && occurrence.completedCount >= occurrence.targetCompletions),
     completedCount: occurrence?.completedCount ?? 0,
@@ -82,8 +87,17 @@ async function getTaskResponse(taskId: string, context: TaskResponseContext) {
   return taskResponse(task, task.occurrences[0], context);
 }
 
+export async function GET(request: Request) {
+  if (process.env.NEXT_PUBLIC_CUIDAM_MOCK !== "false") {
+    return NextResponse.json({ error: "O app móvel precisa do ambiente com backend real." }, { status: 503 });
+  }
+  const household = await getRealHouseholdSnapshot(request);
+  if (!household) return NextResponse.json({ error: "Entre novamente ou configure sua casa." }, { status: 401 });
+  return NextResponse.json({ household });
+}
+
 export async function POST(request: Request) {
-  const context = await getRealContext();
+  const context = await getRealContext(request);
   if (!context) return NextResponse.json({ error: "Sua sessão expirou. Entre novamente." }, { status: 401 });
   const body = await request.json().catch(() => null) as TaskPayload | null;
   const parsed = parseTaskPayload(body ?? {});
@@ -96,6 +110,11 @@ export async function POST(request: Request) {
 
   const now = new Date();
   const recurrence = recurrenceFromLabel(parsed.recurrence);
+  const recurrenceAnchor = recurrence.recurrenceKind === "ONCE"
+    ? dateAtNoonInTimeZone(parsed.dueDate ?? "", context.household.timezone)
+    : now;
+  if (!recurrenceAnchor) return NextResponse.json({ error: "Informe uma data válida para a tarefa pontual." }, { status: 400 });
+  const periodKey = periodKeyForRecurrence({ ...recurrence, recurrenceAnchor }, now, context.household.timezone);
   const task = await prisma.task.create({
     data: {
       householdId: context.household.id,
@@ -104,19 +123,19 @@ export async function POST(request: Request) {
       responsibilityType: responsibility.responsibilityType,
       responsibleMemberId: responsibility.responsibleMemberId,
       ...recurrence,
-      recurrenceAnchor: now,
+      recurrenceAnchor,
       load: parsed.load,
       status: "ACTIVE",
-      occurrences: {
+      ...(periodKey ? { occurrences: {
         create: {
-          periodKey: periodKeyForRecurrence({ ...recurrence, recurrenceAnchor: now }, now, context.household.timezone)!,
-          scheduledFor: now,
+          periodKey,
+          scheduledFor: recurrenceAnchor,
           targetCompletions: recurrence.recurrenceKind === "WEEKLY" ? recurrence.weeklyTarget : 1,
           responsibilityTypeSnapshot: responsibility.responsibilityType,
           responsibleMemberIdSnapshot: responsibility.responsibleMemberId,
           loadSnapshot: parsed.load
         }
-      }
+      } } : {})
     }
   });
 
@@ -124,7 +143,7 @@ export async function POST(request: Request) {
 }
 
 export async function PATCH(request: Request) {
-  const context = await getRealContext();
+  const context = await getRealContext(request);
   if (!context) return NextResponse.json({ error: "Sua sessão expirou. Entre novamente." }, { status: 401 });
   const body = await request.json().catch(() => null) as (TaskPayload & { taskId?: unknown; action?: unknown }) | null;
   if (typeof body?.taskId !== "string") return NextResponse.json({ error: "Tarefa inválida." }, { status: 400 });
@@ -137,6 +156,25 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ task: await getTaskResponse(existing.id, context) });
   }
 
+  if (body.action === "transfer") {
+    if (existing.responsibilityType !== "PERSON" || existing.responsibleMemberId !== context.membership.id) {
+      return NextResponse.json({ error: "Só é possível passar para outra pessoa uma tarefa da sua responsabilidade." }, { status: 409 });
+    }
+    const recipient = await prisma.membership.findFirst({
+      where: { householdId: context.household.id, status: "ACTIVE", id: { not: context.membership.id } },
+      orderBy: { joinedAt: "asc" }
+    });
+    if (!recipient) return NextResponse.json({ error: "Convide outra pessoa para passar esta tarefa." }, { status: 400 });
+    await prisma.$transaction(async (tx) => {
+      await tx.task.update({ where: { id: existing.id }, data: { responsibilityType: "PERSON", responsibleMemberId: recipient.id } });
+      await tx.taskOccurrence.updateMany({
+        where: { taskId: existing.id, status: "PENDING" },
+        data: { responsibilityTypeSnapshot: "PERSON", responsibleMemberIdSnapshot: recipient.id, claimedByUserId: null, claimedAt: null }
+      });
+    });
+    return NextResponse.json({ task: await getTaskResponse(existing.id, context) });
+  }
+
   if (body.action === "edit") {
     const parsed = parseTaskPayload(body);
     if (!parsed) return NextResponse.json({ error: "Preencha nome, área, frequência e carga." }, { status: 400 });
@@ -144,6 +182,11 @@ export async function PATCH(request: Request) {
     if (!area) return NextResponse.json({ error: "A área informada não pertence a esta casa." }, { status: 400 });
     const responsibility = await resolveResponsibility(parsed.responsibility, context.household.id, context.membership.id);
     if (!responsibility) return NextResponse.json({ error: "Convide outra pessoa antes de atribuir uma tarefa a ela." }, { status: 400 });
+    const recurrence = recurrenceFromLabel(parsed.recurrence);
+    const recurrenceAnchor = recurrence.recurrenceKind === "ONCE"
+      ? dateAtNoonInTimeZone(parsed.dueDate ?? "", context.household.timezone)
+      : existing.recurrenceAnchor;
+    if (!recurrenceAnchor) return NextResponse.json({ error: "Informe uma data válida para a tarefa pontual." }, { status: 400 });
     await prisma.task.update({
       where: { id: existing.id },
       data: {
@@ -151,11 +194,12 @@ export async function PATCH(request: Request) {
         name: parsed.name,
         responsibilityType: responsibility.responsibilityType,
         responsibleMemberId: responsibility.responsibleMemberId,
-        ...recurrenceFromLabel(parsed.recurrence),
+        ...recurrence,
+        recurrenceAnchor,
         load: body.load === undefined ? existing.load : parsed.load
       }
     });
-    const household = await getRealHouseholdSnapshot();
+    const household = await getRealHouseholdSnapshot(request);
     return NextResponse.json({ task: household?.tasks.find((task) => task.id === existing.id) ?? null });
   }
 

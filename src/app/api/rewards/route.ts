@@ -11,8 +11,10 @@ function validCost(value: unknown): value is number {
   return Number.isInteger(value) && Number(value) > 0 && Number(value) <= 999;
 }
 
-export async function GET() {
-  const context = await getRealContext();
+export async function GET(request: Request): Promise<NextResponse>;
+export async function GET(): Promise<NextResponse>;
+export async function GET(request?: Request) {
+  const context = await getRealContext(request);
   if (!context) return NextResponse.json({ error: "Sua sessão expirou. Entre novamente." }, { status: 401 });
 
   const [rewards, earned, redeemed, members, history] = await Promise.all([
@@ -31,7 +33,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const context = await getRealContext();
+  const context = await getRealContext(request);
   if (!context) return NextResponse.json({ error: "Sua sessão expirou. Entre novamente." }, { status: 401 });
   const body = await request.json().catch(() => null) as { name?: unknown; cost?: unknown; recipientType?: unknown; recipientMemberId?: unknown } | null;
   if (!validName(body?.name) || !validCost(body?.cost)) return NextResponse.json({ error: "Informe um nome e um custo entre 1 e 999 estrelas." }, { status: 400 });
@@ -48,7 +50,7 @@ export async function POST(request: Request) {
 }
 
 export async function PATCH(request: Request) {
-  const context = await getRealContext();
+  const context = await getRealContext(request);
   if (!context) return NextResponse.json({ error: "Sua sessão expirou. Entre novamente." }, { status: 401 });
   const body = await request.json().catch(() => null) as { rewardId?: unknown; action?: unknown; name?: unknown; cost?: unknown; recipientType?: unknown; recipientMemberId?: unknown; idempotencyKey?: unknown } | null;
   if (typeof body?.rewardId !== "string") return NextResponse.json({ error: "Recompensa inválida." }, { status: 400 });

@@ -22,7 +22,35 @@ vi.mock("@/lib/real/household", () => ({
 }));
 vi.mock("@/lib/real/recurrence", () => ({ periodKeyForRecurrence: mocks.periodKeyForRecurrence }));
 
-import { PATCH, POST } from "@/app/api/tasks/route";
+import { GET, PATCH, POST } from "@/app/api/tasks/route";
+
+describe("GET /api/tasks", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.stubEnv("NEXT_PUBLIC_CUIDAM_MOCK", "false");
+    mocks.getRealHouseholdSnapshot.mockResolvedValue({ id: "house-1", name: "Nossa casa", tasks: [] });
+  });
+
+  it("returns the household task snapshot for the mobile client", async () => {
+    const request = new Request("https://cuidam-preview.vercel.app/api/tasks", {
+      headers: { authorization: "Bearer valid-session-token" },
+    });
+
+    const response = await GET(request);
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({ household: { id: "house-1", name: "Nossa casa" } });
+    expect(mocks.getRealHouseholdSnapshot).toHaveBeenCalledWith(request);
+  });
+
+  it("requires an authenticated household snapshot", async () => {
+    mocks.getRealHouseholdSnapshot.mockResolvedValue(null);
+
+    const response = await GET(new Request("https://cuidam-preview.vercel.app/api/tasks"));
+
+    expect(response.status).toBe(401);
+  });
+});
 
 describe("POST /api/tasks", () => {
   beforeEach(() => {
@@ -92,7 +120,7 @@ describe("PATCH /api/tasks", () => {
     mocks.prisma.task.findFirst.mockResolvedValue({
       id: "task-1", name: "Tarefa atual", areaId: "area-1", status: "ACTIVE",
       responsibilityType: "PERSON", responsibleMemberId: "member-1", recurrenceKind: "DAILY",
-      recurrenceInterval: 1, weeklyTarget: 1, load: 4, occurrences: []
+      recurrenceInterval: 1, weeklyTarget: 1, recurrenceAnchor: new Date("2026-09-28T12:00:00.000Z"), load: 4, occurrences: []
     });
     mocks.prisma.area.findFirst.mockResolvedValue({ id: "area-1" });
     mocks.prisma.membership.findFirst.mockResolvedValue(null);

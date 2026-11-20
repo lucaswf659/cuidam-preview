@@ -1,8 +1,8 @@
 import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
 import { authDisplayNameOrEmail } from "@/lib/real/auth-display-name";
+import { getAuthenticatedUser } from "@/lib/real/household";
 
 type RouteContext = { params: Promise<{ token: string }> };
 
@@ -32,13 +32,12 @@ export async function GET(_request: Request, context: RouteContext) {
   return NextResponse.json({ invitation: { email: result.invitation.email, householdName: result.invitation.household.name, expiresAt: result.invitation.expiresAt.toISOString() } });
 }
 
-export async function POST(_request: Request, context: RouteContext) {
+export async function POST(request: Request, context: RouteContext) {
   const { token } = await context.params;
   const result = await findValidInvitation(token);
   if (!result.invitation) return NextResponse.json({ error: result.error }, { status: 404 });
 
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthenticatedUser(request);
   if (!user?.email) return NextResponse.json({ error: "Entre ou crie sua conta antes de aceitar o convite." }, { status: 401 });
   if (user.email.trim().toLowerCase() !== result.invitation.email) return NextResponse.json({ error: "Este convite foi enviado para outro e-mail." }, { status: 403 });
 

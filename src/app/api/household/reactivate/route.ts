@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
+import { getAuthenticatedUser } from "@/lib/real/household";
 
 type Payload = { householdId?: unknown };
 
@@ -10,8 +10,7 @@ function redirectTo(path: string) {
 
 export async function POST(request: Request) {
   const isFormPost = request.headers.get("content-type")?.includes("application/x-www-form-urlencoded") ?? false;
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthenticatedUser(request);
   if (!user?.email) {
     if (isFormPost) return redirectTo("/entrar?mode=login&reopenError=session");
     return NextResponse.json({ error: "Sua sessão expirou. Entre novamente." }, { status: 401 });

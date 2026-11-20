@@ -49,6 +49,7 @@ enum RecurrenceKind {
   WEEKLY
   EVERY_N_WEEKS
   MONTHLY
+  ONCE
 }
 
 enum OccurrenceStatus {

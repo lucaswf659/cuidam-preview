@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getRealContext } from "@/lib/real/household";
 
 export async function POST(request: Request) {
-  const context = await getRealContext();
+  const context = await getRealContext(request);
   if (!context) return NextResponse.json({ error: "Sua sessão expirou. Entre novamente." }, { status: 401 });
   const body = await request.json().catch(() => null) as { email?: unknown } | null;
   if (typeof body?.email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email.trim())) return NextResponse.json({ error: "Informe um e-mail válido." }, { status: 400 });
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const context = await getRealContext();
+  const context = await getRealContext(request);
   if (!context) return NextResponse.json({ error: "Sua sessão expirou. Entre novamente." }, { status: 401 });
   const body = await request.json().catch(() => null) as { invitationId?: unknown } | null;
   if (typeof body?.invitationId !== "string") return NextResponse.json({ error: "Convite não encontrado." }, { status: 400 });

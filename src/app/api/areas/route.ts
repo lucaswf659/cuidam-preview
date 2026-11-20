@@ -4,13 +4,13 @@ import { getRealContext, getRealHouseholdSnapshot } from "@/lib/real/household";
 
 type AreaPayload = { name?: unknown; icon?: unknown; areaId?: unknown; action?: unknown };
 
-async function areaResponse(areaId: string) {
-  const household = await getRealHouseholdSnapshot();
+async function areaResponse(areaId: string, request?: Request) {
+  const household = await getRealHouseholdSnapshot(request);
   return household?.areas.find((area) => area.id === areaId) ?? null;
 }
 
 export async function POST(request: Request) {
-  const context = await getRealContext();
+  const context = await getRealContext(request);
   if (!context) return NextResponse.json({ error: "Sua sessão expirou. Entre novamente." }, { status: 401 });
   const body = await request.json().catch(() => null) as AreaPayload | null;
   if (typeof body?.name !== "string" || !body.name.trim()) return NextResponse.json({ error: "Informe o nome da área." }, { status: 400 });
@@ -27,11 +27,11 @@ export async function POST(request: Request) {
       }
     });
   });
-  return NextResponse.json({ area: await areaResponse(area.id) }, { status: 201 });
+  return NextResponse.json({ area: await areaResponse(area.id, request) }, { status: 201 });
 }
 
 export async function PATCH(request: Request) {
-  const context = await getRealContext();
+  const context = await getRealContext(request);
   if (!context) return NextResponse.json({ error: "Sua sessão expirou. Entre novamente." }, { status: 401 });
   const body = await request.json().catch(() => null) as AreaPayload | null;
   if (body?.action === "delete") {
@@ -58,5 +58,5 @@ export async function PATCH(request: Request) {
       icon: typeof body.icon === "string" && body.icon.trim() ? body.icon.trim().slice(0, 12) : existing.icon
     }
   });
-  return NextResponse.json({ area: await areaResponse(area.id) });
+  return NextResponse.json({ area: await areaResponse(area.id, request) });
 }

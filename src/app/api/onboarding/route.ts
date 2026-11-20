@@ -1,27 +1,22 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
 import { mockHouseholdForSession, saveMockHousehold } from "@/lib/mock/store";
-import { getReopenableHouseholds, recurrenceFromLabel } from "@/lib/real/household";
+import { getAuthenticatedUser, getReopenableHouseholds, recurrenceFromLabel } from "@/lib/real/household";
 import { periodKeyForRecurrence } from "@/lib/real/recurrence";
 import { onboardingPayloadSchema } from "@/lib/real/onboarding-schema";
 import { starterRewardSuggestions } from "@/lib/reward-suggestions";
 
 const mockMode = process.env.NEXT_PUBLIC_CUIDAM_MOCK !== "false";
 
-async function getAuthenticatedUser() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  return user && user.email ? user : null;
-}
-
-export async function GET() {
+export async function GET(request: Request): Promise<NextResponse>;
+export async function GET(): Promise<NextResponse>;
+export async function GET(request?: Request) {
   if (mockMode) {
     const household = mockHouseholdForSession((await cookies()).get("cuidam_mock_session")?.value);
     return NextResponse.json({ household: household ? { id: household.id, name: household.name, areas: household.areas } : null });
   }
-  const user = await getAuthenticatedUser();
+  const user = await getAuthenticatedUser(request);
   if (!user) return NextResponse.json({ error: "Sua sessão expirou. Entre novamente." }, { status: 401 });
 
   const dbUser = await prisma.user.findUnique({
@@ -61,7 +56,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ householdId: household.id, created: true }, { status: 201 });
   }
 
-  const user = await getAuthenticatedUser();
+  const user = await getAuthenticatedUser(request);
   if (!user) return NextResponse.json({ error: "Sua sessão expirou. Entre novamente." }, { status: 401 });
 
   const result = await prisma.$transaction(async (tx) => {
@@ -152,4 +147,3 @@ export async function POST(request: Request) {
 
   return NextResponse.json({ householdId: result.household.id, created: result.created }, { status: result.created ? 201 : 200 });
 }
-

@@ -7,13 +7,13 @@ import { mockHouseholdForSession, mockNotificationPreferencesForSession } from "
 
 const mockMode = process.env.NEXT_PUBLIC_CUIDAM_MOCK !== "false";
 
-export async function GET() {
+export async function GET(request?: Request) {
   if (mockMode) {
     const session = (await cookies()).get("cuidam_mock_session")?.value;
     if (!session || !mockHouseholdForSession(session)) return NextResponse.json({ error: "Sua sessão expirou." }, { status: 401 });
     return NextResponse.json({ preferences: mockNotificationPreferencesForSession(session) });
   }
-  const context = await getRealContext();
+  const context = await getRealContext(request);
   if (!context) return NextResponse.json({ error: "Sua sessão expirou. Entre novamente." }, { status: 401 });
   const saved = await prisma.notificationPreference.findUnique({ where: { membershipId: context.membership.id } });
   return NextResponse.json({ preferences: { ...defaultNotificationPreferences, ...saved, quietStart: saved?.quietStart ?? defaultNotificationPreferences.quietStart, quietEnd: saved?.quietEnd ?? defaultNotificationPreferences.quietEnd } });
@@ -31,7 +31,7 @@ export async function PATCH(request: Request) {
     mockNotificationPreferencesForSession(session, preferences);
     return NextResponse.json({ preferences });
   }
-  const context = await getRealContext();
+  const context = await getRealContext(request);
   if (!context) return NextResponse.json({ error: "Sua sessão expirou. Entre novamente." }, { status: 401 });
   const saved = await prisma.notificationPreference.upsert({
     where: { membershipId: context.membership.id },
