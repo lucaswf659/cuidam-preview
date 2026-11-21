@@ -103,7 +103,7 @@ Itens que o usuário já levantou, mantidos para avaliação futura:
 Uma usuária elogiou a interface e as cores e sugeriu melhorias para encaixar o Cuidam na rotina real. As quatro mudanças abaixo foram incorporadas à versão web; cenários com crianças seguem em validação de produto:
 
 1. **Adicionar tarefa rapidamente — implementado.** O atalho fica no cabeçalho em qualquer tela autenticada e abre o formulário de Hoje.
-2. **Encontrar tarefas por cômodo — implementado.** A navegação “Por cômodo” permite consultar tarefas ativas agrupadas por área, sem criar uma lista global extensa.
+2. **Encontrar tarefas por cômodo — implementado em Hoje.** As tarefas aparecem agrupadas por área por padrão; filtros rápidos na própria tela permitem focar em um cômodo sem adicionar outro destino à navegação.
 3. **Tarefas pontuais com prazo — implementado.** Exigem uma data, aparecem em Hoje quando chega o prazo e permanecem vencidas até concluir ou arquivar. Não têm horário nem geram repetição.
 4. **Passar responsabilidade — implementado na web.** A tarefa pessoal passa imediatamente para a outra pessoa; tarefas pendentes passam a refletir a nova responsabilidade. A atualização é vista ao abrir ou atualizar o Cuidam. Push fica para o app mobile; e-mail e SMS não são enviados.
 5. **Rotina com filhos pequenos — validar com famílias.** Usar o exemplo de levar criança à creche em conversas de pesquisa; não criar modo infantil, perfis ou permissões adicionais ainda.

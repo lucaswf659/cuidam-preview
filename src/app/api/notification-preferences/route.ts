@@ -7,7 +7,7 @@ import { mockHouseholdForSession, mockNotificationPreferencesForSession } from "
 
 const mockMode = process.env.NEXT_PUBLIC_CUIDAM_MOCK !== "false";
 
-export async function GET(request?: Request) {
+export async function GET(request: Request) {
   if (mockMode) {
     const session = (await cookies()).get("cuidam_mock_session")?.value;
     if (!session || !mockHouseholdForSession(session)) return NextResponse.json({ error: "Sua sessão expirou." }, { status: 401 });

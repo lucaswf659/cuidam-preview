@@ -673,7 +673,7 @@ html, body { overflow-x: hidden; }
 /* Shared app navigation: one clear structure across Hoje, Nós, Recompensas and Casa. */
 :root { --app-rail-width: 236px; --app-nav-shadow: 0 12px 32px rgba(41, 42, 39, .12); }
 html, body { height: auto; min-height: 100%; overflow-x: hidden; overflow-y: auto; }
-.today-shell, .nos-shell, .casa-shell, .rewards-shell, .rooms-shell {
+.today-shell, .nos-shell, .casa-shell, .rewards-shell {
   position: relative;
   width: 100%;
   min-height: 100svh;
@@ -694,7 +694,7 @@ html, body { height: auto; min-height: 100%; overflow-x: hidden; overflow-y: aut
 .app-brand-lockup:focus-visible { border-radius: 10px; outline: 3px solid var(--ring); outline-offset: 4px; }
 .app-brand-mark { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 12px; color: var(--green-dark); background: #dcefe0; }
 .app-brand-mark .cuidam-mark-svg { width: 28px; height: 28px; }
-.primary-nav { position: fixed; z-index: 50; right: 0; bottom: 0; left: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; width: 100%; padding: 8px 8px calc(8px + env(safe-area-inset-bottom)); border-top: 1px solid rgba(55, 107, 69, .1); background: rgba(255, 255, 255, .96); box-shadow: 0 -8px 24px rgba(41, 42, 39, .06); backdrop-filter: blur(16px); }
+.primary-nav { position: fixed; z-index: 50; right: 0; bottom: 0; left: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; width: 100%; padding: 8px 8px calc(8px + env(safe-area-inset-bottom)); border-top: 1px solid rgba(55, 107, 69, .1); background: rgba(255, 255, 255, .96); box-shadow: 0 -8px 24px rgba(41, 42, 39, .06); backdrop-filter: blur(16px); }
 .primary-nav__brand, .primary-nav__note { display: none; }
 .primary-nav__links { display: contents; }
 .primary-nav__link { min-width: 0; min-height: 54px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; border-radius: 14px; color: var(--muted); font-size: .66rem; font-weight: 600; text-decoration: none; transition: color .16s ease, background .16s ease, transform .16s ease; }
@@ -702,7 +702,7 @@ html, body { height: auto; min-height: 100%; overflow-x: hidden; overflow-y: aut
 .primary-nav__link.is-active { color: var(--green-dark); background: #e8f4ea; }
 .primary-nav__icon { width: 21px; height: 21px; flex: none; }
 .primary-nav__link:focus-visible { outline: 3px solid var(--ring); outline-offset: 1px; }
-.today-content, .nos-content, .casa-content, .rewards-content, .rooms-content { width: min(100%, 1040px); max-height: none; margin: clamp(22px, 4vh, 42px) auto 0; overflow: visible; }
+.today-content, .nos-content, .casa-content, .rewards-content { width: min(100%, 1040px); max-height: none; margin: clamp(22px, 4vh, 42px) auto 0; overflow: visible; }
 .today-content { padding-bottom: 30px; }
 .nos-content { padding-bottom: 30px; }
 .casa-content { min-height: 0; }
@@ -715,8 +715,8 @@ html, body { height: auto; min-height: 100%; overflow-x: hidden; overflow-y: aut
 .logout-button { min-height: 44px; }
 
 @media (min-width: 820px) {
-  .today-shell, .nos-shell, .casa-shell, .rewards-shell, .rooms-shell { padding: 24px 32px 36px calc(var(--app-rail-width) + 36px); }
-  .today-content, .nos-content, .casa-content, .rewards-content, .rooms-content { width: min(100%, 1080px); margin-top: clamp(28px, 4vh, 46px); }
+  .today-shell, .nos-shell, .casa-shell, .rewards-shell { padding: 24px 32px 36px calc(var(--app-rail-width) + 36px); }
+  .today-content, .nos-content, .casa-content, .rewards-content { width: min(100%, 1080px); margin-top: clamp(28px, 4vh, 46px); }
   .app-topbar { min-height: 54px; justify-content: flex-end; }
   .app-topbar > .app-brand-lockup { display: none; }
   .primary-nav { top: 0; right: auto; bottom: 0; left: 0; display: flex; width: var(--app-rail-width); height: 100svh; flex-direction: column; align-items: stretch; gap: 0; padding: 28px 18px 22px; border: 0; border-right: 1px solid rgba(55, 107, 69, .1); border-radius: 0 24px 24px 0; background: rgba(255, 255, 255, .92); box-shadow: 8px 0 30px rgba(41, 42, 39, .035); backdrop-filter: blur(18px); }
@@ -733,7 +733,7 @@ html, body { height: auto; min-height: 100%; overflow-x: hidden; overflow-y: aut
 }
 
 @media (max-width: 480px) {
-  .today-shell, .nos-shell, .casa-shell, .rewards-shell, .rooms-shell { padding-right: 16px; padding-left: 16px; }
+  .today-shell, .nos-shell, .casa-shell, .rewards-shell { padding-right: 16px; padding-left: 16px; }
   .app-topbar { min-height: 44px; }
   .app-topbar__actions { gap: 6px; }
   .quick-add-link { width: 44px; padding: 0; }
@@ -858,15 +858,15 @@ html, body { height: auto; min-height: 100%; overflow-x: hidden; overflow-y: aut
   .casa-people-panel .casa-invite-card .button { width: 100%; }
 }
 html, body { height: auto; min-height: 100%; overflow-x: hidden; overflow-y: auto; }
-.today-shell, .nos-shell, .casa-shell, .rewards-shell, .rooms-shell { height: auto; min-height: 100svh; overflow: visible; }
-.today-content, .nos-content, .casa-content, .rewards-content, .rooms-content { height: auto; max-height: none; overflow: visible; }
+.today-shell, .nos-shell, .casa-shell, .rewards-shell { height: auto; min-height: 100svh; overflow: visible; }
+.today-content, .nos-content, .casa-content, .rewards-content { height: auto; max-height: none; overflow: visible; }
 .casa-content { gap: 22px 28px; }
 
 @media (min-width: 820px) and (max-width: 959px) {
-  .today-shell, .nos-shell, .casa-shell, .rewards-shell, .rooms-shell { padding: 18px 20px calc(100px + env(safe-area-inset-bottom)); }
+  .today-shell, .nos-shell, .casa-shell, .rewards-shell { padding: 18px 20px calc(100px + env(safe-area-inset-bottom)); }
   .app-topbar { min-height: 48px; justify-content: space-between; }
   .app-topbar > .app-brand-lockup { display: inline-flex; }
-  .primary-nav { top: auto; right: 0; bottom: 0; left: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 2px; width: 100%; height: auto; flex-direction: row; align-items: stretch; padding: 8px 8px calc(8px + env(safe-area-inset-bottom)); border: 0; border-top: 1px solid rgba(55, 107, 69, .1); border-radius: 0; background: rgba(255, 255, 255, .96); box-shadow: 0 -8px 24px rgba(41, 42, 39, .06); }
+  .primary-nav { top: auto; right: 0; bottom: 0; left: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2px; width: 100%; height: auto; flex-direction: row; align-items: stretch; padding: 8px 8px calc(8px + env(safe-area-inset-bottom)); border: 0; border-top: 1px solid rgba(55, 107, 69, .1); border-radius: 0; background: rgba(255, 255, 255, .96); box-shadow: 0 -8px 24px rgba(41, 42, 39, .06); }
   .primary-nav__brand, .primary-nav__note { display: none; }
   .primary-nav__links { display: contents; }
   .primary-nav__link { min-width: 0; min-height: 54px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 0; border-radius: 14px; font-size: .66rem; }
@@ -918,7 +918,6 @@ html, body { height: auto; min-height: 100%; overflow-x: hidden; overflow-y: aut
 /* Navegação ilustrada: uma cor reconhecível para cada destino. */
 .primary-nav__icon-shell { width: 34px; height: 34px; display: grid; flex: none; place-items: center; border-radius: 12px; transition: transform .18s ease, box-shadow .18s ease; }
 .primary-nav__icon-shell--sun, .primary-nav__icon-shell--star { background: #fff4d5; }
-.primary-nav__icon-shell--rooms { background: #e6f2e7; }
 .primary-nav__icon-shell--people { background: #fff0ed; }
 .primary-nav__icon-shell--home { background: #e4f2e6; }
 .primary-nav__icon { width: 25px; height: 25px; }
@@ -928,12 +927,6 @@ html, body { height: auto; min-height: 100%; overflow-x: hidden; overflow-y: aut
 /* Navigation stays in brand green; accents belong to the content itself. */
 .primary-nav__link.is-active { color: var(--green-dark); background: var(--green-soft); }
 
-/* A visão Por cômodo navega a casa inteira sem empurrar o conteúdo para trás da navegação. */
-.rooms-shell { min-height: 100svh; background: var(--cream); }
-@media (min-width: 900px) {
-  .rooms-shell { height: 100svh; min-height: 0; overflow: hidden; }
-  .rooms-content { height: calc(100svh - 130px); max-height: none; overflow-y: auto; padding: 0 12px 28px 0; scrollbar-gutter: stable; }
-}
 
 @media (min-width: 900px) {
   .primary-nav {
@@ -988,6 +981,41 @@ html, body { height: auto; min-height: 100%; overflow-x: hidden; overflow-y: aut
 .reward-card-icon { color: var(--accent-yellow-ink); background: var(--accent-yellow-soft); }
 .rewards-balance { background: linear-gradient(115deg, var(--green-dark) 0%, #477d55 100%); }
 .rewards-balance small { color: var(--accent-yellow) !important; }
+
+/* Hoje is organized by room first; filters stay in the page, not in navigation. */
+.today-area-filter { display: grid; gap: 8px; margin: 2px 0 20px; }
+.today-area-filter-label { color: var(--muted); font-size: .73rem; font-weight: 650; }
+.today-area-filter-options { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.today-area-filter-chip { min-height: 44px; display: inline-flex; flex: none; align-items: center; justify-content: center; gap: 8px; padding: 0 13px; border: 1px solid #e7e7df; border-radius: 999px; color: var(--graphite); background: rgba(255,255,255,.86); font: inherit; font-size: .75rem; font-weight: 600; cursor: pointer; transition: color .16s ease, background .16s ease, border-color .16s ease, transform .16s ease, box-shadow .16s ease; }
+.today-area-filter-chip:hover { border-color: #b9d9be; background: #f6faf5; transform: translateY(-1px); }
+.today-area-filter-chip[aria-pressed="true"] { border-color: #b3d3b7; color: var(--green-dark); background: #eaf5ec; box-shadow: inset 0 0 0 1px rgba(55,107,69,.04); }
+.today-area-filter-chip:focus-visible, .today-transfer-button:focus-visible { outline: 3px solid var(--ring); outline-offset: 2px; }
+.today-area-filter-chip small { min-width: 20px; height: 20px; display: grid; place-items: center; padding: 0 5px; border-radius: 999px; color: var(--green-dark); background: #e8f3e9; font-size: .65rem; line-height: 1; }
+.today-area-filter-icon { width: 25px !important; height: 25px !important; border-radius: 9px !important; }
+.today-area-filter-icon svg { width: 19px !important; height: 19px !important; }
+.today-area-groups { display: grid; gap: 22px; }
+.today-area-group { min-width: 0; }
+.today-area-heading { display: flex; align-items: center; gap: 11px; margin: 0 2px 9px; }
+.today-area-heading-icon { width: 38px !important; height: 38px !important; display: grid !important; flex: none; place-items: center; border-radius: 13px !important; }
+.today-area-heading-icon svg { width: 27px !important; height: 27px !important; }
+.today-area-heading h2 { margin: 0; color: var(--graphite); font-size: 1rem; font-weight: 650; letter-spacing: -.025em; }
+.today-area-heading p { margin: 3px 0 0; color: var(--muted); font-size: .72rem; }
+.today-area-group .task-list { width: 100%; max-height: none; height: auto; min-height: 0; display: grid; gap: 9px; overflow: visible; padding: 0; }
+.today-area-group .task-card { min-height: 72px; padding: 14px 16px; border: 1px solid #e8e9e2; border-radius: 16px; background: #fff; box-shadow: 0 2px 10px rgba(41,42,39,.025); }
+.today-area-group .task-card strong { font-size: .9rem; font-weight: 650; }
+.today-task-actions { display: flex; flex: none; align-items: center; justify-content: flex-end; gap: 7px; }
+.today-transfer-button { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0 11px; border: 1px solid #dfe9df; border-radius: 12px; color: var(--green-dark); background: #fff; font: inherit; font-size: .7rem; font-weight: 650; cursor: pointer; transition: background .16s ease, border-color .16s ease, transform .16s ease; }
+.today-transfer-button:hover:not(:disabled) { transform: translateY(-1px); border-color: #b9d9be; background: #f6faf5; }
+.today-transfer-button:disabled { opacity: .65; cursor: wait; }
+.today-action-notice { margin: 0 0 12px; color: var(--green-dark); font-size: .82rem; font-weight: 600; }
+.today-filter-empty { margin-top: 4px; }
+@media (max-width: 600px) {
+  .today-area-filter-options { flex-wrap: nowrap; overflow-x: auto; padding: 2px 2px 8px; scrollbar-width: thin; }
+  .today-area-group .task-card { align-items: flex-start; flex-direction: column; gap: 12px; }
+  .today-area-group .task-card-main { width: 100%; }
+  .today-task-actions { width: 100%; }
+  .today-task-actions .complete-button, .today-transfer-button { min-height: 44px; flex: 1; width: auto; }
+}
 
 
 /* Public Cuidam marketing page */
@@ -1325,15 +1353,15 @@ html, body { height: auto; min-height: 100%; overflow-x: hidden; overflow-y: aut
   .casa-people-panel .casa-invite-card .button { width: 100%; }
 }
 html, body { height: auto; min-height: 100%; overflow-x: hidden; overflow-y: auto; }
-.today-shell, .nos-shell, .casa-shell, .rewards-shell, .rooms-shell { height: auto; min-height: 100svh; overflow: visible; }
-.today-content, .nos-content, .casa-content, .rewards-content, .rooms-content { height: auto; max-height: none; overflow: visible; }
+.today-shell, .nos-shell, .casa-shell, .rewards-shell { height: auto; min-height: 100svh; overflow: visible; }
+.today-content, .nos-content, .casa-content, .rewards-content { height: auto; max-height: none; overflow: visible; }
 .casa-content { gap: 22px 28px; }
 
 @media (min-width: 820px) and (max-width: 959px) {
-  .today-shell, .nos-shell, .casa-shell, .rewards-shell, .rooms-shell { padding: 18px 20px calc(100px + env(safe-area-inset-bottom)); }
+  .today-shell, .nos-shell, .casa-shell, .rewards-shell { padding: 18px 20px calc(100px + env(safe-area-inset-bottom)); }
   .app-topbar { min-height: 48px; justify-content: space-between; }
   .app-topbar > .app-brand-lockup { display: inline-flex; }
-  .primary-nav { top: auto; right: 0; bottom: 0; left: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 2px; width: 100%; height: auto; flex-direction: row; align-items: stretch; padding: 8px 8px calc(8px + env(safe-area-inset-bottom)); border: 0; border-top: 1px solid rgba(55, 107, 69, .1); border-radius: 0; background: rgba(255, 255, 255, .96); box-shadow: 0 -8px 24px rgba(41, 42, 39, .06); }
+  .primary-nav { top: auto; right: 0; bottom: 0; left: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2px; width: 100%; height: auto; flex-direction: row; align-items: stretch; padding: 8px 8px calc(8px + env(safe-area-inset-bottom)); border: 0; border-top: 1px solid rgba(55, 107, 69, .1); border-radius: 0; background: rgba(255, 255, 255, .96); box-shadow: 0 -8px 24px rgba(41, 42, 39, .06); }
   .primary-nav__brand, .primary-nav__note { display: none; }
   .primary-nav__links { display: contents; }
   .primary-nav__link { min-width: 0; min-height: 54px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 0; border-radius: 14px; font-size: .66rem; }

@@ -64,9 +64,7 @@ Histórico: persistido no backend; UI completa fora do MVP.
 
 4. Navegação
 
-Hoje: o que eu preciso fazer?
-
-Por cômodo: o que pode ser feito em cada espaço? Esta consulta reúne as tarefas ativas por área e permite passar imediatamente uma responsabilidade pessoal para a outra pessoa da casa.
+Hoje: o que eu preciso fazer? As tarefas aparecem agrupadas por cômodo, com um filtro rápido na própria tela para ver todos os cômodos ou apenas um.
 
 Nós: quem cuida do quê?
 
@@ -74,7 +72,7 @@ Recompensas: saldo e recompensas.
 
 Configurações: como organizamos esta casa?
 
-Não existe uma lista global obrigatória de tarefas. Tarefas são consultadas em Nós → Área e gerenciadas em Configurações → Área → Tarefas; também podem ser criadas por Hoje → +.
+Não existe uma lista global obrigatória de tarefas. Tarefas são consultadas em Nós → Área e gerenciadas em Configurações → Área → Tarefas; também podem ser criadas por Hoje → +. A consulta por cômodo faz parte de Hoje, sem destino extra na navegação.
 
 5. Modelo mental
 

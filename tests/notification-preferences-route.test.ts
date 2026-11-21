@@ -25,7 +25,7 @@ describe("/api/notification-preferences", () => {
   });
 
   it("returns safe defaults scoped to the current household membership", async () => {
-    const response = await GET();
+    const response = await GET(new Request("http://localhost/api/notification-preferences"));
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toMatchObject({ preferences: { morningReminder: true, activity: false, sharedTask: false, quietStart: "22:00", quietEnd: "08:00" } });
     expect(mocks.prisma.notificationPreference.findUnique).toHaveBeenCalledWith({ where: { membershipId: "member-1" } });
@@ -45,7 +45,7 @@ describe("/api/notification-preferences", () => {
 
   it("requires an authenticated household membership", async () => {
     mocks.getRealContext.mockResolvedValue(null);
-    const response = await GET();
+    const response = await GET(new Request("http://localhost/api/notification-preferences"));
     expect(response.status).toBe(401);
     expect(mocks.prisma.notificationPreference.findUnique).not.toHaveBeenCalled();
   });
