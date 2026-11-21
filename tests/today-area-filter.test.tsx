@@ -41,4 +41,27 @@ describe("Filtro de cômodo em Hoje", () => {
     expect(screen.getByRole("heading", { name: "Cozinha" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Banheiro" })).toBeInTheDocument();
   });
+
+  it("conta e mostra somente tarefas pendentes da casa que podem aparecer em Hoje", () => {
+    render(<TodayMock household={{
+      ...household,
+      areas: [...household.areas, { id: "living", name: "Sala", icon: "🛋️", sortOrder: 2 }],
+      tasks: [
+        ...household.tasks,
+        { id: "completed", name: "Tarefa concluída", areaId: "kitchen", responsibility: "Você", recurrence: "Diária", load: 1, completed: true },
+        { id: "archived", name: "Tarefa arquivada", areaId: "kitchen", responsibility: "Você", recurrence: "Diária", load: 1, completed: false, archived: true },
+        { id: "unavailable", name: "Ocorrência indisponível", areaId: "kitchen", responsibility: "Você", recurrence: "Diária", load: 1, completed: false, occurrenceAvailable: false },
+        { id: "other-person", name: "Tarefa da outra pessoa", areaId: "kitchen", responsibility: "Outra pessoa", recurrence: "Diária", load: 1, completed: false }
+      ]
+    }} />);
+
+    expect(screen.getByRole("button", { name: /Cozinha/ })).toHaveTextContent("1");
+    expect(screen.queryByText("Tarefa concluída")).not.toBeInTheDocument();
+    expect(screen.queryByText("Tarefa arquivada")).not.toBeInTheDocument();
+    expect(screen.queryByText("Ocorrência indisponível")).not.toBeInTheDocument();
+    expect(screen.queryByText("Tarefa da outra pessoa")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Sala" }));
+    expect(screen.getByRole("heading", { name: "Nada pendente neste cômodo." })).toBeInTheDocument();
+  });
 });
